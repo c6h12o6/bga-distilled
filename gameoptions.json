@@ -1,0 +1,25 @@
+{
+    "100": {
+        "name": "Flight",
+        "values": {
+            "1": { "name": "A" },
+            "2": { "name": "B" },
+            "3": { "name": "C" },
+            "4": { "name": "D" },
+            "5": { "name": "E" },
+            "6": { "name": "F" },
+            "7": { "name": "G (no gold recipes)", "nobeginner": true },
+            "8": { "name": "H (aged spirits only)", "nobeginner": true },
+            "9": {"name": "Random (A, B, C)"}
+        },
+        "default": 9
+    },
+    "101": {
+        "name": "Use Recommended Distiller Pairings",
+        "values": {
+            "0": { "name": "No"},
+            "1": { "name": "Yes"}
+        },
+        "default": "1"
+    }
+}

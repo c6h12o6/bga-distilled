@@ -1,0 +1,116 @@
+{
+  "table": {
+    "turns_number": {
+      "id": 10,
+      "name": "Number of turns",
+      "type": "int"
+    }
+  },
+  "player": {
+    "basic_cards": {
+      "id": 10,
+      "name": "Basic Ingredients Purchased",
+      "type": "int"
+    },
+    "du_cards": {
+      "id": 11,
+      "name": "Distillery Upgrades Purchased",
+      "type": "int"
+    },
+    "ing_cards": {
+      "id": 12,
+      "name": "Premium Ingredients Purchased",
+      "type": "int"
+    },
+    "item_cards": {
+        "id": 13,
+        "name": "Premium Items Purchased",
+        "type": "int"
+    },
+    "years_aged": {
+        "id": 15,
+        "name": "Number of Rounds Aged",
+        "type": "int"
+    },
+    "money_gained": {
+        "id": 16,
+        "name": "Money Gained",
+        "type": "int"
+    },
+    "bronze_labels": {
+        "id": 17,
+        "name": "Bronze Labels Collected",
+        "type": "int"
+    },
+    "silver_labels": {
+        "id": 18,
+        "name": "Silver Labels Collected",
+        "type": "int"
+    },
+    "gold_labels": {
+        "id": 19,
+        "name": "Gold Labels Collected",
+        "type": "int"
+    },
+    "recipe_cubes": {
+        "id": 20,
+        "name": "Recipe Cubes Purchased",
+        "type": "int"
+    },
+    "basic_labels": {
+        "id": 21,
+        "name": "Basic Labels Collected",
+        "type": "int"
+    },
+    "goals_achieved": {
+      "id": 22,
+      "name": "Goals Achieved",
+      "type": "int"
+    },
+    "spirit_awards_achieved": {
+      "id": 23,
+      "name": "Spirit Awards Achieved",
+      "type": "int"
+    },
+    "bottles_used": {
+      "id": 24,
+      "name": "Bottles Used",
+      "type": "int"
+    },
+    "signature_spirit": {
+      "id": 25,
+      "name": "Signature Spirit Distilled",
+      "type": "bool"
+    },
+    "points_ingame": {
+      "id": 26,
+      "name": "In Game Points",
+      "type": "int"
+    },
+    "points_warehouses": {
+      "id": 27,
+      "name": "Points from warehouses",
+      "type": "int"
+    },
+    "points_money": {
+      "id": 28,
+      "name": "Points from money",
+      "type": "int"
+    },
+    "points_dus": {
+      "id": 29,
+      "name": "Points from upgrades",
+      "type": "int"
+    },
+    "points_bottles": {
+      "id": 30,
+      "name": "Points from bottles",
+      "type": "int"
+    },
+    "points_goals": {
+      "id": 31,
+      "name": "Points from goals",
+      "type": "int"
+    }
+  }
+}

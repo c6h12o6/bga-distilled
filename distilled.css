@@ -1,0 +1,1966 @@
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * distilledsugar implementation : © JB Feldman <wigginender520@gmail.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ * distilledsugar.css
+ *
+ * distilledsugar stylesheet
+ *
+ */
+
+/*
+    This is the CSS stylesheet of your game User Interface.
+    
+    Styles defined on this file will be applied to the HTML elements you define in your
+    HTML template (distilledsugar_distilledsugar.tpl), and to HTML elements you create dynamically
+    (in distilledsugar.js).
+    
+    Usually, you are using CSS to:
+    
+    1°) define the overall layout of your game
+        (ex: place the board on the top left, place player's hand beside, place the deck on the right, ...).
+
+    2°) create your CSS-sprites:
+        All images of your games should be gathered into a small number of image files. Then, using
+        background-image and background-position CSS properties, you create HTML blocks that can 
+        display these images correctly (see example below).
+    
+    3°) ... anything else:
+        It is really easy to add and remove CSS classes dynamically from your Javascript with
+        dojo.addClass and dojo.removeClass. It is also easy to check if an element has a class
+        (dojo.hasClass) or to get all elements with a specific class (dojo.query). This is why,
+        very often, using CSS classes for the logic of your user interface allow you to do complex
+        thing easily.
+        
+        
+     Note: on the production platform, this file will be compressed and comments will be removed.
+           Consequently, don't hesitate to put as many comments as necessary.
+*/
+
+
+/* Note: you must not use any @import directive */
+
+
+/********* You can start writing your CSS below this line: **********/
+
+
+/*@import url(modules/bga-cards.css);*/
+
+body > .card {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+}
+
+:root {
+    --label-width: 6.25vw;
+    --label-height: 4.375vw;
+    --flippy-width: 11vw;
+    --flippy-height: 18vw;
+    --flippy-width-mobile: 110px;
+    --flippy-height-mobile: 170px;
+    --label-width-mobile: 62px;
+    --label-height-mobile: 45px;
+    --icon-size: 2.3vw;
+    --icon-size-mobile: 20px;
+}
+
+.log-tooltip {
+    font-weight: bold;
+    cursor: pointer;
+}
+.card {
+  flex-shrink: 0;
+}
+.card[data-side=back] .card-sides {
+  transform: rotateY(180deg);
+}
+.card .card-sides {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+.card .card-sides .card-side {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform-style: preserve-3d;
+  -webkit-backface-visibility: hidden; /* Safari */
+  backface-visibility: hidden;
+  transform-origin: center center;
+  box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+.card .card-sides .card-side.front > * {
+  pointer-events: none;
+  user-select: none;
+}
+.card .card-sides .card-side.back {
+  transform: rotateY(180deg);
+}
+.card .card-sides .card-side.back > * {
+  pointer-events: none;
+  user-select: none;
+}
+
+.card-stock .card.bga-cards_selectable-card:not(.bga-cards_disabled-card) {
+  cursor: pointer;
+}
+.card-stock .card.bga-cards_disabled-card {
+  cursor: not-allowed;
+  filter: contrast(0.6);
+}
+
+.card-stock.line-stock {
+  display: flex;
+  gap: var(--gap);
+  flex-wrap: var(--wrap);
+  flex-direction: var(--direction);
+}
+.card-stock.line-stock[data-center=true] {
+  justify-content: center;
+}
+
+.card-stock.slot-stock {
+  display: flex;
+  gap: var(--gap);
+  flex-wrap: var(--wrap);
+  flex-direction: var(--direction);
+}
+.card-stock.slot-stock[data-center=true] {
+  justify-content: center;
+}
+
+.card-stock.scrollable-stock {
+  display: flex;
+  gap: var(--button-gap);
+}
+.card-stock.scrollable-stock[data-scrollbar-visible=false] {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.card-stock.scrollable-stock[data-scrollbar-visible=false]::-webkit-scrollbar {
+  display: none;
+}
+.card-stock.scrollable-stock .scrollable-stock-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: var(--gap);
+}
+.card-stock.scrollable-stock .scrollable-stock-inner[data-center=true] {
+  justify-content: center;
+}
+
+.card-stock.hand-stock {
+  display: flex;
+  justify-content: center;
+}
+.card-stock.hand-stock .card {
+  transform: translateY(calc(var(--card-shift) * var(--hand-stock-middle-index-abs))) rotate(calc(var(--hand-stock-middle-index) * var(--card-inclination)));
+}
+.card-stock.hand-stock .card:not(:first-child) {
+  margin-left: calc(-1 * var(--card-overlap));
+}
+
+.card-stock.manual-position-stock {
+  position: relative;
+}
+.card-stock.manual-position-stock .card {
+  position: absolute;
+}
+
+.card-stock.void-stock {
+  position: relative;
+}
+.card-stock.void-stock .card {
+  position: absolute;
+}
+
+.card-stock.deck {
+  position: relative;
+  width: var(--width);
+  height: var(--height);
+}
+.card-stock.deck > .card {
+  position: absolute;
+  top: calc(var(--thickness) * var(--xShadowShift) * -1);
+  left: calc(var(--thickness) * var(--yShadowShift) * -1);
+}
+.card-stock.deck > .card:first-child {
+  box-shadow: calc(var(--thickness) * var(--xShadowShift)) calc(var(--thickness) * var(--yShadowShift)) 0px 0px #111, calc(var(--thickness) * var(--xShadowShift)) calc(var(--thickness) * var(--yShadowShift)) 2px 1px rgba(0, 0, 0, 0.5);
+}
+.card-stock.deck[data-empty=true] > .card {
+  visibility: hidden;
+}
+.card-stock.deck[data-empty=true] .bga-cards_deck-counter.hide-when-empty {
+  display: none;
+}
+
+.bga-cards_deck-counter {
+  --bga-cards-deck-counter-size: 20px;
+  position: absolute;
+  z-index: 2;
+  width: var(--bga-cards-deck-counter-size);
+  height: var(--bga-cards-deck-counter-size);
+  left: calc(var(--bga-cards-deck-left) - var(--bga-cards-deck-counter-size) / 2);
+  top: calc(var(--bga-cards-deck-top) - var(--bga-cards-deck-counter-size) / 2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  pointer-events: none;
+}
+.bga-cards_deck-counter.round {
+  color: black;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 2px 1px black;
+  font-size: 14px;
+}
+.bga-cards_deck-counter.text-shadow {
+  color: white;
+  text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black;
+  font-size: 20px;
+}
+.bga-cards_deck-counter.hidden {
+  display: none;
+}
+
+.card-stock.all-visible-deck {
+  position: absolute;
+  --tile-count: 1;
+  width: calc(var(--width) + (var(--tile-count) - 1) * var(--horizontal-shift));
+  height: calc(var(--height) + (var(--tile-count) - 1) * var(--vertical-shift));
+  transition: width 0.5s ease-in-out, height 0.5s ease-in-out, background-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+  opacity: var(--tile-count);
+}
+.card-stock.all-visible-deck > .card {
+  position: absolute;
+  margin: 0;
+  transition: left 0.5s ease-in-out, top 0.5s ease-in-out;
+  top: calc(var(--vertical-shift) * var(--order));
+  left: calc(var(--horizontal-shift) * var(--order));
+}
+.card-stock.all-visible-deck.vertical:hover, .card-stock.all-visible-deck.vertical:active, .card-stock.all-visible-deck.vertical.opened {
+  height: calc((var(--height) + var(--vertical-shift)) * var(--tile-count) - var(--vertical-shift));
+  z-index: 1;
+}
+.card-stock.all-visible-deck.vertical:hover > .card, .card-stock.all-visible-deck.vertical:active > .card, .card-stock.all-visible-deck.vertical.opened > .card {
+  top: calc((var(--height) + var(--vertical-shift)) * var(--order));
+}
+.card-stock.all-visible-deck.horizontal:hover, .card-stock.all-visible-deck.horizontal:active, .card-stock.all-visible-deck.horizontal.opened {
+  width: calc((var(--width) + var(--horizontal-shift)) * var(--tile-count) - var(--horizontal-shift));
+  z-index: 1;
+}
+.card-stock.all-visible-deck.horizontal:hover > .card, .card-stock.all-visible-deck.horizontal:active > .card, .card-stock.all-visible-deck.horizontal.opened > .card {
+  left: calc((var(--width) + var(--horizontal-shift)) * var(--order));
+}
+.card-stock.all-visible-deck .bga-cards_deck-counter {
+  transition: left 0.5s ease-in-out, top 0.5s ease-in-out;
+}
+.card-stock.all-visible-deck[data-empty=true] > .card {
+  visibility: hidden;
+}
+.card-stock.all-visible-deck[data-empty=true] .bga-cards_deck-counter.hide-when-empty {
+  display: none;
+}
+/*@import url(modules/bga-cards.css);*/
+
+.icon-sp-em {
+    background: url("img/icons.png");
+    --width: 1.0em;
+    background-size: calc(var(--width) * 29) var(--width);
+    background-position-x: calc(-18*var(--width));
+    width: var(--width);
+    height: var(--width);
+    display: inline-block;
+}
+
+.recipeCardGrow {
+    font-size: x-large;
+    font-weight: bold;
+    position: absolute;
+    right: 2vw;
+    top: 2.3vw;
+    text-align: center;
+    cursor: pointer;
+}
+.jumboCard .recipeCardGrow {
+    top: 5vw;
+}
+.card {
+    flex-shrink: unset;
+}
+.activePower {
+    background-color: darkblue;
+}
+.activePower:hover {
+    background-color: darkblue !important;
+}
+.basicMarket {
+    /*display: grid;
+    grid-template-columns: repeat(8, 125px);*/
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    padding: 10px;
+    justify-content: center;
+    max-width: 1000px;
+    /*height: 200px;*/
+}
+
+.mainShared {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.labelDisplay {
+    /*width: 20%;*/
+    display: flex;
+    flex-direction: row;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    align-items: center;
+    align-content: center;
+    text-align: center;
+    justify-content: center;
+}
+
+.market {
+    align-items: center;
+    align-content: center;
+    text-align: center;
+}
+
+.mobile_version .market {
+    width: 100%;
+}
+.desktop_version .market {
+    width: 100%;
+    max-width: 1000px;
+}
+
+.marketCard {
+    width: 122px; 
+    height: 190px;
+    position: relative;
+    /*background-color: gray;*/
+    /*cursor: pointer;*/
+}
+.marketDeck {
+    /*overflow: hidden;*/
+}
+.marketDeckRtl {
+    float: right;
+}
+.miniDeck.marketDeckRtl {
+    width: 25px;
+}
+.miniDeck .card {
+    display: none;
+}
+
+.marketCardUnselectable {
+    width: 122px; 
+    height: 190px;
+    /*background-color: gray;*/
+}
+
+.deckCounter {
+    background-color: rgba(150, 150, 150, 0.8);
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    top: 80%;
+}
+.miniDeck .deckCounter {
+    top: 45%;
+}
+/*
+.pantryCard {
+    width: 122px; 
+    height: 190px;
+    background-color: gray;
+    background-color: gray;
+    cursor: pointer;
+}*/
+
+.advancedMarketWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 1000px;
+    color: White;
+}
+
+.advancedMarket {
+    flex: 4;
+    background-color: blueviolet;
+}
+
+.premiumMarket {
+    flex: 4;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    padding: 2px;
+    margin: 2px;
+    /*height: 210px;*/
+}
+
+.fade {
+    opacity: 0.5;
+}
+
+.truck {
+    flex: 1;
+    background-color: aqua;
+}
+.flexOne {
+    flex: 1;
+    margin: 10px;
+}
+
+/*
+.bg-distilled_water {
+    width: 125px; height: 190px;
+    background: url('img/distilled_basic_market.png') -436px -10px;
+}
+
+.bg-distilled_yeast {
+    width: 125px; height: 190px;
+    background: url('img/distilled_basic_market.png') -582px -10px;
+}
+
+.bg-distilled_wood_barrel {
+    width: 125px; height: 190px;
+    background: url('img/distilled_basic_market.png') -293px -10px;
+}
+
+.bg-distilled_clay_barrel {
+    width: 125px; height: 190px;
+    background: url('img/distilled_basic_market.png') -151px -10px;
+}
+
+.bg-distilled_mixed_fruits {
+    width: 125px; height: 190px;
+    background: url('img/distilled_basic_market.png') -10px -10px;
+}
+
+.bg-distilled_mixed_plants {
+    width: 125px; height: 190px;
+    background: url('img/distilled_basic_market.png') -728px -10px;
+}
+
+.bg-distilled_mixed_grains {
+    width: 125px; height: 190px;
+    background: url('img/distilled_basic_market.png') -874px -10px;
+}
+
+.bg-distilled-basic_market_marker {
+    background: url('img/basicMarketMarker.png');
+    background-size: 100%;
+}
+*/
+
+.playerContainer {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+   /* grid-template-columns: 900px 300px; */
+    width: 100%;
+    color: black;
+    justify-content: space-around;
+}
+
+.playerDistillery {
+    background: url('img/modified_distillery.jpg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    flex-basis: 60vw;
+    height: 45vw;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+.mobile_version .playerDistillery {
+    flex-basis: 600px;
+    height: 425px;
+}
+.playerRecipeCard {
+    background: url('img/recipeCard.png');
+    background-repeat: no-repeat;
+    flex-basis: 20vw;
+    height: 46vw;
+    background-size: 100% 100%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    top: -2.5vw;
+    position: relative;
+}
+.jumboCard.playerRecipeCard {
+    flex-basis: 30vw;
+    height: 69vw;
+}
+.mobile_version .playerRecipeCard {
+    flex-basis: 200px;
+    height: 460px;
+}
+.mobile_version .jumboCard.playerRecipeCard {
+    flex-basis: 400px;
+    height: 920px;
+}
+.playerFlight {
+    /* background: url('img/flightA.png'); */
+    background: url('img/Flights.png');
+    /*background-size: 2616px  3000px;*/
+    background-size: 400% 300%;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 33%;
+    left: 18%;
+    width: 80%;
+    height: 54%;
+}
+
+.recipeCubeSlot {
+    width: 9%;
+    aspect-ratio: 1/1;
+    position: absolute;
+}
+
+.recipeCubeSlot.marketBuyable {
+    border-color: green;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.marketBuyable {
+    cursor: pointer;
+}
+
+.signatureRecipeSlot {
+    width: var(--width);
+    height: var(--height);
+    padding: 0px;
+    /*aspect-ratio: 10/7;*/
+    position: absolute;
+    align-items: center;
+    --width: var(--label-width);
+    --height: var(--label-height);
+}
+.mobile_version .signatureRecipeSlot {
+    --width: var(--label-width-mobile);
+    --height: var(--label-height-mobile);
+}
+
+/*
+.signatureRecipeSlot .dlabel {
+    background: url('img/labels.jpg');
+    background-repeat: no-repeat;
+    background-size: 33vw 38.5vw;
+    border-radius: 3px;
+    aspect-ratio: 10/7;
+}*/
+.dcard {
+    background: url('img/cardfronts.jpg');
+    background-repeat: no-repeat;
+    background-size: 1708px 1900px;
+    width: 122px;
+    height: 190px;
+    /*position: absolute;*/
+    background-color:rgba(0, 0, 0, 0.0);
+    border-radius: 10px;
+    opacity: unset;
+}
+
+.dcard2 {
+    background: url('img/cardfronts.jpg');
+    background-repeat: no-repeat;
+    background-size: 1708px 1900px;
+    border-radius: 10px;
+    /*width: 122px;
+    height: 190px;*/
+    opacity: unset;
+}
+
+.gcard2 {
+    background: url('img/dgoals2.jpg');
+    background-repeat: no-repeat;
+    background-size: 1220px 380px;
+    border-radius: 10px;
+    /*width: 122px;
+    height: 190px;*/
+    opacity: unset;
+}
+
+
+.dlabel {
+    background: url('img/labels.jpg');
+    background-repeat: no-repeat;
+    background-size: calc(6*var(--width)) calc(10*var(--height));
+    border-radius: 3px;
+    width: var(--width);
+    height: var(--height);
+    --width: var(--label-width);
+    --height: var(--label-height);
+    aspect-ratio: 10/7;
+}
+.mobile_version .dlabel {
+    --width: var(--label-width-mobile);
+    --height: var(--label-height-mobile);
+}
+.pantry .dlabel {
+    --width: 100px;
+    --height: 70px;
+}
+.jumboCard .dlabel {
+    --width: calc(var(--label-width)*2);
+    --height: calc(var(--label-height)*2);
+}
+.mobile_version .jumboCard .dlabel {
+    --width: calc(var(--label-width-mobile)*2);
+    --height: calc(var(--label-height-mobile)*2);
+}
+/*
+.mobile_version .signatureRecipeSlot .dlabel {
+    --width: var(--label-width);
+    --height: var(--label-height);
+}
+*/
+
+.dlabelSlot {
+    position: relative;
+}
+
+.distiller {
+    position: relative;
+    --width: 11vw;
+    --height: 18vw;
+    width: var(--width);
+    height: var(--height);
+    overflow: hidden;
+}
+.mobile_version .distiller {
+    --width: 220px;
+    --height: 360px;
+}
+.mobile_version .playerDistillery .distiller {
+    --width: var(--flippy-width-mobile);
+    --height: var(--flippy-height-mobile);
+}
+.distillerCard {
+    background: url('img/distillers_scaled.jpg');
+    background-repeat: no-repeat;
+    background-size: calc(9*var(--width)) calc(4*var(--height));
+    width: var(--width);
+    height: var(--height);
+    --width: 11vw;
+    --height: 18vw;
+    border-radius: 10px;
+}
+.mobile_version .distillerCard {
+    --width: 220px;
+    --height: 360px;
+}
+.mobile_version .playerDistillery .distillerCard {
+    --width: var(--flippy-width-mobile);
+    --height: var(--flippy-height-mobile);
+}
+
+.scaledMarketCard {
+    background: url('img/cardfronts.jpg');
+    background-repeat: no-repeat;
+    background-size: calc(14*var(--width)) calc(10*var(--height));
+    --width: var(--flippy-width);
+    --height: var(--flippy-height);
+    border-radius: 10px;
+}
+
+.mobile_version .scaledMarketCard {
+    --width: var(--flippy-width-mobile);
+    --height: var(--flippy-height-mobile);
+}
+
+.duCardBack {
+    background: url("img/distilleryUpgradeBack.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: 122px;
+    height: 190px;
+    max-width: 122px;
+    flex-grow: 0;
+    flex-basis: 122px;
+    flex-shrink: 0;
+    flex: 1;
+    border-radius: 10px;
+    background-color:rgba(0, 0, 0, 0.0);
+}
+
+.ingCardBack {
+    background: url("img/ingredientBack.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: 122px;
+    height: 190px;
+    flex-basis: 122px;
+    max-width: 122px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex: 1;
+    background-color:rgba(0, 0, 0, 0.0);
+    border-radius: 10px;
+}
+.flavorCardBack {
+    background: url("img/flavorBack.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: 122px;
+    height: 190px;
+    flex-basis: 122px;
+    max-width: 122px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex: 1;
+    background-color:rgba(0, 0, 0, 0.0);
+    border-radius: 10px;
+}
+
+.itemCardBack {
+    background: url("img/premiumItemBack.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: 122px;
+    height: 190px;
+    max-width: 122px;
+    flex-grow: 0;
+    flex-basis: 122px;
+    flex-shrink: 0;
+    flex: 1;
+    background-color:rgba(0, 0, 0, 0.0);
+    border-radius: 10px;
+}
+
+.duCardSlot {
+    /*outline: 2px solid darkmagenta;*/
+    /* background: url("img/distilleryUpgradeBack.png"); */
+    /*background: rgba(150, 150, 150, 0.6);*/
+    /* opacity: 0.6;*/
+    max-width: 13.5%;
+    /*height: 190px; */
+    aspect-ratio: 12/19;
+    background-size: 100% 100%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    position: relative;
+    align-items: center;
+}
+.duCardSlotFixed {
+    flex: 1;
+    padding: 5px;
+    /*outline: 2px solid darkmagenta;*/
+    /* background: url("img/distilleryUpgradeBack.png"); */
+    /*background: rgba(150, 150, 150, 0.6);*/
+    /*background: blueviolet;*/
+    /*opacity: 0.6;*/
+    width: 122px;
+    flex-basis: 122px;
+    height: 190px;
+    background-size: 100% 100%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.labelSlot {
+    padding: 0px;
+    max-width: var(--width);
+    width: var(--width);
+    --width: var(--label-width);
+    height: var(--height);
+    --height: var(--label-height);
+    position: relative;
+    align-items: center;
+}
+.mobile_version .labelSlot {
+    --width: var(--label-width-mobile);
+    --height: var(--label-height-mobile);
+}
+.pantry .labelSlot {
+    --width: 100px;
+    --height: 70px;
+}
+/*
+.mobile_version .signatureRecipeSlot .labelSlot {
+    --width: var(--label-width);
+    --height: var(--label-height);
+}
+*/
+
+.invisiblePantryWrap {
+    /* height: 200px; */
+    position: fixed; 
+    bottom:0%;
+    width:100%; 
+    background-color: rgba(50, 50, 50, .8);
+    padding: 10px;
+    top: 40%;
+    align-items: center;
+    z-index: 11;
+}
+
+.pantryWrap {
+    /* height: 200px; */
+    position: fixed; 
+    bottom:0%;
+    width:100%; 
+    background-color: rgba(50, 50, 50, .8);
+    padding: 10px;
+    align-items: center;
+    z-index: 11;
+    background-size: 1600px 1300px;
+}
+.pantryWrapTop {
+    width:100%; 
+    background-color: rgba(50, 50, 50, .8);
+    padding: 10px;
+    align-items: center;
+    z-index: 11;
+    background-size: 1600px 1300px;
+}
+.pantryExpanded {
+    gap: 2px;
+}
+.pantryExpanded .pantry.invisible.currentPlayer {
+    display: unset !important;
+    visibility: unset;
+}
+.pantryWrap .displaybase {
+    display: none;
+}
+.pantryWrapTop .displaybase {
+    display: none;
+}
+.pantry_inner_wrapper {
+    display: flex;
+    overflow: hidden;
+    gap: 8px;
+}
+.pantryExpanded .pantry_inner_wrapper {
+    display: flex;
+}
+.pantry {
+    min-height: 190px;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    grid-column-gap: 10px;
+    /*max-width: 90vw;*/
+    overflow: auto;
+}
+.pantry2 {
+    /*max-width: 90vw;*/
+    overflow: overlay;
+    flex: 1;
+}
+.pantryExpanded .pantry2 {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 0.5vw;
+    padding: 10px;
+    margin: 5px;
+    color: white;
+}
+.pantryButtons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 5px;
+}
+.pantryButton {
+    width: auto;
+}
+
+.pantryCard {
+    position: relative;
+}
+.storeCard {
+    position: relative;
+}
+.ing-card {
+    position: relative;
+}
+.item-card {
+    position: relative;
+}
+.goalsCard {
+    position: relative;
+}
+
+
+.label {
+    position: relative;
+    align-items: center;
+}
+
+.invisible {
+    display: none !important;
+}
+
+.silverCube {
+    width: var(--width); height: var(--width);
+    background: url('img/cubes.webp') calc(-4 * var(--width)) 0px;
+    background-size: calc(10 * var(--width)) var(--width);
+    --width: 1.5vw;
+}
+.mobile_version .silverCube {
+    --width: 15px;
+}
+.jumboCard .silverCube {
+    --width: 3vw;
+}
+.mobile_version .jumboCard .silverCube {
+    --width: 30px;
+}
+.bronzeCube {
+    width: var(--width); height: var(--width);
+    background: url('img/cubes.webp') calc(-2 * var(--width)) 0px;
+    background-size: calc(10 * var(--width)) var(--width);
+    --width: 1.5vw;
+}
+.mobile_version .bronzeCube {
+    --width: 15px;
+}
+.jumboCard .bronzeCube {
+    --width: 3vw;
+}
+.mobile_version .jumboCard .bronzeCube {
+    --width: 30px;
+}
+.goldCube {
+    width: var(--width); height: var(--width);
+    background: url('img/cubes.webp') calc(-6 * var(--width)) 0px;
+    background-size: calc(10 * var(--width)) var(--width);
+    --width: 1.5vw;
+}
+.mobile_version .goldCube {
+    --width: 15px;
+}
+.jumboCard .goldCube {
+    --width: 3vw;
+}
+.mobile_version .jumboCard .goldCube {
+    --width: 30px;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.selected {
+    border-color: green;
+    border-style: solid;
+    border-width: 4px;
+}
+
+#bga-zoom-wrapper #bga-zoom-controls button:not(.disabled) {
+  cursor: pointer;
+}
+
+#bga-zoom-wrapper #bga-zoom-controls button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.disabledMarket {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/*
+.overlap {
+    overflow: hidden;
+}*/
+.overlap .card {
+    margin-top: -140px;
+}
+.overlap .card:hover {
+    overflow: visible;
+    z-index: 2;
+}
+.overlap .card:first-child {
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+.item-card {
+    position: relative;
+}
+
+.canvas {
+    width: 10vw;
+    height: 15.4vw;
+}
+.mobile_version .canvas {
+    width: calc(var(--flippy-width-mobile) - 12px);
+    height: calc(var(--flippy-height-mobile) - 20px);
+}
+.iconCanvas {
+    display: grid;
+    position: relative;
+    grid-template-columns: repeat(4, var(--icon-size));
+    flex-wrap: wrap;
+    padding: 1px;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    justify-content: space-between;
+    vertical-align: top;
+    font-size: 1.2vw;
+    border-radius: 0.5vw;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+.mobile_version .iconCanvas {
+    grid-template-columns: repeat(4, var(--icon-size-mobile));
+    font-size: 10px;
+}
+
+.iconCanvas .iconCanvas {
+    text-align: center;
+    height: 1.5vw;
+    grid-column-start: 1;
+    grid-column-end: 5;
+    background-color: unset;
+    display: flex;
+}
+.mobile_version .iconCanvas .iconCanvas {
+    font-size: 12px;
+    height: 13px;
+}
+.icon-flavor {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-11 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-flavor {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-flavor-em {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-11 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: 1em;
+    display: inline-block;
+}
+
+.icon-fruit {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-12 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-fruit {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-grain {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-13 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-grain {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-plant {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-16 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-plant {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-water {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-26 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-water {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-aged {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-1 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-aged {
+    --width: var(--icon-size-mobile);
+}
+.icon-aged-em {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-1 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: 1em;
+}
+
+.icon-unaged {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-25 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-unaged {
+    --width: var(--icon-size-mobile);
+}
+.icon-unaged-em {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-25 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: 1em;
+}
+
+
+.icon-alcohol-em {
+    background: url("img/icons.png");
+    background-size: 29em 1em;
+    background-position-x: -2em;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+}
+.icon-water-em {
+    background: url("img/icons.png");
+    background-size: 29em 1em;
+    background-position-x: -26em;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+}
+.icon-yeast-em {
+    background: url("img/icons.png");
+    background-size: 29em 1em;
+    background-position-x: -28em;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+}
+.icon-plant-em {
+    background: url("img/icons.png");
+    background-size: 29em 1em;
+    background-position-x: -16em;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+}
+.icon-start-em {
+    background: url("img/icons.png");
+    background-size: 29em 1em;
+    background-position-x: -19em;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+}
+
+.icon-grain-em {
+    background: url("img/icons.png");
+    background-size: 29em 1em;
+    background-position-x: -13em;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+}
+.icon-fruit-em {
+    background: url("img/icons.png");
+    background-size: 29em 1em;
+    background-position-x: -12em;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+}
+.icon-americas-em {
+    background: url("img/icons.png");
+    display: inline-block;
+    background-position-x: calc(-3*var(--width));
+    --width: 2em;
+    background-size: calc(29*var(--width)) var(--width);
+    width: var(--width);
+    height: var(--width);
+}
+.icon-europe-em {
+    background: url("img/icons.png");
+    background-size: 58em 2em;
+    background-position-x: -20em;
+    display: inline-block;
+    width: 2em;
+    height: 2em;
+}
+.icon-asia-em {
+    background: url("img/icons.png");
+    background-size: 58em 2em;
+    background-position-x: -8em;
+    display: inline-block;
+    width: 2em;
+    height: 2em;
+}
+.icon-yeast {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-28 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-yeast {
+    --width: var(--icon-size-mobile);
+}
+
+
+.icon-coin {
+    background: url("img/icons.png");
+    background-size: 72.5vw 2.5vw;
+    background-position-x: -17.5vw;
+    width: 2.5vw;
+    height: 2.5vw;
+}
+.icon-coin-em {
+    background: url("img/icons.png");
+    /*
+    background-size: 43.5em 1.5em;
+    background-position-x: -10.5em;
+    width: 1.5em;
+    height: 1.5em;
+    */
+
+    display: inline-block;
+    --width: 1.0em;
+    background-size: calc(var(--width) * 29) var(--width);
+    background-position-x: calc(7*-1*var(--width));
+    width: var(--width);
+    height: var(--width);
+}
+
+
+.icon-bottle {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-5 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-bottle {
+    --width: var(--icon-size-mobile);
+}
+
+
+.icon-clay {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-6 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-clay {
+    --width: var(--icon-size-mobile);
+}
+
+
+.icon-wood {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-27 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-wood {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-metal {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-15 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-metal {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-americas {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-3 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-americas {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-asia {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-4 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-asia {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-europe {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-10 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-europe {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-home {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-14 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-home {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-sp {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-18 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-sp {
+    --width: var(--icon-size-mobile);
+}
+
+.icon-alcohol {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-2 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: var(--icon-size);
+}
+.mobile_version .icon-alcohol {
+    --width: var(--icon-size-mobile);
+}
+
+
+.icon-coin-mini {
+    background: url("img/icons.png");
+    background-size: 43.5vw 1.5vw;
+    background-position-x: -10.5vw;
+    width: 1.5vw;
+    height: 1.5vw;
+}
+
+
+.icon-sp-mini {
+    background: url("img/icons.png");
+    background-size: 43.5vw 1.5vw;
+    background-position-x: -27vw;
+    width: 1.5vw;
+    height: 1.5vw;
+}
+
+
+.icon-redx {
+    background: url("img/redx.png");
+    background-size: 2vw 2vw;
+    width: 2vw;
+    height: 2vw;
+    position: absolute;
+}
+.mobile_version .icon-redx {
+    background: url("img/redx.png");
+    background-size: 30px 30px;
+    width: 30px;
+    height: 30px;
+    position: absolute;
+}
+
+.turnsAndSA {
+    display: flex; 
+    flex-direction: row; 
+    justify-content: space-between;
+    align-items: center;
+}
+
+.turnTrack {
+    width: 40vw;
+    height: 7vw;
+    background: url("img/turntrack_horizontal.jpg");
+    background-size: 100% 100%;
+    margin: 10px;
+    aspect-ratio: 187 / 33;
+    position: relative;
+    border-radius: 1vw;
+}
+.mobile_version .turnTrack {
+    width: 350px;
+    height: unset;
+}
+
+.turnHighlight1 {
+    position: absolute;
+    width: 9%;
+    left: 0.5%;
+    top: 20%;
+    aspect-ratio: 1/1;
+    border:0.5vw solid green;    
+    border-radius:50%;
+}
+.mobile_version .turnHighlight1 {
+    border-width: 5px;
+}
+.turnHighlight2 {
+    position: absolute;
+    width: 9%;
+    left: 12.5%;
+    top: 20%;
+    aspect-ratio: 1/1;
+    border:0.5vw solid green;    
+    border-radius:50%;
+}
+.mobile_version .turnHighlight2 {
+    border-width: 5px;
+}
+.turnHighlight3 {
+    position: absolute;
+    width: 9%;
+    left: 24.5%;
+    top: 20%;
+    aspect-ratio: 1/1;
+    border:0.5vw solid green;    
+    border-radius:50%;
+}
+.mobile_version .turnHighlight3 {
+    border-width: 5px;
+}
+.turnHighlight4 {
+    position: absolute;
+    width: 9%;
+    left: 48.3%;
+    top: 20%;
+    aspect-ratio: 1/1;
+    border:0.5vw solid green;    
+    border-radius:50%;
+}
+.mobile_version .turnHighlight4 {
+    border-width: 5px;
+}
+.turnHighlight5 {
+    position: absolute;
+    width: 9%;
+    left: 61.3%;
+    top: 20%;
+    aspect-ratio: 1/1;
+    border:0.5vw solid green;    
+    border-radius:50%;
+}
+.mobile_version .turnHighlight5 {
+    border-width: 5px;
+}
+.turnHighlight6 {
+    position: absolute;
+    width: 9%;
+    left: 74.3%;
+    top: 20%;
+    aspect-ratio: 1/1;
+    border:0.5vw solid green;    
+    border-radius:50%;
+}
+.mobile_version .turnHighlight6 {
+    border-width: 5px;
+}
+.turnHighlight7 {
+    position: absolute;
+    width: 9%;
+    left: 87.1%;
+    top: 20%;
+    aspect-ratio: 1/1;
+    border:0.5vw solid green;    
+    border-radius:50%;
+}
+.mobile_version .turnHighlight7 {
+    border-width: 5px;
+}
+.spiritAwardBlank {
+    background: url("img/sa_blank.png");
+    background-size: var(--width)  var(--height);
+    height: var(--height);
+    width: var(--width);
+    --width: 6vw;
+    --height: 7.2vw;
+    position: relative;
+}
+.mobile_version .spiritAwardBlank {
+    --width: 60px;
+    --height: 72px;
+}
+
+.spiritAward {
+    background: url("img/spiritawards.png");
+    background-size: calc(8*var(--width))  calc(3*var(--height));
+    height: var(--height);
+    width: var(--width);
+    --width: 5vw;
+    --height: 6vw;
+    position: relative;
+}
+
+.spiritAwards {
+    display: flex;
+    justify-content: space-around;
+    width: 48%;
+}
+
+
+/* Modal stuff */
+.modal-open {
+  overflow:hidden
+}
+.modal {
+  position:fixed;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+  z-index:1050;
+  display:none;
+  overflow:hidden;
+  -webkit-overflow-scrolling:touch;
+  outline:0
+}
+.modal.modal-fade .modal-dialog {
+  transition:-webkit-transform .15s ease-out;
+  transition:transform .15s ease-out;
+  -webkit-transform:translate(0, -25%);
+  -ms-transform:translate(0, -25%);
+  transform:translate(0, -25%)
+}
+.modal.in .modal-dialog {
+  -webkit-transform:translate(0, 0);
+  -ms-transform:translate(0, 0);
+  transform:translate(0, 0)
+}
+.modal-open .modal {
+  overflow-x:hidden;
+  overflow-y:auto
+}
+.modal-dialog {
+  position:relative;
+  width:auto;
+  margin:10px
+}
+.modal-content {
+  position:relative;
+  background-color:#fff;
+  background-clip:padding-box;
+  border:1px solid #999;
+  border:1px solid rgba(0,0,0,0.2);
+  border-radius:3px;
+  outline:0;
+  box-shadow:0 3px 9px rgba(0,0,0,0.5)
+}
+.modal-backdrop {
+  position:fixed;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+  z-index:1040;
+  background-color:#000
+}
+.modal-backdrop.fade {
+  filter:alpha(opacity=0);
+  opacity:0
+}
+.modal-backdrop.in {
+  filter:alpha(opacity=50);
+  opacity:.5
+}
+.modal-header {
+  min-height:16.42857143px;
+  padding:15px;
+  border-bottom:1px solid #e5e5e5
+}
+.modal-title {
+  display:inline-block;
+  margin:0;
+  line-height:1.42857143
+}
+.modal-body {
+  position:relative;
+  padding:15px
+}
+.modal-body p:last-child {
+  margin-bottom:0
+}
+.modal-footer {
+  padding:15px;
+  text-align:right;
+  border-top:1px solid #e5e5e5
+}
+.modal-footer .btn+.btn {
+  margin-bottom:0;
+  margin-left:5px
+}
+.modal-footer .btn-group .btn+.btn {
+  margin-left:-1px
+}
+.modal-footer .btn-block+.btn-block {
+  margin-left:0
+}
+.modal-scrollbar-measure {
+  position:absolute;
+  top:-9999px;
+  width:50px;
+  height:50px;
+  overflow:scroll
+}
+
+.standard_popin {
+    max-width: 90%;
+}
+
+.modalContent {
+    display: flex;
+    max-width: 100%;
+    flex-wrap: wrap;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.cardTooltip {
+    width: 20%;
+    height: 20%;
+    background-color: greenyellow;
+}
+
+.replacement-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.tooltipContainer {
+    display: grid;
+    grid-template-columns: 185px 100px;
+    grid-column-gap: 2px;
+    grid-row-gap: 10px;
+    padding: 2px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.bgabutton.disabled-looking {
+    background: #787878;
+}
+.bgabutton.disabled-looking:hover {
+    background: #787878;
+}
+
+.tooltipContainer .dcard {
+    background-size: 2562px 2850px;
+    width: 183px;
+    height: 285px;
+}
+.tooltipContainer .gcard2 {
+    background-size: 1830px 570px;
+    width: 183px;
+    height: 285px;
+}
+.tooltipContainer .spiritAward {
+    background-size: calc(8*var(--width)) calc(3*var(--height));
+    height: var(--height);
+    width: var(--width);
+    --width: 180px;
+    --height: 216px;
+}
+.tooltipContainer .flavorCardBack {
+    width: 183px;
+    max-width: 183px;
+    height: 285px;
+}
+
+.scoringTable {
+    height: unset;
+    z-index: 100;
+    border-radius: 10px;
+    box-shadow:0 20px 20px rgba(0,0,0,0.5);
+    position: relative;
+}
+.scoringTable th, td {
+    padding: 15px;
+    text-align: center;
+}
+
+.scoringTable th, td {
+  padding: 15px;
+  text-align: center;
+}
+
+.tempPantry {
+    position: fixed;
+    height: 200px;
+    top: 40%;
+    /*background: rgba(255, 255, 255, 0.9);*/
+    display: flex;
+    flex-direction: row;
+    align-items: left;
+    justify-content: left;
+    padding: 15px;
+    margin: 15px;
+    gap: 15px;
+    background: url('img/grain.jpg');
+    background-size: 1600px 1300px;
+    border-radius: 1vw;
+
+}
+
+.player_board {
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+}
+
+.player_board .player_board {
+    gap: 2px;
+}
+
+.player-board {
+    background-color: #39201b;
+    /*background-color: #6d372c;*/
+    border-color: #6d372c;
+    color: white;
+    border-style: solid;
+    border-width: 2px;
+    box-sizing: border-box;
+
+}
+
+.current-player-board {
+    border-color: white;
+}
+
+.body {
+    background: url('img/grain.jpg');
+    background-size: 1600px 1300px;
+}
+
+#overall-content {
+    background: url('img/grain.jpg');
+    background-size: min(var(--widthA), var(--widthB)) min(var(--heightA), var(--heightB));
+    --widthA: 100vw;
+    --widthB: 1800px;
+    --heightA: 81vw;
+    --heightB: 1500px;
+}
+/*
+https://studio.boardgamearena.com:8084/data/themereleases/current/games/distilled/999999-9999/img/grain.jpg
+https://studio.boardgamearena.com:8084/data/themereleases/240320-1000/img/layout/back-main_games.jpg
+https://studio.boardgamearena.com:8084/data/themereleases/240320-1000/css/gameserver.css
+*/
+.dwhiteblock {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 0.5vw;
+    padding: 10px;
+    margin: 5px;
+    color: white;
+}
+
+/*
+.card {
+    border-radius: 10px;
+    height: var(--card_height);
+    width: var(--card_width);
+    position:relative;
+  }
+
+.card.chamber {
+  background-size: calc(var(--card_width)*10) calc(var(--card_height)*10);
+  background-position: -100% -300%;
+}*/
+
+.sa-wrapper {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.5vw;
+    color: #c5ae68;
+    gap: 5px;
+    flex-grow: 0;
+}
+
+.sa-overlay-nowrap {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+    position: absolute;
+    top: 0;
+    left: 0;
+    gap: 2px;
+}
+.mobile_version .sa-overlay-nowrap {
+    font-size: 12px;
+}
+.sa-overlay-award {
+    background-color: rgba(255, 255, 255);
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 2px;
+    font-size: 0.9vw;
+    text-wrap: nowrap;
+    min-width: 100%;
+    text-align: center;
+}
+.mobile_version .sa-overlay-award {
+    font-size: 10px;
+}
+
+
+.sa-overlay {
+    width: 85%;
+    height: 50%;
+    color: black;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    margin: 0;
+    padding-top: 25%;
+    padding-left: 0.5vw;
+    gap: 0;
+}
+
+.mobile_version .sa-overlay {
+    padding-left: 5px;
+    padding-top: 30%;
+}
+
+.sa-wrapper .sa-title {
+    font-weight: bold;
+    font-size: 0.8vw;
+}
+.mobile_version .sa-wrapper .sa-title {
+    font-size: 10px;
+}
+
+.sa-overlay .sa-reward {
+    font-size: 0.8vw;
+}
+.mobile_version .sa-wrapper .sa-reward {
+    font-size: 10px;
+}
+.sa-overlay .text {
+    font-weight: normal;
+    font-size: 0.7vw;
+    line-height: 0.8vw;
+}
+.mobile_version .sa-overlay .text {
+    font-size: 6px;
+    line-height: 7px;
+}
+
+.dashboardMoney {
+    display:flex; 
+    flex-direction: row; 
+    font-size: x-large; 
+    color: lightgrey; 
+    /*width: 5vw;*/
+}
+
+.pantryExpanded .dashboardMoney {
+    width: auto;
+}
+.card:hover {
+    overflow: visible;
+}
+
+.powerCard {
+    box-sizing: border-box;
+    background: unset;
+    border: 4px solid #4871b6;
+    text-shadow: none;
+    color: black !important;
+}
+.powerCard:hover {
+    background: white !important;
+}
+
+.powerCard.activePower {
+    border: 4px solid green;
+}
