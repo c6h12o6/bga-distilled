@@ -1085,7 +1085,7 @@ Purchase it or return it to the bottom of the deck.`
         self::initStat( 'player', 'ing_cards', 0 );  // Init a player statistics (for all players)
         self::initStat( 'player', 'recipe_cubes', 0 );  // Init a player statistics (for all players)
         self::initStat( 'player', 'bottles_used', 0 );  // Init a player statistics (for all players)
-        self::initStat( 'player', 'years_aged', 0 );  // Init a player statistics (for all players)
+        //self::initStat( 'player', 'years_aged', 0 );  // Init a player statistics (for all players)
         self::initStat( 'player', 'money_gained', 0 );  // Init a player statistics (for all players)
         self::initStat( 'player', 'bronze_labels', 0 );  // Init a player statistics (for all players)
         self::initStat( 'player', 'silver_labels', 0 );  // Init a player statistics (for all players)
@@ -1475,12 +1475,26 @@ Purchase it or return it to the bottom of the deck.`
         if (!$powers) {
             return true;
         }
+
+
+        /*
+        self::notifyAllPlayers("dbgdbg", "playerHasPowers", array(
+            'pc' => $powerCards,
+            'powers' => $powers));
+            */
         foreach ($powers as $checkPower) {
-            if ($checkPower == 0) // Distiller abilities may come through as 0
+            if ($checkPower == "") // this sometimes happens with the explode command
+                continue;
+            if ($checkPower == 0) { // Distiller abilities may come through as 0 
                 $checkPower = $this->getPlayerDistiller($pid)->id;
+            }
             $found = false;
             foreach ($powerCards as $pc) {
-                if ($pc['uid'] == $checkPower && $pc['player_id'] == $pid)  {
+                if ($pc['market'] == 'du' && $pc['uid'] == $checkPower && $pc['player_id'] == $pid)  {
+                    $found = true;
+                    break;
+                }
+                if ($pc['market'] == 'distiller' && $pc['card_id'] == $checkPower && $pc['player_id'] == $pid)  {
                     $found = true;
                     break;
                 }
@@ -1907,7 +1921,7 @@ Purchase it or return it to the bottom of the deck.`
             self::notifyAllPlayers("ageDrink", 'Flavor card added to ${player_name}\'s ${location} by ${trigger_name}', array(
                 "player_name" => $this->getPlayerName($playerId),
                 "player_id" => $playerId,
-                "location" => $location,
+                "location" => self::normalizeString($location),
                 "trigger_name" => $this->AllCards[$triggerCard]->name,
                 // TODO make this private
                 "visible_card" => $visibleCard,
@@ -1916,9 +1930,16 @@ Purchase it or return it to the bottom of the deck.`
             self::notifyAllPlayers("ageDrink", 'Flavor card added to ${player_name}\'s ${location}', array(
                 "player_name" => $this->getPlayerName($playerId),
                 "player_id" => $playerId,
-                "location" => $location,
+                "location" => self::normalizeString($location),
             ));
         }
+    }
+    public function normalizeString($location) {
+        switch ($location) {
+            case 'warehouse1': return self::_("warehouse 1");
+            case 'warehouse2': return self::_("warehouse 2");
+        }
+        return $location;
     }
     public function getPowerCards() {
         $sql = "SELECT uid, card_id, 'du' as market, player_id FROM distillery_upgrade
@@ -2010,19 +2031,12 @@ Purchase it or return it to the bottom of the deck.`
                     $result = array();
                     foreach ($recipes as $r) {
                         $region = $this->getRecipeRegionForPlayer($player_id, $r);
-                        self::notifyAllPlayers("dbgdbg", 'DEBUG LANDGRAB: ${name} is from ${region}', array(
-                            'name' => $r['name'],
-                            'region' => $region,
-                        ));
 
                         if (!array_key_exists($region, $result)) 
                             $result[$region] = 0;
                         $result[$region]++;
                     }
 
-                    self::notifyAllPlayers("dbgdbg", 'DEBUG LANDGRAB: Region count is ${count}', array(
-                        'count' => count($result),
-                    ));
                     if (count($result) >= 2) {
                         $winningPlayers[$player_id] = true;
                     }
@@ -2084,7 +2098,7 @@ Purchase it or return it to the bottom of the deck.`
                 }
                 break;
             case 5:
-                // Collector
+                // Mouth Party
                 foreach ($drinks as $drink) {
                     if ($drink['flavor_count'] >= 4)
                         $winningPlayers[$drink['player_id']] = true;
@@ -2810,15 +2824,9 @@ Purchase it or return it to the bottom of the deck.`
 
         $this->gamestate->setPlayerNonMultiactive($player_id, 'selectDistiller'); 
     }
-    function buyCard2($uid, $market, $slotId=null, $duSlot=null) {
-        $this->buyCard_internal($this->getActivePlayerId(), $uid, $market, $slotId, $duSlot);
-    }
     function buyCard_internal($playerId, $uid, $marketId, $slotId=null, $duSlot=null, $powers=null) {
         $free = false;
-        if ($this->getStateName() == "placeLabel3" || 
-            $this->getStateName() == "placeLabel4" || 
-            $this->getStateName() == "placeLabel5" || 
-            $this->getStateName() == "placeLabel6" || 
+        if (
             $this->getStateName() == "roundStartAction" || // TODO: This may require some other indicator, I dont think everything is free at the start
             $this->getStateName() == 'chooseDistillerGame' || 
             $this->getStateName() == 'sell') {
@@ -2833,9 +2841,15 @@ Purchase it or return it to the bottom of the deck.`
         }
 
         $deck = $this->getDeckFromId($marketId);
-        if ($marketId != 'bm' && !$this->isCardInMarket($deck, $uid)) {
+        // TODO differentiate between when you can buy from market vs bm vs reveal
+        if ($this->getStateName() == 'roundStartAction' && $this->getGameStateValue("powercard") == 123) {
+            if (!$this->isCardInTruck($deck, $uid)) {
+                throw new BgaSystemException("Card not in truck for trucker");
+            }
+        } else if ($marketId != 'bm' && !$this->isCardInMarket($deck, $uid) && !$this->isCardRevealed($deck, $uid)) {
             throw new BgaSystemException( "Card not available for purchase" );
         }
+
         if (!$this->playerHasPowers(self::getActivePlayerId(), $powers)) {
             throw new BgaSystemException("Ability/Power not available.");
         }
@@ -3066,6 +3080,9 @@ Purchase it or return it to the bottom of the deck.`
         return $ret;
     }
     function buyRecipe_internal($playerId, $recipeSlot, $powers,  $triggerCard=null) {
+        if (!$this->playerHasPowers($playerId, $powers)) 
+            throw new BgaSystemException( "Invalid Powers" );
+
         if ($this->getStateName() == "placeLabel4" || 
             $this->getStateName() == "sell" ||
             $triggerCard != null) {
@@ -3083,8 +3100,6 @@ Purchase it or return it to the bottom of the deck.`
             }
         } 
 
-        if (!$this->playerHasPowers($playerId, $powers)) 
-            throw new BgaSystemException( "Invalid Powers" );
         if ($recipeSlot < -2 || $recipeSlot > 7) 
             throw new BgaSystemException( "Invalid Recipe Slot" );
 
@@ -3205,9 +3220,12 @@ Purchase it or return it to the bottom of the deck.`
             throw new BgaSystemException( "Invalid Goal" );
         }
 
-        self::notifyPlayer($player_id, "discardGoal", "You discarded ${goal_name}", array(
+        self::notifyPlayer($player_id, "discardGoal", 'You discarded ${goal_name}', array(
             'goal_name' => $this->AllCards[$goalUid]->name,
-            'goal' => $this->AllCards[$goalUid]));
+            'goal' => $this->AllCards[$goalUid],
+            'goal_uid' => $goalUid,
+            'player_id' => $player_id,
+        ));
 
         self::notifyAllPlayers("discardGoal", 
             clienttranslate('${player_name} discards 1 Distillery Goal Card'),
@@ -3442,6 +3460,7 @@ Purchase it or return it to the bottom of the deck.`
 
         $choices = array();
 
+        //self::notifyAllPlayers("dbgdbg", "round start action select", array('actions' => $actions));
         foreach ($actions as $pc) {
             // TODO this is a terrible way to check for Distiller
             $card_id = $pc['card_id'];
@@ -3450,12 +3469,14 @@ Purchase it or return it to the bottom of the deck.`
                     'name' => $this->distillers[$card_id]->name,
                     'card_id' => $card_id,
                     'uid' => $card_id,
+                    'market' => 'distiller',
                 );
             } else {
                 $choices[] = array(
                     'name' => $this->AllCards[$pc['uid']]->name,
                     'card_id' => $card_id,
                     'uid' => $pc['uid'],
+                    'market' => 'du',
                 );
             }
         }
@@ -3848,7 +3869,7 @@ Purchase it or return it to the bottom of the deck.`
                 SELECT COUNT(*) FROM (SELECT uid, player_id FROM bottomless_card UNION ALL SELECT uid, player_id FROM  premium_ingredient) as t
                 WHERE uid in (%s) AND player_id=$playerId
             ", implode(',', $cardList)));
-            self::notifyAllPlayers("dbgdbg", 'Card check ${check}', array('check' => $check, 'cardList' => $cardList));
+            //self::notifyAllPlayers("dbgdbg", 'Card check ${check}', array('check' => $check, 'cardList' => $cardList));
             if ($check != count($cardList))
                 throw new BgaSystemException("Invalid cards - Not owner of all cards");
         }
@@ -3982,7 +4003,7 @@ Purchase it or return it to the bottom of the deck.`
         if ($check != 1) {
             throw new BgaSystemException("Invalid Card - not your cards");
         }
-        if ($this->AllCards[$out]->card_id < 133 || $this->AllCards[$out]->card_id > 138)  // Cannot trade yeast
+        if ($this->AllCards[$in]->card_id < 133 || $this->AllCards[$in]->card_id > 139) 
             throw new BgaSystemException("Invalid Card - Non-basic");
 
         if ($this->isSignatureCard($this->AllCards[$out])) {
@@ -4050,13 +4071,15 @@ Purchase it or return it to the bottom of the deck.`
             SELECT uid, player_id, location FROM premium_ingredient
             UNION ALL SELECT uid, player_id, location FROM bottomless_card
             ) as t WHERE uid=$out AND player_id=$pid AND location='player'")) {
-                throw new BgaSystemException("Trade card not valid");
+                throw new BgaSystemException("Trade card not valid (out)");
         }
         if (1 != self::getUniqueValueFromDb("SELECT COUNT(*) FROM (
             SELECT uid, player_id, location FROM premium_ingredient
             UNION ALL SELECT uid, player_id, location FROM bottomless_card
+            UNION ALL SELECT uid, player_id, location FROM distillery_upgrade
+            UNION ALL SELECT uid, player_id, location FROM premium_item
             ) as t WHERE uid=$in AND location='truck'")) {
-                throw new BgaSystemException("Trade card not valid");
+                throw new BgaSystemException("Trade card not valid (in)");
         }
 
 
@@ -4097,15 +4120,19 @@ Purchase it or return it to the bottom of the deck.`
             $in_uid = $cardIn->uid;
             //self::dbQuery("UPDATE distillery_upgrade SET location='player', player_id=$pid, location_idx=$duSlot WHERE uid=$in_uid");
             self::notifyAllPlayers("placeLabel2Trade", 
-                _('${player_name} discards ${out_name} and draws ${in_name} from the ${truck_name} truck'), array(
+                _('${player_name} discards ${card1_name} and draws ${card2_name} from the ${truck_name} truck'), array(
                 'player_name' => self::getActivePlayerName(),
                 'player_id' => self::getActivePlayerId(),
                 'in_name' => $cardIn->name,
+                'card2_name' => $cardIn->name,
                 'out_name' => $cardOut->name,
+                'card1_name' => $cardOut->name,
                 'in_card' => $cardIn,
                 'out_card' => $cardOut,
                 'truck_name' => $truckName,
                 'truck' => $truck,
+                'card1_id' => $cardOut->uid,
+                'card2_id' => $cardIn->uid,
             ));
 
 
@@ -4125,6 +4152,8 @@ Purchase it or return it to the bottom of the deck.`
                     'out_card' => $cardOut,
                     'truck_name' => $truckName,
                     'truck' => $truck,
+                    'card1_id' => $cardOut->uid,
+                    'card2_id' => $cardIn->uid,
                 ));
         }
 
@@ -4136,15 +4165,16 @@ Purchase it or return it to the bottom of the deck.`
         $pid = self::getActivePlayerId();
 
         if ($uid == 0) {
-            $card_id = $this->getPlayerDistiller($pid);
+            $card_id = $this->getPlayerDistiller($pid)->id;
         } else {
             $card_id = $this->AllCards[$uid]->card_id;
         }
-        if (!$this->playerHasPowers($pid, [$card_id])) {
+        if (!$this->playerHasPowers($pid, [$uid])) {
             throw new BgaSystemException("Invalid round start action");
         }
 
         $this->setGameStateValue("powercard", $card_id);
+        //$this->notifyAllPlayers("dbgdbg", 'select round start action', array("card_id" => $card_id, 'uid' => $uid));
         self::giveExtraTime($pid);
         switch ($card_id) {
             case 123:
@@ -4476,6 +4506,8 @@ Purchase it or return it to the bottom of the deck.`
         $flavor = 0;
         if ($sold && $recipe['aged'])
             $flavor += $this->getFlavorScore($flavorCount);
+        if (!$sold && $recipe['aged'])
+            $flavor = $flavorCount;
 
         if ($sold) {
             $bottleData = $this->getBottleData($playerId, $recipe, $bottle);
@@ -4534,6 +4566,7 @@ Purchase it or return it to the bottom of the deck.`
             ' has a subtle ${card_name} taste to it.',
             ' reminds me of ${card_name}.',
             ' tastes of ${card_name}.', 
+            ' brings a natural ${card_name} flavor.',
         );
 
         $set2 = array(
@@ -4588,7 +4621,7 @@ Purchase it or return it to the bottom of the deck.`
             throw new BgaSystemException("Invalid drink - Not sellable");
 
         // Check that label slot is open 
-        if (self::getUniqueValueFromDb("SELECT COUNT(*) FROM label WHERE location='player' AND location_idx=$labelSlot"))
+        if (self::getUniqueValueFromDb("SELECT COUNT(*) FROM label WHERE location='player' AND location_idx=$labelSlot AND player_id=$playerId"))
             throw new BgaSystemException("Label slot already taken");
 
         if ($this->AllCards[$bottle]->card_id != 20 && !self::getUniqueValueFromDb(
@@ -4893,7 +4926,6 @@ Purchase it or return it to the bottom of the deck.`
     function selectRecipe($slot, $drinkId, $barrelUid) {
         self::checkAction("selectRecipe");
 
-
         $pid = self::getActivePlayerId();
         $recipe = $this->getRecipeFromSlot($slot, $pid);
 
@@ -4916,9 +4948,6 @@ Purchase it or return it to the bottom of the deck.`
                 throw new BgaSystemException("Invalid recipe - bad barrel");
         }
 
-
-
-        //$slot = $this->getRecipeSlotFromName($recipeName, $pid);
         $recipeName = $recipe['name'];
 
         $sql = sprintf('UPDATE drink SET recipe_slot=%d, barrel_uid=%d WHERE id=%d', 
@@ -5453,6 +5482,8 @@ Purchase it or return it to the bottom of the deck.`
         $result = array();
         // first get all the bottle data so we don't do it multiple times
         foreach ($players as $player_id => $info) {
+            $this->incStat($info['player_score'], "points_ingame", $player_id);
+
             $regions = array();
             $regionsWithoutHome = array();
             $bottles = self::getCollectionFromDb("SELECT uid FROM premium_item WHERE location='display' AND player_id=$player_id");
@@ -6315,12 +6346,8 @@ Purchase it or return it to the bottom of the deck.`
                             $sql = sprintf("UPDATE drink SET flavor_count=flavor_count+1 WHERE id=%d", $drinkId);
                             self::dbQuery($sql);
 
-                            self::notifyAllPlayers("ageDrink", 'Flavor card added to ${player_name}\'s ${location} by ${trigger_name}', array(
-                                "player_name" => $this->getPlayerName($pid),
-                                "player_id" => $pid,
-                                "location" => 'washback',
-                                "trigger_name" => $this->AllCards[$pc['uid']]->name,
-                            ));
+                            $c1 = $this->revealFromDeck($this->flavorDeck);
+                            $this->addFlavorToDrink($drinkId, $pid, null, $pc['uid'], $c1, false);
                             break;
                         case 113: // Doig Ventilator
                             $c1 = $this->revealFromDeck($this->flavorDeck);
@@ -6339,7 +6366,9 @@ Purchase it or return it to the bottom of the deck.`
                             self::notifyPlayer($pid, "doig", _('${trigger_name} reveals ${card1_name} and ${card2_name}. ${winner_name} selected.'), array(
                                 "trigger_name" => $this->AllCards[$pc['uid']]->name,
                                 'card1_name' => $card1->name,
+                                'card1_id' => $card1->uid,
                                 'card2_name' => $card2->name,
+                                'card2_id' => $card2->uid,
                                 'winner_name' => $this->AllCards[$winner]->name,
                             ));
                             $this->addFlavorToDrink($drinkId, $pid, null, $pc['uid'], $winner, false);
@@ -7067,6 +7096,11 @@ Purchase it or return it to the bottom of the deck.`
         $check = self::getUniqueValueFromDb("SELECT COUNT(*) FROM $market WHERE location='market' AND uid=$uid");
         return $check && $check == 1;
     }
+    function isCardInTruck($deck, $uid) {
+        $market = $deck->dbTable;
+        $check = self::getUniqueValueFromDb("SELECT COUNT(*) FROM $market WHERE location='truck' AND uid=$uid");
+        return $check && $check == 1;
+    }
 
     function dealToIndex($deck, $index) {
         // TODO handle shuffle?
@@ -7104,7 +7138,7 @@ Purchase it or return it to the bottom of the deck.`
             return $result['uid'];
         }
         $this->reshuffle($deck);
-        return $this->revealFromDeck($deck, $index);
+        return $this->revealFromDeck($deck);
     }
 
     function moveCardToPlayer($deck, $uid, $playerId) {
@@ -7140,6 +7174,12 @@ Purchase it or return it to the bottom of the deck.`
                         $deck->dbTable, $slotId);
         $result = self::DbQuery($sql);
 
+    }
+
+    function isCardRevealed($deck, $uid) {
+        $table = $deck->dbTable;
+        $check = self::getUniqueValueFromDb("SELECT COUNT(*) FROM $table WHERE uid=$uid AND location='reveal'");
+        return $check == 1;
     }
 
     function getMarket($deck) {
@@ -7499,14 +7539,18 @@ Purchase it or return it to the bottom of the deck.`
                 switch ($this->AllCards[$pc]->card_id) {
                     case 104: 
                         // Worm Tub
-                        self::notifyAllPlayers("powerCard", _('Adding 2 additional alcohol (${trigger_name})'),
-                            array('trigger_name' => $this->AllCards[$pc]->name));
+                        self::notifyAllPlayers("powerCard", _('Adding 2 additional alcohol (${card_name})'),
+                            array('trigger_name' => $this->AllCards[$pc]->name,
+                                  'card_name' => $this->AllCards[$pc]->name,
+                                  'card' => $this->AllCards[$pc]));
                         $count += 2;
                         break;
                     case 129:
                         // Coppersmith
-                        self::notifyAllPlayers("powerCard", _('Adding 1 additional alcohol (${trigger_name})'),
-                            array('trigger_name' => $this->AllCards[$pc]->name));
+                        self::notifyAllPlayers("powerCard", _('Adding 1 additional alcohol (${card_name})'),
+                            array('trigger_name' => $this->AllCards[$pc]->name,
+                                  'card_name' => $this->AllCards[$pc]->name,
+                                  'card' => $this->AllCards[$pc]));
                         $count += 1;
                         break;
                 }

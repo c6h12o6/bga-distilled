@@ -580,7 +580,7 @@ body > .card {
     aspect-ratio: 10/7;
 }*/
 .dcard {
-    background: url('img/cardfronts.jpg');
+    background: url('img/cardfronts_new.webp');
     background-repeat: no-repeat;
     background-size: 1708px 1900px;
     width: 122px;
@@ -592,7 +592,7 @@ body > .card {
 }
 
 .dcard2 {
-    background: url('img/cardfronts.jpg');
+    background: url('img/cardfronts_new.webp');
     background-repeat: no-repeat;
     background-size: 1708px 1900px;
     border-radius: 10px;
@@ -686,7 +686,7 @@ body > .card {
 }
 
 .scaledMarketCard {
-    background: url('img/cardfronts.jpg');
+    background: url('img/cardfronts_new.webp');
     background-repeat: no-repeat;
     background-size: calc(14*var(--width)) calc(10*var(--height));
     --width: var(--flippy-width);
@@ -1199,7 +1199,7 @@ body > .card {
 .icon-start-em {
     background: url("img/icons.png");
     background-size: 29em 1em;
-    background-position-x: -19em;
+    background-position-x: -17em;
     display: inline-block;
     width: 1em;
     height: 1em;

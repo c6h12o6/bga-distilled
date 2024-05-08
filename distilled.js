@@ -361,8 +361,31 @@ function (dojo, declare, on, bgacards) {
             tt.appendChild(image);
             return formatHTML
         },
+        getTooltipForDistiller(card_id) {
+            var xBack = (card_id %  9);
+            var yBack = Math.floor(card_id / 9);
+
+            let text = this.distiller_text?.[card.card_id];
+            if (text == undefined) 
+                text = ""
+
+            let imageClass = "distillerCard"
+            var formatHTML = `
+
+                <div class="tooltipContainer">
+                    <div class="${imageClass}" 
+                        style="--width: 250px; --height: 360px; background-position-x: calc(-${xBack} * var(--width)); background-position-y: calc(-${yBack} * var(--height));"> 
+                    </div>
+                </div>
+            `
+            return formatHTML
+        },
         addTooltipForCard( card , div) {
             formatHTML = this.getTooltipForCard(card)
+            this.addTooltipHtml(div.id, formatHTML, 1000)
+        },
+        addTooltipForDistiller(card, div) {
+            formatHTML = this.getTooltipForDistiller(card)
             this.addTooltipHtml(div.id, formatHTML, 1000)
         },
         addTooltipForGoal( card , div) {
@@ -1852,16 +1875,27 @@ function (dojo, declare, on, bgacards) {
                         Object.assign(Ccopy, C);
 
                         Ccopy.location = 'truck'
-                        switch (C.market) {
-                            case 'du':
-                                this.decks.duTruck.addCard(Ccopy);
-                                break;
-                            case 'ing':
-                                this.decks.ingTruck.addCard(Ccopy);
-                                break;
-                            case 'item':
-                                this.decks.itemTruck.addCard(Ccopy);
-                                break;
+                        if (C.uid < 1000) { // not bottomless
+                            switch (C.market) {
+                                case 'du':
+                                    this.decks.duTruck.addCard(Ccopy);
+                                    break;
+                                case 'ing':
+                                    this.decks.ingTruck.addCard(Ccopy);
+                                    break;
+                                case 'item':
+                                    this.decks.itemTruck.addCard(Ccopy);
+                                    break;
+                            }
+                        } else {
+                            switch (C.market) {
+                                case 'ing':
+                                    this.ingVoidStock.addCard(Ccopy);
+                                    break;
+                                case 'item':
+                                    this.itemVoidStock.addCard(Ccopy);
+                                    break;
+                            }
                         }
 
                         args.discard = Ccopy.uid
@@ -2638,6 +2672,7 @@ function (dojo, declare, on, bgacards) {
 
                 front.dataset.uid = card_id;
                 back.dataset.uid = card_id+1;
+                this.addTooltipForDistiller(card_id+1, card)
             } else if (type == 'ing' || type == 'du') {
                 var idx = this.activeCards[card_id].card_id;
                 const xBack = (idx %  14);
@@ -2918,7 +2953,6 @@ function (dojo, declare, on, bgacards) {
                 div.style.backgroundPositionX = `calc(-${xBack} * var(--width))`
 
                 if (card.count <= 0) {
-                    this.showMessage(`Debug Message: count is ${card.count}`, "error");
                     div.classList.add('fade');
                     if (div.children.length == 0)
                         dojo.place(this.format_block('jstpl_label_x', {}), div, 'last');
@@ -4217,9 +4251,11 @@ _(`Confirm sale and collect ${this.activeCards[cardName].name}`),
         notif_discardGoal: function(notif) {
             console.log("discardGoal");
             console.log(notif);
-            let card = this.activeCards[notif.args.goal_uid];
-            console.log(card)
-            this.playerGoalsStock[notif.args.player_id].removeCard(card);
+            if (notif.args.goal_uid) {
+                let card = this.activeCards[notif.args.goal_uid];
+                console.log(card)
+                this.playerGoalsStock[notif.args.player_id].removeCard(card);
+            }
         },
         notif_playerPoints: function(notif) {
             console.log("player points");
@@ -4761,28 +4797,21 @@ _(`Confirm sale and collect ${this.activeCards[cardName].name}`),
          *  @Override
          */
         format_string_recursive(log, args) {
-            console.log(log)
-            console.log(args)
             try {
                 if (log && args && !args.processed) {
-                    console.log("in here")
                     args.processed = true;
 
                     if (args.card_name !== undefined) {
                         let card;
                         if (args.card) {
-                            console.log("$$$$$$$$$$$$$$$$$$$$$$$")
                             card = args.card
                         } else if (args.card_id) {
                             card = this.activeCards[args.card_id]
-                            console.log(card)
-                            console.log(this.activeCards[parseInt(args.card_id)])
                         }
                         if (card) {
                             uid = Date.now() 
                             args.card_name = `<span class="log-tooltip" id="log-${uid}">${_(args.card_name)}</span>`;
                             html = this.getTooltipForCard(card)
-                            console.log(html)
                             this.registerCustomTooltip(html, `log-${uid}`)
                         }
                     }
@@ -4795,7 +4824,6 @@ _(`Confirm sale and collect ${this.activeCards[cardName].name}`),
                             uid = Date.now() + '_1'
                             args.card1_name = `<span class="log-tooltip" id="log-${uid}">${_(args.card1_name)}</span>`;
                             html = this.getTooltipForCard(card)
-                            console.log(html)
                             this.registerCustomTooltip(html, `log-${uid}`)
                         }
                     }
@@ -4808,7 +4836,6 @@ _(`Confirm sale and collect ${this.activeCards[cardName].name}`),
                             uid = Date.now() + '_2'
                             args.card2_name = `<span class="log-tooltip" id="log-${uid}">${_(args.card2_name)}</span>`;
                             html = this.getTooltipForCard(card)
-                            console.log(html)
                             this.registerCustomTooltip(html, `log-${uid}`)
                         }
                     }
@@ -4816,7 +4843,6 @@ _(`Confirm sale and collect ${this.activeCards[cardName].name}`),
             } catch (e) {
                 console.error(log, args, 'Exception thrown', e.stack);
             }
-            console.log(args)
 
             return this.inherited(arguments);
         }

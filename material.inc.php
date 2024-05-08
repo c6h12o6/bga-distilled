@@ -105,6 +105,8 @@ $this->card_text = array(
   130 => "During the Sell Phase, add 2 <span class='icon-coin-em'></span> to the sell value of each spirit you sell.",
   131 => "Once per Market Phase, may discount one barrel by 2 <span class='icon-coin-em'></span><br/>Endgame: 1  <span class='icon-sp-em'></span>  for each barrel type represented in your spirit labels",
   132 => "<span class='icon-start-em'> </span> add a basic <span class='icon-yeast-em'></span> card to your pantry.<br/>Endgame: 1  <span class='icon-sp-em'></span>  for each of your specialist distillery upgrades",
+  138 => "When purchased, you may reveal the top card of any market deck to all players. Purchase it or return it to the bottom of the deck.",
+  139 => "When purchased, immediately gain 1 <span class='icon-coin-em'></span> <br/> <br/> Cannot be traded with the basic market.",
 );
 
 $this->sa_text = array(
