@@ -2347,6 +2347,23 @@ function (dojo, declare, on, bgacards) {
         },
         setupPlayerCards(pid, playerCards) {
             console.log("setup player cards for " + pid)
+            // remove some cards to ensure idempotency
+            // Remove cards over 10,000 which are unknown flavor cards
+            removeFlavor = function (C, stock) {
+                if (C.uid > 10000)
+                    stock[pid].ing.removeCard(C);
+            }
+
+            this.playerWashbackStock[pid].ing.getCards().forEach(C => {
+                removeFlavor(C, this.playerWashbackStock)
+            })
+            this.playerWarehouse1Stock[pid].ing.getCards().forEach(C => {
+                removeFlavor(C, this.playerWarehouse1Stock)
+            })
+            this.playerWarehouse2Stock[pid].ing.getCards().forEach(C => {
+                removeFlavor(C, this.playerWarehouse2Stock)
+            })
+
             playerCards.forEach(X => {
                     if (X.market != 'label')
                         this.activeCards[X.uid] = X;
@@ -2412,8 +2429,9 @@ function (dojo, declare, on, bgacards) {
                             this.playerWarehouse1Stock[pid].item.addCard(X);
                         if (X.market == 'label')
                             this.playerWarehouse1Stock[pid].label.addCard(X);
-                        if (X.market == 'flavor') 
+                        if (X.market == 'flavor')  {
                             this.playerWarehouse1Stock[pid].ing.addCard(this.newFlavorBack());
+                        }
                     } else if (X.location == 'warehouse2') {
                         X.location_idx = 1;
                         if (X.market == 'ing')
@@ -3477,45 +3495,6 @@ function (dojo, declare, on, bgacards) {
             }
 
         },
-        placeDuCardDialog: function(uid, ajaxArgs, ajaxPath=null) {
-            var existing = {};
-            for (var ii = 1; ii <= 3; ii++) {
-                var divname = 'du' + ii + "_" + this.player_id + '-front';
-                var elem = document.getElementById(divname);
-                if (elem) {
-                    existing[ii] = this.activeCards[elem.dataset.uid].name
-                } else {
-                    existing[ii] = _("Empty")
-                }
-            }
-
-            let card = this.activeCards[uid];
-            var pcElem = document.getElementById("placementCard")
-            if (pcElem)
-                this.addTooltipForCard(this.activeCards[this.clientStateArgs.cardName], pcElem)
-
-            var ajaxPath = this.clientStateArgs.ajax
-            if (!ajaxPath) 
-                ajaxPath = "/distilled/distilled/buyCard.html"
-
-                /*
-            let fn = function () {
-                this.ajaxcall( `/distilled/distilled/${ajaxPath}.html`, args, this, function(result) {});
-            }*/
-            this.replaceActionBar();
-            this.addReplacementButton('1', '1 (' + existing[1] + ')', ()=>{
-                ajaxArgs.duSlot = 1
-                this.ajaxcall( ajaxPath, this.clientStateArgs, this, function(result) {})});
-            this.addReplacementButton('1', '1 (' + existing[2] + ')', ()=>{
-                ajaxArgs.duSlot = 2
-                this.ajaxcall( ajaxPath, this.clientStateArgs, this, function(result) {})});
-            this.addReplacementButton('1', '1 (' + existing[3] + ')', ()=>{
-                ajaxArgs.duSlot = 3;
-                this.ajaxcall( ajaxPath, this.clientStateArgs, this, function(result) {})});
-            titleElement = document.getElementById("pagemaintitletext")
-            this.oldtitle = titleElement.innerHTML
-            this.innerHTML = _(`Choose an upgrade slot for ${card.uid}`)
-        },
         onPrefClick: function(evt) {
             console.log("onPrefClick");
             console.log(evt);
@@ -3706,28 +3685,12 @@ _(`Confirm sale and collect ${this.activeCards[cardName].name}`),
                 COLOR: color, 
             }), 'recipeCubeSlot_' + slot + '_' + player_id, 'only');
         },
-        /*
-        addCardOnBoard: function(startObj, destObj, card_id) {
-            dojo.place(this.format_block('jstpl_card', {
-                CARD_ID: card_id,
-                X_OFF: 0, //(card_id % 10) * 375,
-                Y_OFF: Math.floor(card_id / 10) * 585
-            }), destObj, 'last');
-            /*
-            this.placeOnObject('card_'+card_id, startObj);
-            this.slideToObject('card_'+card_id, destObj).play();
-        },
-        */
         onDuCardClick: function(evt) {
             dojo.stopEvent(evt);
-            console.log("onDuCardClick");
-            console.log(evt);
-            console.log(evt.currentTarget);
 
             const extractCardId = /du-card-(\d+)-.*/;
             const match = evt.currentTarget.id.match(extractCardId);
             console.log(match);
-            this.duMarketStock.flipCard(this.activeCards[match[1]]);
             this.duMarketStock.flipCard(this.activeCards[match[1]]);
         },
         getStock: function(marketShort) {

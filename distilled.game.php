@@ -1918,19 +1918,21 @@ Purchase it or return it to the bottom of the deck.`
                         break;
                 }
             }
-            self::notifyAllPlayers("ageDrink", 'Flavor card added to ${player_name}\'s ${location} by ${trigger_name}', array(
+            self::notifyAllPlayers("ageDrink", 'Flavor card added to ${player_name}\'s ${location_str} by ${trigger_name}', array(
                 "player_name" => $this->getPlayerName($playerId),
                 "player_id" => $playerId,
-                "location" => self::normalizeString($location),
+                "location" => $location,
+                "location_str" => self::normalizeString($location),
                 "trigger_name" => $this->AllCards[$triggerCard]->name,
                 // TODO make this private
                 "visible_card" => $visibleCard,
             ));
         } else {
-            self::notifyAllPlayers("ageDrink", 'Flavor card added to ${player_name}\'s ${location}', array(
+            self::notifyAllPlayers("ageDrink", 'Flavor card added to ${player_name}\'s ${location_str}', array(
                 "player_name" => $this->getPlayerName($playerId),
                 "player_id" => $playerId,
-                "location" => self::normalizeString($location),
+                "location" => $location,
+                "location_str" => self::normalizeString($location),
             ));
         }
     }
@@ -2150,7 +2152,7 @@ Purchase it or return it to the bottom of the deck.`
                 break;
             case 9: 
                 // North and South, 3 americas => 7
-                $labels = self::getCollectionFromDb("SELECT uid, label, player_id FROM label WHERE player_id is not null");
+                $labels = self::getCollectionFromDb("SELECT uid, label, player_id FROM label WHERE player_id is not null and count != 0");
                 $playerCount = array();
                 foreach ($labels as $info) {
                     $pid = $info['player_id'];
@@ -2231,7 +2233,7 @@ Purchase it or return it to the bottom of the deck.`
 
             case 17: // The Sun never sets
                 // 3 europes
-                $labels = self::getCollectionFromDb("SELECT uid, label, player_id FROM label WHERE player_id is not null");
+                $labels = self::getCollectionFromDb("SELECT uid, label, player_id FROM label WHERE player_id is not null AND count != 0");
                 $playerCount = array();
                 foreach ($labels as $info) {
                     $pid = $info['player_id'];
@@ -2276,8 +2278,8 @@ Purchase it or return it to the bottom of the deck.`
                 }
                 break;
             case 20: // Up with the sun
-                 // 3 europes
-                $labels = self::getCollectionFromDb("SELECT uid, label, player_id FROM label WHERE player_id is not null");
+                 // 3 asias
+                $labels = self::getCollectionFromDb("SELECT uid, label, player_id FROM label WHERE player_id is not null and count != 0");
                 $playerCount = array();
                 foreach ($labels as $info) {
                     $pid = $info['player_id'];
@@ -4486,6 +4488,7 @@ Purchase it or return it to the bottom of the deck.`
             $sp += $this->AllCards[$card]->sp;
         }
 
+        $origFlavorCount = $flavorCount;
         $powerCards = $this->getPowerCards();
         foreach ($powerCards as $pc) {
             if ($playerId !=  $pc['player_id']) 
@@ -4507,7 +4510,7 @@ Purchase it or return it to the bottom of the deck.`
         if ($sold && $recipe['aged'])
             $flavor += $this->getFlavorScore($flavorCount);
         if (!$sold && $recipe['aged'])
-            $flavor = $flavorCount;
+            $flavor = $origFlavorCount;
 
         if ($sold) {
             $bottleData = $this->getBottleData($playerId, $recipe, $bottle);
@@ -4885,7 +4888,7 @@ Purchase it or return it to the bottom of the deck.`
                                 $sellArgs['tradeCardIn'], 
                                 $sellArgs['tradeCardOut'], 
                                 $sellArgs['tradeTruck'], 
-                                $sellArgs['labelSlot']);
+                                $sellArgs['duSlot']);
                             break;
                         case 3:
                             $this->buyCard_internal($playerId, $sellArgs['collectCard'], 'ing', $sellArgs['collectCardSlot']);
@@ -5044,7 +5047,7 @@ Purchase it or return it to the bottom of the deck.`
             }
         }
 
-        throw new BgaSystemException( "Recipe name not found" );
+        throw new BgaSystemException( sprintf("Recipe name not found: %s", $recipeName ));
     }
 
     function getRecipeByName($recipeName, $player_id=null) {
@@ -5482,7 +5485,7 @@ Purchase it or return it to the bottom of the deck.`
         $result = array();
         // first get all the bottle data so we don't do it multiple times
         foreach ($players as $player_id => $info) {
-            $this->incStat($info['player_score'], "points_ingame", $player_id);
+            $this->incStat($scores[$player_id]['player_score'], "points_ingame", $player_id);
 
             $regions = array();
             $regionsWithoutHome = array();
@@ -5615,10 +5618,12 @@ Purchase it or return it to the bottom of the deck.`
                         $score = self::getUniqueValueFromDb("SELECT COUNT(id) FROM recipe WHERE player_id=$player_id AND (color='silver' OR color='gold')");
                         break;
                     case 120: // Warehouse Manager
-                        $labels = self::getCollectionFromDb("SELECT * FROM label WHERE player_id=$player_id AND location='player'");
+                        $labels = self::getCollectionFromDb("SELECT * FROM label WHERE player_id=$player_id AND count != 0");
                         $aged = 0;
+                        //self::notifyAllPlayers("dbgdbg", "labels", array('labels', $labels));
                         foreach ($labels as $iuid => $info) {
                             $r = $this->getRecipeByName($info['label'], $player_id);
+                            //self::notifyAllPlayers("dbgdbg", "r", array('r' => $r));
                             if ($r['aged']) {
                                 $aged++;
                             }
@@ -5754,31 +5759,25 @@ Purchase it or return it to the bottom of the deck.`
                         break;
                     case 143: // Skip the easy stuff
                         // have or be tied for the most gold, silver, or bronze tiered spirits
-                        $myScores = array();
-                        $maxScores = array();
+
+                        $myScores = 0;
+                        $maxScore = 0;
                         foreach ($players as $pid => $info) {
-                            $playerScores = array();
+                            $playerScore = 0;
                             foreach ($playerLabels[$pid] as $label) {
-                                if (!array_key_exists($label['cube'], $playerScores)) {
-                                    $playerScores[$label['cube']] = 0;
+                                if (0 <= $this->getRecipeSlotFromName($label['name'], $pid) &&
+                                    7 >  $this->getRecipeSlotFromName($label['name'], $pid)) {
+                                        $playerScore++;
                                 }
-                                $playerScores[$label['cube']]++;
+                                $playerScore++;
                             }
-                            foreach ($playerScores as $color => $ct) {
-                                if (!array_key_exists($color, $maxScores)) {
-                                    $maxScores[$color] = $ct;
-                                } else if ($ct > $maxScores[$color]) {
-                                    $maxScores[$color] = $ct;
-                                }
-                            }
-                            if ($pid == $player_id) {
-                                $myScores = $playerScores;
-                            }
+                            if ($playerScore > $maxScore)
+                                $maxScore = $playerScore;
+                            if ($pid == $player_id)
+                                $myScore = $playerScore;
                         }
-                        foreach ($myScores as $color => $ct) {
-                            if ($ct == $maxScores[$color]) {
-                                $score = 7;
-                            }
+                        if ($myScore == $maxScore && $myScore > 0) {
+                            $score = 7;
                         }
                         break;
                     case 144: // Thirst For Knowledge
@@ -5880,6 +5879,7 @@ Purchase it or return it to the bottom of the deck.`
 
                         $maxCount = 0;
                         $myCount = 0;
+                        $count = 0;
                         foreach ($playerBottles as $pid => $bottles) {
                             foreach ($bottles as $b) {
                                 $bottle = $this->AllCards[$b['uid']];
