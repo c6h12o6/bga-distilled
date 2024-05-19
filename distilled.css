@@ -528,8 +528,8 @@ body > .card {
     height: 920px;
 }
 .playerFlight {
-    /* background: url('img/flightA.png'); */
-    background: url('img/Flights.png');
+    /*background: url('img/Flights.png');*/
+    background: pink;
     /*background-size: 2616px  3000px;*/
     background-size: 400% 300%;
     background-repeat: no-repeat;
@@ -579,6 +579,14 @@ body > .card {
     border-radius: 3px;
     aspect-ratio: 10/7;
 }*/
+.bottleRules {
+    position: absolute;
+    right: 20px;
+    height: 100%;
+    width: auto;
+    text-align: right;
+    z-index: 1;
+}
 .dcard {
     background: url('img/cardfronts_new.webp');
     background-repeat: no-repeat;

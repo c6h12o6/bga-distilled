@@ -264,7 +264,18 @@ var jstpl_player_section = '\
     </div>\
     <div style="display: flex; flex-direction: column; align: center; justify-content: space-between;"> \
         <div id="display_${ID}_wrapper" class="dwhiteblock" style="display: inline-block;" > \
-            <div id="display_${ID}_title" > Display Case </div> \
+            <div id="fiddlesticks"> </div> \
+            <div id="display_${ID}_title" > Display Case 1234 \
+                <div class="bottleRules"> \
+                    <span style="font-weight: bold"> Endgame Scoring </span> <br/> \
+                    2 from same region = 2    <span class="icon-sp-em"></span> <br/> \
+                    3 from same region = 4    <span class="icon-sp-em"></span> <br/> \
+                    4 from same region = 7    <span class="icon-sp-em"></span> <br/> \
+                    5 from same region = 10   <span class="icon-sp-em"></span> <br/> \
+                    6+ from same region = 15  <span class="icon-sp-em"></span> <br/> \
+                    3 different regions = 5   <span class="icon-sp-em"></span> <br/> \
+                </div> \
+            </div> \
             <div class="pantry"> \
                 <div id="display_${ID}" class="warehouseCards" > </div> \
             </div> \

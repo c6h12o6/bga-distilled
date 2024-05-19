@@ -152,8 +152,8 @@ $machinestates = array(
     ),
     15 => array(
     		"name" => "playerBuyTurnReveal",
-    		"description" => clienttranslate('${actplayer} may buy the revealed card or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} may buy the revealed card or pass'),
+    		"description" => clienttranslate('${actplayer} may buy the revealed card or pass.'),
+    		"descriptionmyturn" => clienttranslate('${you} may buy the revealed card or pass.'),
     		"type" => "activeplayer",
     		"possibleactions" => array( "buyCard", "pass"),
             "args" => "argPlayerBuyTurnReveal",
@@ -198,8 +198,8 @@ $machinestates = array(
     24 => array(
         'name' => 'distillPowers',
         "type" => "activeplayer",
-        "description" => _('${actplayer} must distill a spirit or pass'),
-        "descriptionmyturn" => _('${you} may activate Distillery Upgrades and/or player powers'),
+        "description" => clienttranslate('${actplayer} must distill a spirit or pass'),
+        "descriptionmyturn" => clienttranslate('${you} may activate Distillery Upgrades and/or player powers'),
         "args" => "argDistillPowers",
         "possibleactions" => array("distillPostPowers", "restartDistill"),
         "transitions" => array('distillReact' => 21, 'restart'=>20, 'exitDistill'=>23),
@@ -211,7 +211,8 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} may react to the cards removed from the washback'),
         "args" => "argDistillReact",
         "possibleactions" => array("addBack", "distillAgain", "useDistillPower", "distillReactPass", "restartDistill"),
-        //"transitions" => array("distillReact" => 21, "addback" => 21, "distillAgain"=>24, "restart"=>20, "exitDistill" => 23) // pointing restart at 21 because i dont want to be able to restart and then completely restart distill
+        // pointing restart at 21 because i dont want to be able to restart and then completely restart distill
+        //"transitions" => array("distillReact" => 21, "addback" => 21, "distillAgain"=>24, "restart"=>20, "exitDistill" => 23) 
         "transitions" => array("distillReact" => 21, "addback" => 21, "distillAgain"=>24, "restart"=>21, "exitDistill" => 23)
     ),
     23 => array(
