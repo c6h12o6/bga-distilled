@@ -62,6 +62,35 @@ function (dojo, declare, on, bgacards) {
             // Here, you can init the global variables of your user interface
             // Example:
             // this.myGlobalValue = 0;
+            card_order = [
+                'ALCOHOL', 'YEAST', 'WATER', 'GRAIN', 'PLANT', 'FRUIT', 'METAL', 'CLAY', 'WOOD', 'AMERICAS', 'EUROPE', 'ASIA', 'FLAVOR'
+            ]
+            sortFunction = function(a, b) {
+                for (ii = 0; ii < card_order.length; ii++) {
+                    TYPE = card_order[ii];
+                    if (TYPE == a.subtype && TYPE == b.subtype) {
+                        diff = a.cost - b.cost
+                        console.log('equal')
+                        console.log(a)
+                        console.log(b)
+                        return diff
+                    }
+                    else if (TYPE == a.subtype || TYPE == a.type) {
+                        console.log('less')
+                        console.log(a)
+                        console.log(b)
+                        return -1;
+                    } else if (TYPE == b.subtype || TYPE == b.type) {
+                        console.log('greater')
+                        console.log(a)
+                        console.log(b)
+                        return 1;
+                    }
+                }
+                console.log(`${a.name} and ${b.name} tied`)
+                return 0;
+            }
+            this.sortFunction = sortFunction
             this.duCardsManager = new CardManager(this, {
                 getId: (card) => {
                     return 'du-card-' + card.uid;
@@ -380,6 +409,7 @@ function (dojo, declare, on, bgacards) {
             `
             return formatHTML
         },
+
         addTooltipForCard( card , div) {
             formatHTML = this.getTooltipForCard(card)
             this.addTooltipHtml(div.id, formatHTML, 1000)
@@ -494,7 +524,6 @@ function (dojo, declare, on, bgacards) {
             this.cardsToCombos = {}
             this.playerSignatureStock = {}
             this.playerSignatureLabelStock = {}
-            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             this._registeredCustomTooltips = {}
             this._attachedTooltips = {}
 
@@ -506,8 +535,6 @@ function (dojo, declare, on, bgacards) {
 
             for( var player_id in gamedatas.players )
             {
-
-
                 document.getElementById("player_score_" + player_id).classList.add("invisible")
                 document.getElementById("icon_point_" + player_id).classList.add("invisible")
                 this.player_list.push(player_id)
@@ -515,13 +542,22 @@ function (dojo, declare, on, bgacards) {
                 var player = gamedatas.players[player_id];
                 this.player_data[player_id] = player;
 
+                let eye = `<svg id="eye_${player_id}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"></path></svg>`
+                let eyeElem = document.createElement('div')
+                eyeElem.innerHTML = eye;
                 dojo.place(this.format_block('jstpl_player_supplement', {
-                    ID: player_id, 
+                    PID: player_id, 
                     MONEY: player.money,
                 }), 'player_board_' + player_id, 'last');
+                player_name_board = document.getElementById(`player_name_${player_id}`)
+                player_name_board.appendChild(eyeElem.firstChild)
+                let savedPlayerId = function () {return player_id}();
+                // For some reason I have to get the variable again, otherwise it connects both eyes to both
+                let eyeElem2 = document.getElementById(`eye_${player_id}`)
+                dojo.connect(eyeElem2, "onclick", this, () => this.setVisiblePlayer(savedPlayerId));
+
 
                 var counter = new ebg.counter();
-
                 if (this.player_id == player_id) {
                     var counter = new ebg.counter();
                     counter.create("floating_money_counter");
@@ -541,10 +577,11 @@ function (dojo, declare, on, bgacards) {
 
                 // TODO: Setting up players boards if needed
                 let section = dojo.place(this.format_block('jstpl_player_section', {
-                    ID: player_id, 
+                   PID:player_id, 
                     NAME: player.name,
                     COLOR: player.color,
                 }), 'activeBoard' , 'last');
+
                 // Only create the pantries if this is my user
                 // TODO this might cause problems, maybe we just need to make them and hide them
                 console.log("Adding buttons")
@@ -582,10 +619,10 @@ function (dojo, declare, on, bgacards) {
                     dojo.addClass(revealedCardsButton, 'bgabutton_red');
                 }
                 
-                divbases = ['pantry', 'storeroom', 'reveal', 'distillerygoals', 'washback', 'warehouse1', 'warehouse2']
+                divbases = ['reveal', 'pantry', 'storeroom', 'distillerygoals', 'washback', 'warehouse1', 'warehouse2']
                 divbases.forEach(db => {
                     dojo.place(this.format_block('jstpl_player_floater', {
-                        ID: player_id, 
+                        PID: player_id, 
                         NAME: player.name,
                         COLOR: player.color,
                         DIVBASE: db,
@@ -596,9 +633,9 @@ function (dojo, declare, on, bgacards) {
                         return;
 
                     floater = document.getElementById(`${db}_wrapper_${player_id}`)
-                    console.log(floater)
-                    if (player_id == this.player_id)
+                    if (player_id == this.player_id)  {
                         floater.classList.add('currentPlayer')
+                    }
                 })
                 if (player_id != this.player_id) {
                     dojo.addClass(`pantry_wrapper_${player_id}`, 'invisible');
@@ -611,6 +648,7 @@ function (dojo, declare, on, bgacards) {
                     console.log("making visible?")
                     dojo.removeClass('playerSection_' + player_id, "invisible")
                 }
+
 
                 this.playerSections[player_id] = document.getElementById('playerSection_' + player_id)
                 let div = document.getElementById('nextPlayer_' + player_id)
@@ -704,9 +742,7 @@ function (dojo, declare, on, bgacards) {
             // connect radio buttons
             btns = ['floatingRadio', 'topRadio', 'expandedRadio']
             btns.forEach(id => {
-                console.log(id)
                 elem = document.getElementById(id)
-                console.log(elem)
                 dojo.connect(elem, 'onclick', this, "onPrefClick")
             })
             btns = ['nowrapRadio', 'wrapRadio', 'scrollRadio']
@@ -786,6 +822,7 @@ function (dojo, declare, on, bgacards) {
                 console.log(this.playerRevealStock)
                 this.activeCards[X.uid] = X;
                 this.playerRevealStock[this.player_id][X.market].addCard(X);
+                this.showFloatingReveal();
             })
 
             console.log(function () { return this.activeCards}())
@@ -891,6 +928,8 @@ function (dojo, declare, on, bgacards) {
 
 
 
+            if (gamedatas.whatCanIMake)
+                this.updateWhatCanIMake(gamedatas.whatCanIMake)
             this.closeFloaters()
             //this.showFloatingPantry();
 
@@ -898,16 +937,9 @@ function (dojo, declare, on, bgacards) {
             this.setupNotifications();
             addEventListener("resize", () => this.onResize());
             console.log( "Ending game setup" );
-
         },
        
 
-        ///////////////////////////////////////////////////
-        //// Game & client states
-        
-        // onEnteringState: this method is called each time we are entering into a new game state.
-        //                  You can use this method to perform some user interface changes at this moment.
-        //
         onResize() {
             width = document.getElementById("page-content").offsetWidth
             if (width < 800) {
@@ -925,12 +957,23 @@ function (dojo, declare, on, bgacards) {
             }
         },
 
+        ///////////////////////////////////////////////////
+        //// Game & client states
+        
+        // onEnteringState: this method is called each time we are entering into a new game state.
+        //                  You can use this method to perform some user interface changes at this moment.
+        //
         onEnteringState: function( stateName, args )
         {
             console.log( 'Entering state: '+stateName );
             console.log(args);
             this.stateArgs = args
             this.stateName = stateName
+
+            console.log(args.args?.whatCanIMake)
+            if (args.args?.whatCanIMake) {
+                this.updateWhatCanIMake(args.args.whatCanIMake)
+            }
             
             switch( stateName )
             {
@@ -1183,9 +1226,17 @@ function (dojo, declare, on, bgacards) {
                             this.addActionButton('reactReturnButton', 
                                 _("Return removed card to spirit ") + '(' + args.returnCard.triggerCard.name + ')',
                                 () => {
-                                    this.clientStateArgs = {returnCard: args.returnCard}
-                                    this.setClientState('client_distillReactReturnCard', {
-                                        descriptionmyturn: _('${you} must select a card to return to the spirit')
+                                    this.replaceActionBar("You may select a card to return to the spirit");
+
+                                    args.returnCard.returnableCards.forEach ((C) => {
+                                        this.addReplacementActionButton(`btn_${C.uid}`, C.name, () => {
+                                            this.ajaxcall( "/distilled/distilled/addBack.html", {
+                                                triggerCard: args.returnCard.triggerCard.uid,
+                                                returnCard: C.uid,
+                                                lock: true,
+                                            }, this, function(result) {})
+                                            this.revertActionBar()
+                                        })
                                     })
                                 })
                         }
@@ -1230,20 +1281,6 @@ function (dojo, declare, on, bgacards) {
 
                         
                         break;
-                    case 'client_distillReactReturnCard':
-                        console.log("Distill react")
-                        this.clientStateArgs.returnCard.returnableCards.forEach ((C) => {
-                            this.addActionButton('reactReturnButton' + C.uid,
-                                C.name,
-                                () => {
-                                    this.ajaxcall( "/distilled/distilled/addBack.html", {
-                                        triggerCard: this.clientStateArgs.returnCard.triggerCard.uid,
-                                        returnCard: C.uid,
-                                        lock: true,
-                                    }, this, function(result) {})
-                                })
-                            })
-                        break;
                     case 'playerBuyTurnRevealSelect':
                     case 'fangXinRevealSelect':
                         console.log("water reveal");
@@ -1270,6 +1307,10 @@ function (dojo, declare, on, bgacards) {
                     case 'playerBuyTurnReveal':
                         console.log("buy revealed");
                         // Should only be one choice here.
+                        if (args.allowedCards?.length == 0) {
+                            this.showMessage(_("Please report this error as a bug in water reveal"), "error");
+                            return;
+                        }
                         var uid = Object.keys(args.allowedCards)[0];
                         var card = this.activeCards[Object.keys(args.allowedCards)[0]];
                         // TODO handle not enough money
@@ -1443,7 +1484,7 @@ function (dojo, declare, on, bgacards) {
                                 })
 
                                 console.log(C)
-                                if (O.trigger == 34) {
+                                if (O.trigger == 34 || O.trigger == 124) {
                                     console.log("Inside")
                                     buyButton = document.getElementById("buyButton" + C.uid)
                                     buyButton.dataset.uid = C.uid
@@ -1542,13 +1583,51 @@ function (dojo, declare, on, bgacards) {
                                 }
                             });
 
-                            this.ajaxcall( "/distilled/distilled/distill.html", {
-                                washbackCards: wbCards.join(","),
-                                tradeIn: this.clientStateArgs?.trade?.in,
-                                tradeOut: this.clientStateArgs?.trade?.out,
-                                lock: true,
+                            fn = function() {
+                                this.pantrySelection = {}
+                                this.playerPantryStock[this.player_id].ing.getCards().forEach( C => {
+                                    this.pantrySelection[C.uid] = false
+                                });
+                                this.playerStoreStock[this.player_id].item.getCards().forEach( C => {
+                                    this.pantrySelection[C.uid] = false
+                                });
 
-                            }, this, function(result) {})
+                                console.log("hide yc_wrap")
+                                this.yeastCounter.setValue(0);
+                                dojo.addClass('yc_wrap', 'invisible')
+
+                                this.waterCounter.setValue(0);
+                                dojo.addClass('wc_wrap', 'invisible')
+
+                                this.alcoholCounter.setValue(0);
+                                dojo.addClass('ac_wrap', 'invisible')
+
+                                this.grainCounter.setValue(0);
+                                dojo.addClass('gc_wrap', 'invisible')
+
+                                this.plantCounter.setValue(0);
+                                dojo.addClass('pc_wrap', 'invisible')
+
+                                this.fruitCounter.setValue(0);
+                                dojo.addClass('fc_wrap', 'invisible')
+
+                                dojo.addClass('distill_button', "disabled-looking");
+
+                                console.log(this.playerPantryStock[this.player_id])
+                                this.connectCardsForDistill()
+                                this.revertActionBar();
+                                console.log("done")
+                                return;
+                            }
+                            distillButton = document.getElementById("distill_button")
+                            this.confirmButton(distillButton.innerHTML, "distill", {
+                                    washbackCards: wbCards.join(","),
+                                    tradeIn: this.clientStateArgs?.trade?.in,
+                                    tradeOut: this.clientStateArgs?.trade?.out,
+                                    lock: true,
+                                },
+                                fn,
+                                _("Confirm distill")); 
                         });
                         this.addTooltip("distill_button", 
                             _("Click this button to distill"), 
@@ -1595,7 +1674,8 @@ function (dojo, declare, on, bgacards) {
                         this.addActionButton("selectAllButton", _("Select All"), ()=> {
                             console.log("Select All")
                             this.playerPantryStock[this.player_id].ing.getCards().forEach(X => {
-                                elem = this.playerPantryStock[this.player_id].ing.getCardElement(X);
+                                let elem = this.playerPantryStock[this.player_id].ing.getCardElement(X);
+                                console.log(elem)
                                 if (dojo.hasClass(elem, 'selected')) {
                                     console.log(`${X.name} is already selected`)
                                     return;
@@ -1605,6 +1685,7 @@ function (dojo, declare, on, bgacards) {
                                 console.log(this.pantrySelection[X.uid])
 
                                 this.showFloatingPantry();
+                                console.log(elem)
                                 this.onPantryClickElem(elem)
                             });
 
@@ -1700,6 +1781,45 @@ function (dojo, declare, on, bgacards) {
         // <a href="#" class="action-button bgabutton bgabutton_blue" onclick="return false;" id="discount1" data-uid="0">2 <span class="icon-coin-em"> </span>  off ingredient (Distiller Ability)</a>
 
         // @override
+        isExpanded() {
+            let elem = document.getElementById('floatingPantryWrap')
+            return dojo.hasClass(elem, 'pantryExpanded')
+        },
+        getTooltipForWhatCanIMake(spiritList) {
+            let imageClass = "dlabel"
+            var formatHTML = '<div> ' + _("Distillable Recipes") + '<br/><div class="wcimTooltipContainer">'
+                
+            spiritList.forEach(spirit => {
+                label = spirit.label
+                if (spirit.signature == true) {
+                    label += 18;
+                }
+
+                const xBack = (label %  6);
+                const yBack = Math.floor(label / 6);
+
+                formatHTML += `
+                    <div class="${imageClass}" 
+                        style="--width: 124px; --height: 90px; background-position-x: calc(-${xBack} * var(--width)); background-position-y: calc(-${yBack} * var(--height));"> 
+                    </div>
+                    `
+            })
+            formatHTML += '</div></div>';
+            return formatHTML
+        },
+        updateWhatCanIMake(args) {
+            console.log("whatCanIMake")
+            Object.keys(args).forEach(pid => {
+                console.log(pid)
+                data = args[pid]
+
+                html = this.getTooltipForWhatCanIMake(data)
+                console.log(html)
+                if (pid == this.player_id)
+                    this.addTooltipHtml(`whatCanIMake`, html, 1000)
+            })
+        },
+
         toggleRecipeCardSize() {
             console.log("toggleRecipeCardSize")
             divs = dojo.query(".playerRecipeCard")
@@ -2235,6 +2355,7 @@ function (dojo, declare, on, bgacards) {
                 }
             })
         },
+        // function confirmButton
         confirmButton(buttonText, url, args, cb, title) {
             if (title)
                 this.replaceActionBar(title, cb);
@@ -2701,7 +2822,7 @@ function (dojo, declare, on, bgacards) {
             card_id = parseInt(card_id)
             dojo.place(
                 this.format_block('jstpl_distiller', {
-                    ID: player_id,
+                   PID:player_id,
                     DIVBASE: divname,
                 }),
                 divname, 'last');
@@ -2845,7 +2966,7 @@ function (dojo, declare, on, bgacards) {
             let iconSurface = document.getElementById(divbase + player_id + '_canvas');
             if (iconSurface) {
                 ret.canvas = dojo.place(this.format_block('jstpl_icon_canvas', {
-                    ID: player_id,
+                   PID:player_id,
                     DIVBASE: divbase,
                 }), divbase + player_id + "_canvas", 'only');
 
@@ -2869,6 +2990,8 @@ function (dojo, declare, on, bgacards) {
                 if (hideWhenEmpty) {
                     console.log("Unhide reveal button")
                     dojo.removeClass('floatingRevealedButton', 'invisible');
+                    if (this.isExpanded())
+                        dojo.removeClass(`reveal_wrapper_${this.player_id}`, 'invisible');
                 }
 
                 // TODO race
@@ -2934,6 +3057,8 @@ function (dojo, declare, on, bgacards) {
 
                 if (ret.card_count == 0 && hideWhenEmpty) {
                     dojo.addClass('floatingRevealedButton', 'invisible');
+                    if (this.isExpanded())
+                        dojo.addClass(`reveal_wrapper_${this.player_id}`, 'invisible');
                     this.showFloatingPantry();
                 }
                 
@@ -2953,7 +3078,7 @@ function (dojo, declare, on, bgacards) {
                 ret.label = new LineStock(
                         this.labelCardsManager,
                         elem,
-                        {direction: "column", wrap: "nowrap"});
+                        {direction: "column", wrap: "nowrap", sort: sortFunction});
                 ret.label.addCardCallback = addCardCallback;
                 ret.label.removeCardCallback = removeCardCallback;
             }
@@ -2961,7 +3086,7 @@ function (dojo, declare, on, bgacards) {
             ret.item = new LineStock(
                     this.itemCardsManager,
                     document.getElementById(divbase + player_id),
-                    {direction: "row", wrap: "nowrap", center: false}
+                    {direction: "row", wrap: "nowrap", center: false, sort: sortFunction}
             );
             ret.item.addCardCallback = addCardCallback;
             ret.item.removeCardCallback = removeCardCallback;
@@ -2969,7 +3094,7 @@ function (dojo, declare, on, bgacards) {
             ret.ing = new LineStock(
                 this.ingCardsManager,
                 document.getElementById(divbase + player_id),
-                {direction: 'row', wrap: 'nowrap', center: false}
+                {direction: 'row', wrap: 'nowrap', center: false, sort: this.sortFunction}
             );
             ret.ing.addCardCallback = addCardCallback;
             ret.ing.removeCardCallback = removeCardCallback;
@@ -2977,7 +3102,7 @@ function (dojo, declare, on, bgacards) {
             ret.du = new LineStock(
                 this.duCardsManager,
                 document.getElementById(divbase + player_id),
-                {direction: 'row', wrap: 'nowrap', center: false}
+                {direction: 'row', wrap: 'nowrap', center: false, sort: this.sortFunction}
             );
             ret.du.addCardCallback = addCardCallback;
             ret.du.removeCardCallback = removeCardCallback;
@@ -2985,9 +3110,6 @@ function (dojo, declare, on, bgacards) {
 
 
             ret.addLabel = (card) => {
-                // Turn this into the label image
-                //document.getElementById("canvas_name_"+divbase+player_id).innerHTML = card.name;
-
                 // Just plop a label on there and move on
                 size = this.cardSize(card);
                 outer_div = document.getElementById(`canvas_label_${divbase}${player_id}`)
@@ -3023,16 +3145,41 @@ function (dojo, declare, on, bgacards) {
                     type = card.subtype;
 
                 if (ret.canvas) {
-                    // Delete another one first, this can fail and that's fine
-                    // TODO update the costs
                     // Instead of destroying and recreating, consider animating
-                    dojo.place(this.format_block('jstpl_icon', {
-                        ID: player_id,
+                    blockHTML = this.format_block('jstpl_icon', {
+                       PID:player_id,
                         UID: card.uid,
                         TYPE: type.toLowerCase(),
                         TOOLTIP: card.name,
                         DIVBASE: divbase,
-                    }), ret.canvas, 'last');
+                    })
+                    block = document.createElement("div")
+                    block.innerHTML = blockHTML
+                    block = block.firstChild
+
+                    if (ret.canvas.children.length == 0) {
+                        ret.canvas.appendChild(block)
+                    } else {
+                        placed = false;
+                        for (var ii = 0; ii < ret.canvas.children.length; ii++) {
+                            checkToken = ret.canvas.children[ii]
+                            checkUid = checkToken.dataset.uid
+                            if (!checkUid)
+                                continue;
+                            checkCard = this.activeCards[checkUid]
+                            if (!checkCard)
+                                continue;
+                            sortResult = this.sortFunction(card, checkCard)
+                            if (sortResult < 0 || sortResult == 0) {
+                                ret.canvas.insertBefore(block, checkToken)
+                                placed = true
+                                break;
+                            }
+                        }
+                        if (!placed) {
+                            ret.canvas.appendChild(block)
+                        }
+                    }
                     let elem = document.getElementById("icon_" + player_id + "_" + divbase + card.uid)
                     this.addTooltipForCard(card, elem)
                 }
@@ -3295,6 +3442,17 @@ function (dojo, declare, on, bgacards) {
                 }
             });
 
+            // If it's expanded, allow yourself to see the reveal
+            if (this.isExpanded()) {
+                console.log("checking expanded")
+                if (this.playerRevealStock[this.player_id].ing.getCards().length || 
+                    this.playerRevealStock[this.player_id].item.getCards().length || 
+                    this.playerRevealStock[this.player_id].du.getCards().length) {
+                        console.log("remove invisible from class")
+                        dojo.removeClass(`reveal_wrapper_${this.player_id}`, "invisible")
+                }
+            }
+
             let buttons = dojo.query(".pantryButton");
             buttons.forEach(div => {
                 if (div.id.toLowerCase() == 'floating' + name + "button") {
@@ -3350,6 +3508,7 @@ function (dojo, declare, on, bgacards) {
             this.setVisiblePlayer(pids[idx]);
         },
         setVisiblePlayer: function(new_player_id) {
+            console.log("set visible player to " + new_player_id)
             for( var pid in this.playerSections ) {
                 let section = this.playerSections[pid];
                 if (pid == new_player_id) {
@@ -3395,6 +3554,8 @@ function (dojo, declare, on, bgacards) {
             this.onPantryClickElem(evt.currentTarget)
         },
         onPantryClickElem: function(elem) {
+            console.log(elem.id)
+            console.log(elem)
             const pattern = /\w+-\w+-(\w*)/
             const match = elem.id.match(pattern);
 
@@ -3490,6 +3651,7 @@ function (dojo, declare, on, bgacards) {
 
             // Now update the distill button counters
             if (yeast) {
+                console.log("showing yc_wrap")
                 dojo.removeClass('yc_wrap', 'invisible')
                 this.yeastCounter.setValue(yeast);
             } else {
@@ -3731,6 +3893,7 @@ function (dojo, declare, on, bgacards) {
             }
             element.classList.remove('marketCard');
             element.classList.add(newClass);
+            element.zIndex = null;
 
             // TODO check to see if we're in the distill phase before we start setting this up
             //this.pantrySelection[card.uid] = false;
@@ -3775,8 +3938,6 @@ function (dojo, declare, on, bgacards) {
 
                 // Do not connect basic cards if the player cannot buy basic
                 if (!canBuyBasic && div.parentElement.id.endsWith("basicMarket2")) {
-                    console.log("disabling market because")
-                    console.log(canBuyBasic)
                     dojo.addClass(div, "disabledMarket");
                     return;
                 }
@@ -3986,7 +4147,7 @@ function (dojo, declare, on, bgacards) {
             this.notifqueue.setSynchronous('updateFirstPlayer', 100);
 
             dojo.subscribe('playerPointsEndgame', this, 'notif_playerPointsEndgame');
-            this.notifqueue.setSynchronous('playerPointsEndgame', 1);
+            this.notifqueue.setSynchronous('playerPointsEndgame', 500);
             //this.notifqueue.setSynchronous('playerPointsEndgame', 1000);
 
             dojo.subscribe('playerPointsEndgameInit', this, 'notif_playerPointsEndgameInit');
@@ -4104,7 +4265,7 @@ function (dojo, declare, on, bgacards) {
                 /*
             dojo.place(
                 this.format_block('jstpl_distiller', {
-                    ID: notif.args.player_id,
+                   PID:notif.args.player_id,
                     DIVBASE: 'distillerReveal',
                 }),
                 'distiller' + notif.args.slot, 'last');
@@ -4679,7 +4840,7 @@ function (dojo, declare, on, bgacards) {
             /*
             dojo.place(
                 this.format_block('jstpl_distiller', {
-                    ID: notif.args.player_id,
+                   PID:notif.args.player_id,
                     DIVBASE: 
                 }),
                 'du' + notif.args.slot + "_" + notif.args.player_id, 'last');

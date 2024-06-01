@@ -32,7 +32,7 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
     </div>
 </div>
 
-<div class="centerScreen invisible" style="position: absolute; justify-content: center; align-items: center; width: 100%; height: 100%; display: flex; z-index: 100; gap: 10px">
+<div class="centerScreen invisible" style="position: absolute; justify-content: center; align-items: center; width: 100%; height: auto; display: flex; z-index: 100; gap: 10px">
     <div id="centerScreen" class="centerScreen" style="position: absolute; top: 5vw; justify-content: center; align-items: top; width: 100%; height: unset; display: flex; z-index: 100;">
         <div id="game-scoring" class="invisible" style="background-color: rgba(255, 255, 255, 0.95); height: auto; border-radius: 1vw;">
             <table class="scoringTable">
@@ -75,12 +75,9 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
 </div>
 
 <div id="revealedCards" class="invisible"> </div>
-<!--
-<Button id="collapseMarketButton"> Hide Market </Button>
-<Button id="expandMarketButton" class="invisible"> Show Market </Button>
--->
 <div id="mainShared" class="mainShared">
     <div id="market" class="dwhiteblock market">
+        <div id="whatCanIMake" class="whatCanIMake"> </div>
         <div id="remainingDiv" class="invisible"></div>
         <div id="basicMarket2" class="basicMarket">
         </div>
@@ -108,18 +105,6 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
                 <div id="premiumItemsTruck" class="fade marketDeck"> </div>
             </div>
         </div>
-        <!--
-        <div id="myPlayerRecipeCard" class="playerRecipeCard"> 
-            <div id="myPlayerFlight" class="playerFlight"> </div>
-            <!-- BEGIN recipeCubes -->
-                <div id="recipeCubeSlot_{CUBE_SLOT}" 
-                    class="recipeCubeSlot" 
-                    style="top: {TOP}px; left: {LEFT}px;"
-                    title="{TITLE}">
-                </div>
-            <!-- END recipeCubes -->
-        </div>
-        -->
     </div>
 </div>
 <div id="labelDisplay" class="dwhiteblock labelDisplay"> 
@@ -160,6 +145,7 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
 </div>
 
 
+
 <div id="activeBoard"> </div>
 <div id="floatingPantryWrap" class="pantryWrap" >
     <div style="justify-content: space-between; display: flex;">
@@ -167,21 +153,11 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
             <div class="dashboardMoney"> 
                 <div id="floating_money_counter"> </div> <div class="icon-coin-em"></div>
             </div>
-            <!--
-            <Button id="floatingPantryButton" class="bgabutton bgabutton_blue pantryButton"> Pantry </Button>
-            <Button id="floatingStoreroomButton" class="bgabutton bgabutton_blue pantryButton"> Store Room </Button>
-            <Button id="floatingGoalsButton" class="bgabutton bgabutton_blue pantryButton"> Distillery Goals </Button>
-            -->
             <Button id="floatingCloseButton" class="bgabutton bgabutton_blue pantryButton"> Close </Button>
         </div>
-        <!-- <div style="position: absolute; right: 300px; top: 1px; display:flex; flex-direction: row; font-size: x-large; color: lightgrey">  -->
     </div>
         
         <div id='pantryWrap2'> </div>
-        <!--
-            <div id="floatingStoreRoom" class="pantry invisible"> </div>
-            <div id="floatingWashback" class="pantry invisible"> </div>
-        -->
 </div>
 
 <div id="radioButtons" class="radioButtons whiteblock">
@@ -203,69 +179,76 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
 // Javascript HTML templates
 
 var jstpl_player_supplement = '\
-    <div id="money_board_${ID}" class="player_board">\
+    <div id="money_board_${PID}" class="player_board">\
         <div class="player_board">\
-            <span id="money_counter_${ID}" class="money_board"></span>\
+            <span id="money_counter_${PID}" class="money_board"></span>\
             <span class="icon-coin-em"></span>\
         </div>\
         <div class="player_board">\
-            <span id="score_counter_${ID}" class="money_board"></span>\
+            <span id="score_counter_${PID}" class="money_board"></span>\
             <span class="icon-sp-em"></span>\
         </div>\
-        <br />\
-        <span id="first_player_${ID}" class="firstPlayer"> 1st </span>\
+        <span id="first_player_${PID}" class="firstPlayer"> 1st </span>\
     </div>\
 ';
 
 var jstpl_player_section = '\
-<div id="playerSection_${ID}" class="dwhiteblock" style="padding: 3px">\
+<div id="playerSection_${PID}" class="dwhiteblock" style="padding: 3px">\
     <div class="dwhiteblock" style="width: fit-content; background-color: rgb(0, 0, 0, 1)">\
         <div style="color: #${COLOR}"> \
-            <span class="clickable" id="prevPlayer_${ID}" > <  </span>\
+            <span class="clickable" id="prevPlayer_${PID}" title="Previous Player"> <  </span>\
             <span style="font-weight: bold"> ${NAME} </span>\
-            <span class="clickable" id="nextPlayer_${ID}"> > </span>\
+            <span class="clickable" id="nextPlayer_${PID}" title="Next Player"> > </span>\
         </div>\
     </div>\
-    <div id="myPlayerContainer_${ID}" class="playerContainer">\
-        <div id="myPlayerDistillery_${ID}" class="playerDistillery">\
-            <div id="relativity_${ID}" style="width: 100%; height: 100%; position: relative">\
-                <div id="du1_${ID}" class="duCardSlot" style="position: absolute; top: 14.75%; left: 41%; width: 13.5%;"> </div>\
-                <div id="du2_${ID}" class="duCardSlot" style="position: absolute; top: 14.75%; left: 60%; width: 13.5%;"> </div>\
-                <div id="du3_${ID}" class="duCardSlot" style="position: absolute; top: 14.75%; left: 79%; width: 13.5%;"> </div>\
-                <div id="label0_${ID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 22%; "> </div>\
-                <div id="label1_${ID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 32.7%; "> </div>\
-                <div id="label2_${ID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 43.6%; "> </div>\
-                <div id="label3_${ID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 54.6%; "> </div>\
-                <div id="label4_${ID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 65.7%; "> </div>\
-                <div id="label5_${ID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 76.5%; "> </div>\
-                <div id="label6_${ID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 87.5%; "> </div>\
-                <!-- <div id="pantryDeck_${ID}" class="duCardSlot" style="position: absolute; top: 62%; left: 13.5%; width: 13.5%; max-width: 13.5%"> </div> -->\
-                <div id="pantry_${ID}_canvas" class="canvas" style="position: absolute; top: 62%; left: 22.5%;"> </div>\
-                <div id="storeroom_${ID}_canvas" class="canvas" style="position: absolute; top: 62%; left: 42%;"> </div>\
-                <div id="warehouse1_${ID}_canvas" class="canvas" style="position: absolute; top: 62%; left: 61.5%;"> </div>\
-                <div id="warehouse2_${ID}_canvas" class="canvas" style="position: absolute; top: 62%; left: 80.5%;"> </div>\
-                <div id="washback_${ID}_canvas" class="canvas" style="position: absolute; top: 62%; left: 2.25%;"> </div>\
-                <div id="distiller_${ID}" style="position: absolute; top: 14.75%; left: 21.5%; width: 19%; max-width: 19%; height: 32%;"> </div>\
-                <div id="signature_${ID}" class="fade" style="position: absolute; top: 14.75%; left: 2.25%; width: 19%; max-width: 19%; height: 32%;"> </div>\
+    <div id="myPlayerContainer_${PID}" class="playerContainer">\
+        <div id="myPlayerDistillery_${PID}_wrapper" class="playerDistilleryWrapper" style="margin-bottom: 20px">\
+            <div id="myPlayerDistillery_${PID}" class="playerDistillery">\
+                <div id="relativity_${PID}" style="width: 100%; height: 100%; position: relative">\
+                    <div id="du1_${PID}" class="duCardSlot" style="position: absolute; top: 14.75%; left: 41%; width: 13.5%;"> </div>\
+                    <div id="du2_${PID}" class="duCardSlot" style="position: absolute; top: 14.75%; left: 60%; width: 13.5%;"> </div>\
+                    <div id="du3_${PID}" class="duCardSlot" style="position: absolute; top: 14.75%; left: 79%; width: 13.5%;"> </div>\
+                    <div id="label0_${PID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 22%; "> </div>\
+                    <div id="label1_${PID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 32.7%; "> </div>\
+                    <div id="label2_${PID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 43.6%; "> </div>\
+                    <div id="label3_${PID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 54.6%; "> </div>\
+                    <div id="label4_${PID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 65.7%; "> </div>\
+                    <div id="label5_${PID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 76.5%; "> </div>\
+                    <div id="label6_${PID}" class="labelSlot" style="position: absolute; top: 3.2%; left: 87.5%; "> </div>\
+                    <div id="pantry_${PID}_canvas" class="canvas" style="position: absolute; top: 62%; left: 22.5%;"> </div>\
+                    <div id="storeroom_${PID}_canvas" class="canvas" style="position: absolute; top: 62%; left: 42%;"> </div>\
+                    <div id="warehouse1_${PID}_canvas" class="canvas" style="position: absolute; top: 62%; left: 61.5%;"> </div>\
+                    <div id="warehouse2_${PID}_canvas" class="canvas" style="position: absolute; top: 62%; left: 80.5%;"> </div>\
+                    <div id="washback_${PID}_canvas" class="canvas" style="position: absolute; top: 62%; left: 2.25%;"> </div>\
+                    <div id="distiller_${PID}" style="position: absolute; top: 14.75%; left: 21.5%; width: 19%; max-width: 19%; height: 32%;"> </div>\
+                    <div id="signature_${PID}" class="fade" style="position: absolute; top: 14.75%; left: 2.25%; width: 19%; max-width: 19%; height: 32%;"> </div>\
+                </div>\
+            </div>\
+            <div style="text-align: center; display: flex; flex-direction: row; justify-content: space-around;">\
+                <div> Flavor Bonus: </div>\
+                <div> 1 <span class="icon-flavor-em"></span> = 1 <span class="icon-sp-em"></span> </div>\
+                <div> 2 <span class="icon-flavor-em"></span> = 3 <span class="icon-sp-em"></span> </div>\
+                <div> 3 <span class="icon-flavor-em"></span> = 6 <span class="icon-sp-em"></span> </div>\
+                <div> 4 <span class="icon-flavor-em"></span> = 10 <span class="icon-sp-em"></span> </div>\
+                <div> 5+ <span class="icon-flavor-em"></span> = 15 <span class="icon-sp-em"></span> </div>\
             </div>\
         </div>\
-        <div id="myPlayerRecipeCard_${ID}" class="playerRecipeCard"> \
-            <div id="jumboCard_${ID}" class="recipeCardGrow"> +/- </div> \
-            <div id="myPlayerFlight_${ID}" class="playerFlight"> </div>\
-            <div id="recipeCubeSlot_0_${ID}" class="recipeCubeSlot" style="top: 35%; left: 6%;"> </div> \
-            <div id="recipeCubeSlot_1_${ID}" class="recipeCubeSlot" style="top: 43%; left: 6%;"> </div> \
-            <div id="recipeCubeSlot_2_${ID}" class="recipeCubeSlot" style="top: 50.5%; left: 6%;"> </div> \
-            <div id="recipeCubeSlot_3_${ID}" class="recipeCubeSlot" style="top: 58%; left: 6%;"> </div> \
-            <div id="recipeCubeSlot_4_${ID}" class="recipeCubeSlot" style="top: 66%; left: 6%;"> </div> \
-            <div id="recipeCubeSlot_5_${ID}" class="recipeCubeSlot" style="top: 73.5%; left: 6%;"> </div> \
-            <div id="recipeCubeSlot_6_${ID}" class="recipeCubeSlot" style="top: 81%; left: 6%;"> </div> \
-            <div id="recipeSignatureSlot_${ID}" class="signatureRecipeSlot" style="top: 88.7%; left: 49%"> </div> \
+        <div id="myPlayerRecipeCard_${PID}" class="playerRecipeCard"> \
+            <div id="jumboCard_${PID}" class="recipeCardGrow"> +/- </div> \
+            <div id="myPlayerFlight_${PID}" class="playerFlight"> </div>\
+            <div id="recipeCubeSlot_0_${PID}" class="recipeCubeSlot" style="top: 35%; left: 6%;"> </div> \
+            <div id="recipeCubeSlot_1_${PID}" class="recipeCubeSlot" style="top: 43%; left: 6%;"> </div> \
+            <div id="recipeCubeSlot_2_${PID}" class="recipeCubeSlot" style="top: 50.5%; left: 6%;"> </div> \
+            <div id="recipeCubeSlot_3_${PID}" class="recipeCubeSlot" style="top: 58%; left: 6%;"> </div> \
+            <div id="recipeCubeSlot_4_${PID}" class="recipeCubeSlot" style="top: 66%; left: 6%;"> </div> \
+            <div id="recipeCubeSlot_5_${PID}" class="recipeCubeSlot" style="top: 73.5%; left: 6%;"> </div> \
+            <div id="recipeCubeSlot_6_${PID}" class="recipeCubeSlot" style="top: 81%; left: 6%;"> </div> \
+            <div id="recipeSignatureSlot_${PID}" class="signatureRecipeSlot" style="top: 88.7%; left: 49%"> </div> \
         </div>\
     </div>\
     <div style="display: flex; flex-direction: column; align: center; justify-content: space-between;"> \
-        <div id="display_${ID}_wrapper" class="dwhiteblock" style="display: inline-block;" > \
-            <div id="fiddlesticks"> </div> \
-            <div id="display_${ID}_title" > Display Case 1234 \
+        <div id="display_${PID}_wrapper" class="dwhiteblock" style="display: inline-block;" > \
+            <div id="display_${PID}_title" > Display Case \
                 <div class="bottleRules"> \
                     <span style="font-weight: bold"> Endgame Scoring </span> <br/> \
                     2 from same region = 2    <span class="icon-sp-em"></span> <br/> \
@@ -277,7 +260,7 @@ var jstpl_player_section = '\
                 </div> \
             </div> \
             <div class="pantry"> \
-                <div id="display_${ID}" class="warehouseCards" > </div> \
+                <div id="display_${PID}" class="warehouseCards" > </div> \
             </div> \
         </div> \
     </div>\
@@ -291,34 +274,33 @@ var jstpl_cube='<div id="recipe-cube" class="${COLOR}Cube"> </div>';
 
 
 var jstpl_icon_canvas = '\
-    <div id="icon_canvas_${DIVBASE}_${ID}" class="iconCanvas">\
+    <div id="icon_canvas_${DIVBASE}_${PID}" class="iconCanvas">\
         <div class="iconCanvas" >\
             <div style="width: 31%; display: flex; position: absolute; left: 0px; ">\
-                <div id="coin_counter_${DIVBASE}${ID}"> </div>\
+                <div id="coin_counter_${DIVBASE}${PID}"> </div>\
                 <div class="icon-coin-em"> </div>\
             </div>\
             <div style="width: 31%; position: absolute; justify-content: flex-end; display: flex; right: 0px;">\
-                <div id="sp_counter_${DIVBASE}${ID}"> </div>\
+                <div id="sp_counter_${DIVBASE}${PID}"> </div>\
                 <div class="icon-sp-em"> </div>\
             </div>\
         </div>\
         <div style="width: 100%; justity-content: center; align-items: center; grid-column-start: 1; grid-column-end: 5;"> \
-            <div id="card_counter_${DIVBASE}${ID}" class="invisible"> </div>\
-            <!--<div id="canvas_name_${DIVBASE}${ID}" style="text-align: center; font-size: 1vw;" > </div>-->\
+            <div id="card_counter_${DIVBASE}${PID}" class="invisible"> </div>\
         </div>\
-        <div id="canvas_label_${DIVBASE}${ID}" class="invisible" style="grid-column-start: 1; grid-column-end: 5; align-items: center; justify-content: center; display: flex;">\
-            <div id="canvas_label_${DIVBASE}${ID}_inner" class="dlabel" > </div>\
+        <div id="canvas_label_${DIVBASE}${PID}" class="invisible" style="grid-column-start: 1; grid-column-end: 5; align-items: center; justify-content: center; display: flex;">\
+            <div id="canvas_label_${DIVBASE}${PID}_inner" class="dlabel" > </div>\
         </div>\
     </div> \
 ';
 
 var jstpl_icon = '\
-    <div id="icon_${ID}_${DIVBASE}${UID}" title="${TOOLTIP}" class="icon-${TYPE}"> </div> \
+    <div id="icon_${PID}_${DIVBASE}${UID}" title="${TOOLTIP}" class="icon-${TYPE}" data-uid="${UID}"> </div> \
 ';
 
 var jstpl_floating_label = '\
    <div style="position: relative;">\
-    <div id="player_${ID}_washback_label" class="dlabel" \
+    <div id="player_${PID}_washback_label" class="dlabel" \
         style="background-position-x: -${X_OFF}px; background-position-y: -${Y_OFF}px"> \
     </div> \
    </div> \
@@ -326,12 +308,12 @@ var jstpl_floating_label = '\
 
 var jstpl_player_floater = '\
     <div>\
-        <div id="${DIVBASE}_wrapper_${ID}" class="pantry floatingPantry">\
-            <div class="displaybase"> ${DISPLAYBASE} <br/> </div>\
+        <div id="${DIVBASE}_wrapper_${PID}" class="pantry floatingPantry">\
+            <div class="displaybase ${DIVBASE}_wrapper"> ${DISPLAYBASE} <br/> </div>\
             <div class="pantry_inner_wrapper"> \
-                <div id="${DIVBASE}_${ID}_deck"> </div>\
-                <div id="${DIVBASE}_${ID}_label" class="label"> </div>\
-                <div id="${DIVBASE}_${ID}" class="pantry2"> </div> \
+                <div id="${DIVBASE}_${PID}_deck"> </div>\
+                <div id="${DIVBASE}_${PID}_label" class="label"> </div>\
+                <div id="${DIVBASE}_${PID}" class="pantry2"> </div> \
             </div>\
         </div>\
     </div>\

@@ -105,7 +105,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must take a card at round start'),
         "args" => "argRoundStartAction",
         "possibleactions" => array("buyCard", "roundStartPass"),
-        "transitions" => array(/*'' => 4, */'buyCard' => 5, 'pass' => 6, 'zombiePass'=>10),
+        "transitions" => array(/*'' => 4, */'buyCard' => 5, 'pass' => 6, 'zombiePass'=>6),
     ),
     9 => array(
         "name" => "roundStartActionSelect",
@@ -114,7 +114,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must select a round start action to take'),
         "args" => "argRoundStartActionSelect",
         "possibleactions" => array("selectRoundStartAction"),
-        "transitions" => array('select' => 7, 'fangXin' => 8),
+        "transitions" => array('select' => 7, 'fangXin' => 8, 'zombiePass'=>6),
     ),
 
     8 => array(
@@ -312,8 +312,8 @@ $machinestates = array(
     51 => array(
         'name' => 'tasting',
         "type" => "multipleactiveplayer",
-        "description" => clienttranslate('Tasting: Waiting for other players to exchange up to 4 SP for money'),
-        "descriptionmyturn" => clienttranslate('Tasting: ${you} may exchange up to 4 SP for money'),
+        "description" => clienttranslate('Tasting: Waiting for other players to exchange up to 4 <span class="icon-sp-em"></span> for <span class="icon-coin-em"></span>'),
+        "descriptionmyturn" => clienttranslate('Tasting: ${you} may exchange up to 4 <span class="icon-sp-em"></span> for <span class="icon-coin-em"></span>'),
         "possibleactions" => array("tasting"),
         "transitions" => array('' => 60), // go to round end
     ),

@@ -102,6 +102,11 @@ body > .card {
   box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
+
+.card .card-sides .back {
+  left: auto;
+}
+
 .card .card-sides .card-side.front > * {
   pointer-events: none;
   user-select: none;
@@ -345,6 +350,7 @@ body > .card {
     align-items: center;
     align-content: center;
     text-align: center;
+    position: relative;
 }
 
 .mobile_version .market {
@@ -439,48 +445,6 @@ body > .card {
     margin: 10px;
 }
 
-/*
-.bg-distilled_water {
-    width: 125px; height: 190px;
-    background: url('img/distilled_basic_market.png') -436px -10px;
-}
-
-.bg-distilled_yeast {
-    width: 125px; height: 190px;
-    background: url('img/distilled_basic_market.png') -582px -10px;
-}
-
-.bg-distilled_wood_barrel {
-    width: 125px; height: 190px;
-    background: url('img/distilled_basic_market.png') -293px -10px;
-}
-
-.bg-distilled_clay_barrel {
-    width: 125px; height: 190px;
-    background: url('img/distilled_basic_market.png') -151px -10px;
-}
-
-.bg-distilled_mixed_fruits {
-    width: 125px; height: 190px;
-    background: url('img/distilled_basic_market.png') -10px -10px;
-}
-
-.bg-distilled_mixed_plants {
-    width: 125px; height: 190px;
-    background: url('img/distilled_basic_market.png') -728px -10px;
-}
-
-.bg-distilled_mixed_grains {
-    width: 125px; height: 190px;
-    background: url('img/distilled_basic_market.png') -874px -10px;
-}
-
-.bg-distilled-basic_market_marker {
-    background: url('img/basicMarketMarker.png');
-    background-size: 100%;
-}
-*/
-
 .playerContainer {
     display: flex;
     flex-wrap: wrap;
@@ -495,13 +459,13 @@ body > .card {
     background: url('img/modified_distillery.jpg');
     background-size: 100% 100%;
     background-repeat: no-repeat;
-    flex-basis: 60vw;
+    width: 60vw;
     height: 45vw;
     flex-shrink: 0;
     flex-grow: 0;
 }
 .mobile_version .playerDistillery {
-    flex-basis: 600px;
+    width: 600px;
     height: 425px;
 }
 .playerRecipeCard {
@@ -528,8 +492,7 @@ body > .card {
     height: 920px;
 }
 .playerFlight {
-    /*background: url('img/Flights.png');*/
-    background: pink;
+    background: url('img/Flights.png');
     /*background-size: 2616px  3000px;*/
     background-size: 400% 300%;
     background-repeat: no-repeat;
@@ -582,7 +545,7 @@ body > .card {
 .bottleRules {
     position: absolute;
     right: 20px;
-    height: 100%;
+    height: auto;
     width: auto;
     text-align: right;
     z-index: 1;
@@ -860,6 +823,9 @@ body > .card {
     display: unset !important;
     visibility: unset;
 }
+.reallyinvisible {
+    visibility: none;
+}
 .pantryWrap .displaybase {
     display: none;
 }
@@ -873,6 +839,11 @@ body > .card {
 }
 .pantryExpanded .pantry_inner_wrapper {
     display: flex;
+}
+.reveal_wrapper {
+    background: red;
+    padding: 5px;
+    border-radius: 2px;
 }
 .pantry {
     min-height: 190px;
@@ -1726,6 +1697,16 @@ body > .card {
     text-align: center;
     border-radius: 10px;
 }
+.wcimTooltipContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    border-radius: 10px;
+    gap: 10px;
+    width: auto;
+    flex-wrap:wrap;
+}
+
 
 .bgabutton.disabled-looking {
     background: #787878;
@@ -1789,24 +1770,27 @@ body > .card {
     background: url('img/grain.jpg');
     background-size: 1600px 1300px;
     border-radius: 1vw;
+    z-index: 3;
 
 }
 
 .player_board {
     display: flex;
-    align-items: center;
     gap: 0.5vw;
+    justify-content: space-around;
 }
+
 
 .player_board .player_board {
     gap: 2px;
 }
 
 .player-board {
-    background-color: #39201b;
+    /*background-color: white;*/
+    /*background-color: #39201b;*/
     /*background-color: #6d372c;*/
     border-color: #6d372c;
-    color: white;
+    color: black;
     border-style: solid;
     border-width: 2px;
     box-sizing: border-box;
@@ -1971,4 +1955,22 @@ https://studio.boardgamearena.com:8084/data/themereleases/240320-1000/css/gamese
 
 .powerCard.activePower {
     border: 4px solid green;
+}
+
+.whatCanIMake {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: url("img/RecipeCube.webp");
+    width: 20px;
+    height: 20px;
+    background-size: 20px 20px;
+}
+
+.player-name svg {
+  cursor: pointer;
+  height: 21px;
+  margin-left: 3px;
+  vertical-align: bottom;
+  width: 25px;
 }
