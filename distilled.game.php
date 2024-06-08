@@ -1124,26 +1124,6 @@ Purchase it or return it to the bottom of the deck.`
 
         shuffle($this->goals_cards);
 
-                    /*
-                    unset($distillers[0]);
-                    unset($distillers[2]);
-                    unset($distillers[4]);
-                    unset($distillers[6]);
-                    unset($distillers[8]);
-                    unset($distillers[10]);
-                    unset($distillers[12]);
-                    unset($distillers[14]);
-                    unset($distillers[16]);
-                    unset($distillers[18]);
-                    unset($distillers[20]);
-                    unset($distillers[22]);
-                    unset($distillers[24]);
-                    unset($distillers[26]);
-                    unset($distillers[28]);
-                    unset($distillers[30]);
-                    unset($distillers[32]);
-                    unset($distillers[34]);
-                    */
         $enablePairings = intval($this->getGameStateValue("pairings"));
         $distillers = $this->distillers;
         if ($enablePairings) {
@@ -1650,7 +1630,7 @@ Purchase it or return it to the bottom of the deck.`
             if (in_array(123, $powerTypes)) {
                 $usedPowers[] = [$cardIdToUid[123], 'du'];
             }
-            if (in_array(127, $powerTypes)) {
+            if (in_array(127, $powerTypes)) { // co-op manager
                 $usedPowers[] = [$cardIdToUid[127], 'du'];
             }
             if (in_array(124, $powerTypes)) { // Market Buyer
@@ -2879,6 +2859,10 @@ Purchase it or return it to the bottom of the deck.`
             $this->getStateName() == "roundStartAction" || // TODO: This may require some other indicator, I dont think everything is free at the start
             $this->getStateName() == 'chooseDistillerGame' || 
             $this->getStateName() == 'sell') {
+            // Log round start action purchase
+            $turn = self::getGameStateValue("turn", 0);
+            $turndbg = sprintf("Debug purchase %s - %s - %s -- ", $this->getStateName(), implode(',', $powers ? $powers : []), $uid, $marketId);
+            self::dbQuery("Insert into market_purchase (turn, player_id, action) values($turn, $playerId, '$turndbg')");
             $free = true;
         }
 
@@ -4662,8 +4646,6 @@ Purchase it or return it to the bottom of the deck.`
         return $this->sellDrink_internal($drinkId, $bottle, $labelSlot, $optForSp, $sellArgs);
     }
     function sellDrink_internal($drinkId, $bottle, $labelSlot, $optForSp, $sellArgs) {
-
-        self::checkAction("sellDrink");
         $playerId = self::getActivePlayerId();
 
         // Check that player has drink
@@ -4719,18 +4701,30 @@ Purchase it or return it to the bottom of the deck.`
             $flavor_card = $this->AllCards[$c];
             $flavorString = $this->getSellFlavorString();
             self::notifyAllPlayers("revealFlavor",
-                //'${player_name}\'s ${drink_name} ${flavor_string}',
                 $flavorString,
                 array(
-                    'player_name' => self::getActivePlayerName(),
+                    'player_name' => $this->getPlayerName($playerId),
                     'player_id' => $playerId,
                     'card_name' => $flavor_card->name,
                     'card' => $flavor_card,
                     'flavor' => $flavor_card,
                     'spirit_name' => $drinkName,
                     'value' => $flavor_card->sale,
-                    //'flavor_string' => $this->getSellFlavorString($flavor_card),
-                    // TODO add tooltip to getFlavorString
+                ));
+        }
+        $knownFlavorCards = $this->getKnownFlavors($drinkId);
+        foreach ($knownFlavorCards as $flavor_card) {
+            $flavorString = $this->getSellFlavorString();
+            self::notifyAllPlayers("knownFlavor",
+                $flavorString,
+                array(
+                    'player_name' => $this->getPlayerName($playerId),
+                    'player_id' => $playerId,
+                    'card_name' => $flavor_card->name,
+                    'card' => $flavor_card,
+                    'flavor' => $flavor_card,
+                    'spirit_name' => $drinkName,
+                    'value' => $flavor_card->sale,
                 ));
         }
 
@@ -5343,7 +5337,7 @@ Purchase it or return it to the bottom of the deck.`
                      'pc' => $powerCards,
                      'whatCanIMake' => $this->getWCIM());
     }
-    function getWCIM() {
+    function getWCIM($debug = false) {
         $players = $this->loadPlayersBasicInfos();
         $ret = array();
         foreach ($players as $player_id => $info) {
@@ -5353,6 +5347,15 @@ Purchase it or return it to the bottom of the deck.`
                 SELECT uid FROM premium_ingredient WHERE location='player' AND player_id=${player_id}
                 ");
 
+            if ($debug) {
+                $cardCards = array();
+                foreach ($cards as $uid => $info) {
+                    $cardCards[] = $this->AllCards[$uid];
+                }
+                self::notifyAllPlayers("dbgdbg", 'cards for ${player_name}', 
+                    array('player_name' => $this->getPlayerName($player_id),
+                          'cards' => $cardCards));
+            }
             
             // This means we're trying to find out what spirits we can make
             if (!$this->isValidSpirit(array_keys($cards))) {
@@ -5361,6 +5364,12 @@ Purchase it or return it to the bottom of the deck.`
             }
 
             $distillable = $this->getDistillableRecipes(array_keys($cards), true, $player_id);
+            if ($debug) {
+                self::notifyAllPlayers("dbgdbg", 'distillable for  ${player_name}', 
+                    array('player_name' => $this->getPlayerName($player_id),
+                          'distillable' => $distillable));
+            }
+
             $raw = array();
             foreach ($distillable as $d) {
                 if ($d['recipeSlot'] < 0)
@@ -5369,6 +5378,9 @@ Purchase it or return it to the bottom of the deck.`
                 $raw[$r['label']] = $r;
             }
             $ret[$player_id] = array_values($raw);
+        }
+        if ($debug) {
+            self::notifyAllPlayers("dbgdbg", 'ret', array('ret' => $ret));
         }
         return $ret;
     }
@@ -5554,7 +5566,7 @@ Purchase it or return it to the bottom of the deck.`
     }
 
     function getPlayerLabels() {
-        $labels = self::getCollectionFromDb("SELECT * FROM label WHERE location='player' or location LIKE 'warehouse%'");
+        $labels = self::getCollectionFromDb("SELECT * FROM label WHERE (location='player' or location LIKE 'warehouse%') AND count > 0");
         $playerLabels = array();
         foreach ($labels as $luid => $labelInfo) {
             $playerLabels[$labelInfo['player_id']][] = $this->getRecipeByName($labelInfo['label'], $labelInfo['player_id']);
@@ -6359,12 +6371,6 @@ Purchase it or return it to the bottom of the deck.`
 
         $pid = self::getActivePlayerId();
         if (array_key_exists($pid, $startActions)) {
-            /*self::notifyAllPlayers("dbgdbg", 'this player has an action ${player_name}, ${player_id}',
-                array(
-                    'player_id' => $this->getActivePlayerId(),
-                    'player_name' => $this->getActivePlayerName(),
-                ));*/
-
             $transitionAction = 'startActionSelect';
             self::setGameStateValue("powercard", $startActions[$pid][0]['card_id']);
             $this->gamestate->nextState($transitionAction);
@@ -6840,7 +6846,6 @@ Purchase it or return it to the bottom of the deck.`
             'player_id' => self::getActivePlayerId(),
             'sp' => 2,
         ));
-        //$this->gamestate->nextState("nextPlayerSell");
     }
 
     function stPlaceLabel0() {
@@ -6855,7 +6860,6 @@ Purchase it or return it to the bottom of the deck.`
                         WHERE discarded=0 and location='signature' AND pi.player_id=%d",
                         self::getActivePlayerId());
         $sigUid = self::getUniqueValueFromDb($sql);
-        //self::notifyAllPlayers("dbgdbg", "debug", array('suid' => $sigUid));
         $sigCard = $this->AllCards[$sigUid];
 
         $this->moveCardToPlayer($this->ingredientsDeck, $sigUid, self::getActivePlayerId());
@@ -6870,7 +6874,6 @@ Purchase it or return it to the bottom of the deck.`
                 'card' => $sigCard,
         ));
 
-        //$this->gamestate->nextState("nextPlayerSell");
     }
 
     function argPlaceLabel2() {
@@ -7173,6 +7176,9 @@ Purchase it or return it to the bottom of the deck.`
                 case 'tasting':
                     $this->tasting(0);
                     break;
+                case 'distill':
+                    $this->gamestate->nextState('skip');
+                    break;
                 case 'selectFlavor':
                 case 'placeLabel3':
                 case 'placeLabel4':
@@ -7399,6 +7405,17 @@ Purchase it or return it to the bottom of the deck.`
         $flavorsInLocation = self::getUniqueValueFromDb("SELECT COUNT(*) FROM flavor WHERE location='$loc' AND player_id=$pid");
         return $flavorsInLocation;
     }
+    function getKnownFlavors($drinkId) {
+        $info = self::getObjectFromDb("select * from drink where id=$drinkId");
+        $loc = $info['location'];
+        $pid = $info['player_id'];
+        $flavors = self::getCollectionFromDb("SELECT uid, card_id FROM flavor WHERE location='$loc' AND player_id=$pid");
+        $ret = array();
+        foreach ($flavors as $uid => $info) {
+            $ret[] = $this->AllCards[$uid];
+        }
+        return $ret;
+    }
     function getPlayerCardList($player_id, $isCurrent) {
         // Get the premium item market cards
         $current_player_id = self::getCurrentPlayerId();
@@ -7573,9 +7590,9 @@ Purchase it or return it to the bottom of the deck.`
                 $cardInfo = $this->AllCards[$c];
 
                 if ($cardInfo->type == CardType::SUGAR) {
-                    if (in_array($cardInfo->subtype, $r["allowed"]) || $ignoreInvalid)
+                    if (in_array($cardInfo->subtype, $r["allowed"]))
                         $sugars++;
-                    else {
+                    else if (!$ignoreInvalid) {
                         $invalid = true;
                         $badCard = $cardInfo;
                     }
@@ -7757,18 +7774,18 @@ Purchase it or return it to the bottom of the deck.`
 
         $playerCount = $this->getPlayersNumber();
         $items = array();
-        foreach($this->staticRecipe as $r) {
-            $items[] = sprintf("('%s', 'market', %d)", $r["name"], $playerCount * 2);
-        }
-        foreach($this->getRecipeFlight() as $r) {
-            $items[] = sprintf("('%s', 'market', %d)", $r["name"], $playerCount);
+
+        $recipes = $this->getRecipes();
+        foreach($recipes as $r) {
+            $ct = $playerCount;
+            if ($r['name'] == "Vodka" || $r['name'] == "Moonshine")
+                $ct *= 2;
+            $items[] = sprintf("('%s', 'market', %d)", $r["name"], $ct);
         }
 
         $sql = sprintf('INSERT INTO label(label, location, count) VALUES %s',
             implode(',', $items));
         self::DbQuery($sql);
-
-        
     }
     function debugCards() {
         self::notifyAllPlayers('dbgdbg', "cards", array("AllCards" => array_keys($this->AllCards)));

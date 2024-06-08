@@ -292,6 +292,12 @@ body > .card {
     height: var(--width);
     display: inline-block;
 }
+.player_board .icon-sp-em {
+    --width: 1.2em;
+}
+.player_board .icon-coin-em {
+    --width: 1.2em;
+}
 
 .recipeCardGrow {
     font-size: x-large;
@@ -900,6 +906,9 @@ body > .card {
 .invisible {
     display: none !important;
 }
+.dhidden {
+    visibility: hidden;
+}
 
 .silverCube {
     width: var(--width); height: var(--width);
@@ -1204,26 +1213,28 @@ body > .card {
     background: url("img/icons.png");
     display: inline-block;
     background-position-x: calc(-3*var(--width));
-    --width: 2em;
+    --width: 1.5em;
     background-size: calc(29*var(--width)) var(--width);
     width: var(--width);
     height: var(--width);
 }
 .icon-europe-em {
     background: url("img/icons.png");
-    background-size: 58em 2em;
-    background-position-x: -20em;
+    background-size: calc(29*var(--width)) var(--width);
+    background-position-x: calc(-10*var(--width));
     display: inline-block;
-    width: 2em;
-    height: 2em;
+    width: var(--width);
+    height: var(--width);
+    --width: 1.5em;
 }
 .icon-asia-em {
     background: url("img/icons.png");
-    background-size: 58em 2em;
-    background-position-x: -8em;
+    background-size: calc(29*var(--width)) var(--width);
+    background-position-x: calc(-4*var(--width));
     display: inline-block;
-    width: 2em;
-    height: 2em;
+    width: var(--width);
+    height: var(--width);
+    --width: 1.5em;
 }
 .icon-yeast {
     background: url("img/icons.png");
@@ -1273,6 +1284,10 @@ body > .card {
 }
 .mobile_version .icon-bottle {
     --width: var(--icon-size-mobile);
+}
+
+.player_board .icon-bottle {
+    --width: 1.5em;
 }
 
 
@@ -1359,6 +1374,9 @@ body > .card {
 }
 .mobile_version .icon-home {
     --width: var(--icon-size-mobile);
+}
+.player_board .icon-home {
+    --width: 1.5em;
 }
 
 .icon-sp {
@@ -1774,10 +1792,16 @@ body > .card {
 
 }
 
+.player_board_wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
 .player_board {
     display: flex;
+    flex-direction: row;
     gap: 0.5vw;
-    justify-content: space-around;
+    justify-content: space-between;
 }
 
 
@@ -1973,4 +1997,48 @@ https://studio.boardgamearena.com:8084/data/themereleases/240320-1000/css/gamese
   margin-left: 3px;
   vertical-align: bottom;
   width: 25px;
+}
+
+.player_label_supplement {
+    display: grid;
+    height: 25px;
+    grid-template-columns: repeat(7, 30px);
+    justify-content: space-between;
+}
+.mobile_version .player_label_supplement {
+    grid-template-columns: repeat(7, 30px);
+    margin-right: 2px;
+    height: 28px;
+    overflow: hidden;
+}
+
+.mobile_version .player_label_supplement .labelSlot {
+    --width: 30px;
+    --height: 20px;
+}
+
+.mobile_version .player_label_supplement .dlabel {
+    --width: 30px;
+    --height: 20px;
+}
+
+.tinyLabel {
+    --width: 30px;
+    --height: 20px;
+}
+
+.player_label_supplement .card .card-sides .card-side {
+    box-shadow: unset;
+    box-sizing: border-box;
+    border: black solid 1px;
+    border-radius: 1px;
+}
+
+.firstPlayer {
+    --width: 1.4em;
+    background: url("img/D.webp");
+    background-size: var(--width) var(--width);
+    width: var(--width);
+    height: var(--width);
+    margin-right: 5px;
 }

@@ -179,16 +179,46 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
 // Javascript HTML templates
 
 var jstpl_player_supplement = '\
-    <div id="money_board_${PID}" class="player_board">\
-        <div class="player_board">\
-            <span id="money_counter_${PID}" class="money_board"></span>\
-            <span class="icon-coin-em"></span>\
+    <div id="money_board_${PID}_wrapper" class="player_board_wrapper">\
+        <div id="money_board_${PID}" class="player_board">\
+            <div class="player_board">\
+                <span id="money_counter_${PID}" class="money_board"></span>\
+                <span class="icon-coin-em"></span>\
+            </div>\
+            <div></div>\
+            <div class="player_board">\
+                <span id="score_counter_${PID}" class="money_board"></span>\
+                <span class="icon-sp-em"></span>\
+            </div>\
+            <div></div>\
+            <div style="display: flex" title="First Player">\
+                <span id="first_player_${PID}" class="firstPlayer"> </span>\
+            </div>\
         </div>\
-        <div class="player_board">\
-            <span id="score_counter_${PID}" class="money_board"></span>\
-            <span class="icon-sp-em"></span>\
+        <div id="bottles_board_${PID}" class="player_board">\
+            <div class="player_board" title="Americas bottles in display case">\
+                <span id="americas_counter_${PID}"></span>\
+                <span class="icon-americas-em"></span>\
+            </div>\
+            <div class="player_board" title="Europe bottles in display case">\
+                <span id="europe_counter_${PID}" ></span>\
+                <span class="icon-europe-em"></span>\
+            </div>\
+            <div class="player_board" title="Asia & Oceania bottles in display case">\
+                <span id="asia_counter_${PID}" ></span>\
+                <span class="icon-asia-em"></span>\
+            </div>\
+            <div class="player_board" title="Home bottles in display case">\
+                <span id="home_counter_${PID}" ></span>\
+                <span class="icon-home"></span>\
+            </div>\
+            <div class="player_board" title="Bottles without region in display case">\
+                <span id="bottle_counter_${PID}" ></span>\
+                <span class="icon-bottle"></span>\
+            </div>\
         </div>\
-        <span id="first_player_${PID}" class="firstPlayer"> 1st </span>\
+        <div id="player_label_board_${PID}" class="player_label_supplement">\
+        </div>\
     </div>\
 ';
 

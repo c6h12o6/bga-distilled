@@ -27,11 +27,6 @@
         "name": "Premium Items Purchased",
         "type": "int"
     },
-    "years_aged": {
-        "id": 15,
-        "name": "Number of Rounds Aged",
-        "type": "int"
-    },
     "money_gained": {
         "id": 16,
         "name": "Money Gained",
