@@ -120,8 +120,8 @@ $machinestates = array(
     8 => array(
         "name" => "fangXinRevealSelect",
         "type" => "activeplayer",
-        "description" => clienttranslate('${actplayer} may select a deck to reveal cards from '),
-        "descriptionmyturn" => clienttranslate('${you} may select a deck to reveal cards from '),
+        "description" => clienttranslate('${actplayer} may select a deck to reveal cards from'),
+        "descriptionmyturn" => clienttranslate('${you} may select a deck to reveal cards from'),
         "args" => "argFangXin",
         "possibleactions" => array("reveal"),
         "transitions" => array('reveal' => 7, 'pass' => 6)
@@ -171,7 +171,7 @@ $machinestates = array(
         "action" => "stNextPlayer",
         "updateGameProgression" => true,        
         "args" => "argNextPlayer",
-        "transitions" => array( "nextPlayerBuyTurn" => 10, "cantPlay" => 11, "distillPhase" => 13, "endGame" => 99, "wait" => 97)
+        "transitions" => array( "nextPlayerBuyTurn" => 10, "cantPlay" => 11, "distillPhase" => 13)
     ),
     13 => array(
         "name" => "marketEnd",
@@ -227,19 +227,13 @@ $machinestates = array(
     22 => array(
         "name" => "selectRecipe",
         "type" => "activeplayer",
-        "descriptionmyturn" => clienttranslate('${you} must a select a recipe'),
+        "descriptionmyturn" => clienttranslate('${you} must select a recipe'),
         "description" => clienttranslate('${actplayer} must select a recipe'),
         "args" => "argSelectRecipe",
         "possibleactions" => array("selectRecipe"),
         "transitions" => array('' => 18),
     ),
 
-    25 => array(
-        "name" => "nextPlayerSelectRecipe",
-        "type" => "game",
-        "action" => "stNextPlayerSelectRecipe",
-        "transitions" => array("cantPlay" => 25, "nextPlayerDistill" => 22 , "sellPhase" => 31 )
-    ),
     29 => array (
         "name" => "nextPlayerSellHack",
         "type" => "game",
@@ -250,8 +244,7 @@ $machinestates = array(
         "name" => "nextPlayerSell",
         "type" => "game",
         "action" => "stNextPlayerSell",
-        "transitions" => array("nextPlayerSell" => 30, "cantPlay" => 31, "agePhase" => 48, "wait" => 97)
-        //"transitions" => array("nextPlayerSell" => 99, "cantPlay" => 99, "agePhase" => 99)
+        "transitions" => array("nextPlayerSell" => 30, "cantPlay" => 31, "agePhase" => 48)
     ),
 
     30 => array(
@@ -284,8 +277,7 @@ $machinestates = array(
         "name" => "nextPlayerAgePhase",
         "type" => "game",
         "action" => "stNextPlayerAge",
-        //"transitions" => array("age" => 50 , 'nextPlayer' => 60, "selectFlavor" => 60, 'roundEnd' => 60, "endGame" => 60),
-        "transitions" => array("age" => 50 , 'nextPlayer' => 49, "selectFlavor" => 52, 'roundEnd' => 53, "wait" => 97, "endGame" => 99),
+        "transitions" => array("age" => 50 , 'nextPlayer' => 49, "selectFlavor" => 52, 'roundEnd' => 53),
     ),
     50 => array(
         "name" => "agePhase",
@@ -298,7 +290,7 @@ $machinestates = array(
         "name" => "selectFlavor",
         "type" => "activeplayer",
         "args" => "argPlayerSelectFlavor",
-        "descriptionmyturn" => clienttranslate('Age Phase: ${you} must select a flavor card '),
+        "descriptionmyturn" => clienttranslate('Age Phase: ${you} must select a flavor card'),
         "description" => clienttranslate('${actplayer} must select a flavor card'),
         "possibleactions" => array("selectFlavor"),
         "transitions" => array('next' => 49, 'zombiePass' => 49),
@@ -331,7 +323,7 @@ $machinestates = array(
         "name" => "discardGoals",
         "type" => "multipleactiveplayer",
         "description" => clienttranslate('Waiting for other players to discard distillery goals'),
-        "descriptionmyturn" => _('${you} must discard one distillery goal'),
+        "descriptionmyturn" => clienttranslate('${you} must discard one distillery goal'),
         "possibleactions" => array("discardGoal"),
         "transitions" => array("" => 4),
     ),

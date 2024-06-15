@@ -840,7 +840,7 @@ body > .card {
 }
 .pantry_inner_wrapper {
     display: flex;
-    overflow: hidden;
+    overflow: visible;
     gap: 8px;
 }
 .pantryExpanded .pantry_inner_wrapper {
@@ -858,7 +858,7 @@ body > .card {
     flex-direction: column;
     grid-column-gap: 10px;
     /*max-width: 90vw;*/
-    overflow: auto;
+    overflow: visible;
 }
 .pantry2 {
     /*max-width: 90vw;*/
@@ -1118,6 +1118,7 @@ body > .card {
     width: var(--width);
     height: var(--width);
     --width: var(--icon-size);
+    display: inline-block;
 }
 .mobile_version .icon-aged {
     --width: var(--icon-size-mobile);
@@ -1129,6 +1130,7 @@ body > .card {
     width: var(--width);
     height: var(--width);
     --width: 1em;
+    display: inline-block;
 }
 
 .icon-unaged {
@@ -1138,6 +1140,7 @@ body > .card {
     width: var(--width);
     height: var(--width);
     --width: var(--icon-size);
+    display: inline-block;
 }
 .mobile_version .icon-unaged {
     --width: var(--icon-size-mobile);
@@ -1149,6 +1152,7 @@ body > .card {
     width: var(--width);
     height: var(--width);
     --width: 1em;
+    display: inline-block;
 }
 
 
@@ -2041,4 +2045,27 @@ https://studio.boardgamearena.com:8084/data/themereleases/240320-1000/css/gamese
     width: var(--width);
     height: var(--width);
     margin-right: 5px;
+}
+
+.labelSelect {
+    background: rgba(22, 207, 22, 0.3);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.deckSelect { 
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    display: block;
+    z-index: 20;
+    background: rgba(22, 207, 22, 0.3);
+    border-radius: 10px;
+    cursor: pointer;
+}
+#last-round {
+  background: #92d3e6;
+  color: black;
+  margin: 5px -5px -5px;
+  text-align: center; 
 }

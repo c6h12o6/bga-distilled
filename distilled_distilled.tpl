@@ -25,7 +25,7 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
     </div>
 </div>
 
-<div id="distillerChoice" class="distillerChoice invisible" style="position: absolute; justify-content: center; align-items: center; width: 100%; height: 30vw; display: flex; z-index: 1; background-color: rgba(230, 230, 230, 0.0); gap: 10px;">
+<div id="distillerChoice" class="distillerChoice invisible" style="position: absolute; justify-content: center; align-items: center; width: 100%; height: 30vw; display: flex; z-index: 1; background-color: rgba(230, 230, 230, 0.0); gap: 10px; top: 100px;">
     <div style="position: absolute; top: 5vw; justify-content: center; align-items: top; width: 100%; height: auto; display: flex; z-index: 20; background-color: rgba(230, 230, 230, 0.5); gap: 10px; padding: 10px;">
         <div id="distiller1"> </div>
         <div id="distiller2"> </div>
@@ -84,9 +84,9 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
         <div id="advancedMarket" class="advancedMarketWrap">
             <div style="width: 100%; position:relative;">
                 <div id="markettitles" style="height: 20px">
-                    <div id="deckTitle" style="position: absolute; width: 122px; left: 0px;"> Deck </div>
-                    <div style="position: absolute; width: 122px; right: 0px;"> Truck </div>
-                    <div> Market </div>
+                    <div id="deckTitle" class="translateme" style="position: absolute; width: 122px; left: 0px;"> Deck </div>
+                    <div class="translateme" style="position: absolute; width: 122px; right: 0px;"> Truck </div>
+                    <div class="translateme"> Market </div>
                 </div>
             </div>
             <div id="distilleryUpgrades" class="premiumMarket "> 
@@ -264,7 +264,7 @@ var jstpl_player_section = '\
             </div>\
         </div>\
         <div id="myPlayerRecipeCard_${PID}" class="playerRecipeCard"> \
-            <div id="jumboCard_${PID}" class="recipeCardGrow"> +/- </div> \
+            <div id="jumboCard_${PID}" class="recipeCardGrow" title="Zoom in / out"> +/- </div> \
             <div id="myPlayerFlight_${PID}" class="playerFlight"> </div>\
             <div id="recipeCubeSlot_0_${PID}" class="recipeCubeSlot" style="top: 35%; left: 6%;"> </div> \
             <div id="recipeCubeSlot_1_${PID}" class="recipeCubeSlot" style="top: 43%; left: 6%;"> </div> \
@@ -354,7 +354,7 @@ var jstpl_spirit_award_blank = '<div id="sa-${UID}-wrapper" class="sa-wrapper">\
   <div class="sa-title"> ${SA_TITLE} </div>\
   <div id="sa-${UID}" class="spiritAwardBlank"> \
     <div id="sa-${UID}-text" class="sa-overlay"> \
-        <div class="text">${SA_TEXT}</div>\
+        <div class="text"> ${SA_TEXT} </div>\
         <div class="sa-reward"> ${SA_REWARD} <span class="icon-sp-em"></span> </div>\
     </div>\
     <div id="sa-${UID}-overlay" class="sa-overlay-nowrap"></div>\
@@ -386,7 +386,7 @@ var jstpl_card_tooltip = '\
     <div id="tooltip_${UID}" class="cardTooltip"> </div>\
 ';
 
-var jstpl_floating_button = '<Button id="floating${LOCATION_SHORT}Button" class="bgabutton bgabutton_blue pantryButton"> ${LOCATION} </Button> \n';
+var jstpl_floating_button = '<Button id="floating${LOCATION_SHORT}Button" class="bgabutton bgabutton_blue pantryButton"> ${LOCATION} </Button>';
 
 </script>  
 
