@@ -1359,7 +1359,9 @@ Purchase it or return it to the bottom of the deck.`
         $distillerLabels = array();
         $distillerLabelInfo = self::getCollectionFromDb("SELECT player_id, uid, label, location FROM label WHERE signature=1");
         foreach ($distillers as $d) {
-            $distillerList[$d['player_id']][] = $this->distillers[$d["card_id"]];
+            $distillerClass = $this->distillers[$d["card_id"]];
+            $distillerClass->label = $this->signature_recipes[$distillerClass->id / 2];
+            $distillerList[$d['player_id']][] = $distillerClass;
             if ($distillerLabelInfo != null) {
                 $tmp = $this->signature_recipes[$d["card_id"] / 2];
                 $tmp['location'] = $distillerLabelInfo[$d['player_id']]['location'];

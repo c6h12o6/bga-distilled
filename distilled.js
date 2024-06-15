@@ -763,6 +763,8 @@ function (dojo, declare, on, bgacards) {
             // Place the distiller choice bar
             if (gamedatas.distillersSelected == 0 && gamedatas.distillers[this.player_id]?.length == 2) {
                 console.log("placing distillers for choice")
+                console.log(gamedatas.distillers[this.player_id][0].label.label)
+                console.log(gamedatas.distillers[this.player_id][1].label.label)
                 card1 = this.placeFlippyCard(this.player_id, 'distiller1', 'distiller', 
                     gamedatas.distillers[this.player_id][1].id);
                 card2 = this.placeFlippyCard(this.player_id, 'distiller2', 'distiller', 
@@ -1148,9 +1150,13 @@ function (dojo, declare, on, bgacards) {
                    case 'playerBuyTurn':
                         remaining = document.getElementById("remainingDiv")
                         if (parseInt(args.basicRemaining) == 1)
-                            remaining.innerHTML = "" + args.basicRemaining + _(" Basic Purchase Remaining")
+                            remaining.innerHTML = _("1 Basic Purchase Remaining")
+                        else if (parseInt(args.basicRemaining) == 2)
+                            remaining.innerHTML = _("2 Basic Purchases Remaining")
+                        else if (parseInt(args.basicRemaining) == 3)
+                            remaining.innerHTML = _("3 Basic Purchases Remaining")
                         else 
-                            remaining.innerHTML = "" + args.basicRemaining + _(" Basic Purchases Remaining")
+                            this.showMessage("Invalid value for basic purchases remaining", "error");
 
                         dojo.removeClass(remaining, "invisible")
                         args.discounts.forEach(D => {
@@ -4029,7 +4035,8 @@ _(`Place label and collect Signature Ingredient`) , "sellDrink",
                         description +=  _('This will end your turn.') + _('<span style="color: red;"> Warning: Discounted below 0. </span>');
                     }
                     let c = this.activeCards[cardName];
-                    let button = _(`Purchase ${c.name} for ${effectiveCost}`) +  "<span class='icon-coin-em'></span>";
+                    let button = dojo.string.substitute(_("Purchase ${name} for ${cost}"), {name: c.name, cost: effectiveCost}) + ' <span class="icon-coin-em"></span>'
+
                     //confirmButton(buttonText, url, args, cb, title) {
                     confirmBtn = this.confirmButton(button,
                                             "buyCard", {
@@ -4070,12 +4077,16 @@ _(`Place label and collect Signature Ingredient`) , "sellDrink",
 
             cost = this.getEffectiveRecipeCost(slotNo)
             recipeName = this.recipeFlight[slotNo].name
+            let button = null;
 
             console.log(this.recipeFlight)
-            if (this.stateName.startsWith("placeLabel"))
-                button = _(`Collect ${recipeName} recipe`)
-            else 
-                button = _(`Confirm buy ${recipeName} for ${cost}`) + '<span class="icon-coin-em"> </span>';
+            if (this.stateName.startsWith("placeLabel")) {
+                button = dojo.string.substitute(_("Collect ${recipeName} recipe"), {recipeName: recipeName})
+            }
+            else  {
+                button = dojo.string.substitute(_("Confirm buy ${recipeName} for ${cost}"), {recipeName: recipeName, cost: cost})
+                button += ' <span class="icon-coin-em"> </span>';
+            }
             this.confirmButton(button, "buyRecipe", {
                 recipeSlot: slotNo,
                 powers: powers.join(','),

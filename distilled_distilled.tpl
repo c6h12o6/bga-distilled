@@ -27,8 +27,8 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
 
 <div id="distillerChoice" class="distillerChoice invisible" style="position: absolute; justify-content: center; align-items: center; width: 100%; height: 30vw; display: flex; z-index: 1; background-color: rgba(230, 230, 230, 0.0); gap: 10px; top: 100px;">
     <div style="position: absolute; top: 5vw; justify-content: center; align-items: top; width: 100%; height: auto; display: flex; z-index: 20; background-color: rgba(230, 230, 230, 0.5); gap: 10px; padding: 10px;">
-        <div id="distiller1"> </div>
-        <div id="distiller2"> </div>
+        <div class="distillerChoiceInner"><div id="distiller1"> </div> <div id="label1choice"></div></div>
+        <div class="distillerChoiceInner"><div id="distiller2"> </div> <div id="label2choice"></div></div>
     </div>
 </div>
 
