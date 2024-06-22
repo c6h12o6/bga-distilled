@@ -26,9 +26,9 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
 </div>
 
 <div id="distillerChoice" class="distillerChoice invisible" style="position: absolute; justify-content: center; align-items: center; width: 100%; height: 30vw; display: flex; z-index: 1; background-color: rgba(230, 230, 230, 0.0); gap: 10px; top: 100px;">
-    <div style="position: absolute; top: 5vw; justify-content: center; align-items: top; width: 100%; height: auto; display: flex; z-index: 20; background-color: rgba(230, 230, 230, 0.5); gap: 10px; padding: 10px;">
-        <div class="distillerChoiceInner"><div id="distiller1"> </div> <div id="label1choice"></div></div>
-        <div class="distillerChoiceInner"><div id="distiller2"> </div> <div id="label2choice"></div></div>
+    <div style="position: absolute; top: 5vw; justify-content: center; align-items: top; width: 100%; height: auto; display: flex; z-index: 20; background-color: rgba(230, 230, 230, 0.8); gap: 10px; padding: 10px;">
+        <div class="distillerChoiceInner"><div id="distiller1"> </div> <div id="label1choice" class="dlabel"></div></div>
+        <div class="distillerChoiceInner"><div id="distiller2"> </div> <div id="label2choice" class="dlabel"></div></div>
     </div>
 </div>
 
@@ -153,7 +153,7 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
             <div class="dashboardMoney"> 
                 <div id="floating_money_counter"> </div> <div class="icon-coin-em"></div>
             </div>
-            <Button id="floatingCloseButton" class="bgabutton bgabutton_blue pantryButton"> Close </Button>
+            <Button id="floatingCloseButton" class="bgabutton bgabutton_blue pantryButton translateme"> Close </Button>
         </div>
     </div>
         
@@ -161,16 +161,16 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
 </div>
 
 <div id="radioButtons" class="radioButtons whiteblock">
-    Dashboard Location: 
-    <input type="radio" class="radioPref" id="floatingRadio" name="hud_choice" value="floating" checked="checked"> Floating </input>
-    <input type="radio" class="radioPref" id="topRadio" name="hud_choice" value="top" "> Top </input>
-    <input type="radio" class="radioPref" id="expandedRadio" name="hud_choice" value="expanded" > Expanded </input>
+    <span class="translateme"> Dashboard Location:  </span>
+    <input type="radio" class="radioPref translateme" id="floatingRadio" name="hud_choice" value="floating" checked="checked"><span class="translateme">  Floating </span></input>
+    <input type="radio" class="radioPref translateme" id="topRadio" name="hud_choice" value="top" "><span class="translateme">  Top </span></input>
+    <input type="radio" class="radioPref translateme" id="expandedRadio" name="hud_choice" value="expanded" ><span class="translateme">  Expanded</span> </input>
 </div>
 <div id="radioButtonsWrap" class="radioButtons whiteblock">
-    Wrap Dashboard Contents: 
-    <input type="radio" class="radioPref" id="nowrapRadio" name="wrap_choice" value="nowrap" checked="checked"> Overlap </input>
-    <input type="radio" class="radioPref" id="wrapRadio" name="wrap_choice" value="wrap"> Wrap </input>
-    <input type="radio" class="radioPref" id="scrollRadio" name="wrap_choice" value="scroll"> Scroll </input>
+    <span class="translateme"> Wrap Dashboard Contents:  </span>
+    <input type="radio" class="radioPref translateme" id="nowrapRadio" name="wrap_choice" value="nowrap" checked="checked"> <span class="translateme"> Overlap </span> </input>
+    <input type="radio" class="radioPref translateme" id="wrapRadio" name="wrap_choice" value="wrap"> <span class="translateme"> Wrap</span> </input>
+    <input type="radio" class="radioPref translateme" id="scrollRadio" name="wrap_choice" value="scroll"><span class="translateme">  Scroll</span> </input>
 </div>
 
 
@@ -255,7 +255,7 @@ var jstpl_player_section = '\
                 </div>\
             </div>\
             <div style="text-align: center; display: flex; flex-direction: row; justify-content: space-around;">\
-                <div> Flavor Bonus: </div>\
+                <div class="translateme"> Flavor Bonus: </div>\
                 <div> 1 <span class="icon-flavor-em"></span> = 1 <span class="icon-sp-em"></span> </div>\
                 <div> 2 <span class="icon-flavor-em"></span> = 3 <span class="icon-sp-em"></span> </div>\
                 <div> 3 <span class="icon-flavor-em"></span> = 6 <span class="icon-sp-em"></span> </div>\
@@ -278,15 +278,15 @@ var jstpl_player_section = '\
     </div>\
     <div style="display: flex; flex-direction: column; align: center; justify-content: space-between;"> \
         <div id="display_${PID}_wrapper" class="dwhiteblock" style="display: inline-block;" > \
-            <div id="display_${PID}_title" > Display Case \
+            <div id="display_${PID}_title" > <span class="translateme"> Display Case  </span>\
                 <div class="bottleRules"> \
-                    <span style="font-weight: bold"> Endgame Scoring </span> <br/> \
-                    2 from same region = 2    <span class="icon-sp-em"></span> <br/> \
-                    3 from same region = 4    <span class="icon-sp-em"></span> <br/> \
-                    4 from same region = 7    <span class="icon-sp-em"></span> <br/> \
-                    5 from same region = 10   <span class="icon-sp-em"></span> <br/> \
-                    6+ from same region = 15  <span class="icon-sp-em"></span> <br/> \
-                    3 different regions = 5   <span class="icon-sp-em"></span> <br/> \
+                    <div class="translateme" style="font-weight: bold;"> Endgame Scoring </div> \
+                    <div class="translateme"> 2 from same region = 2 *sp* </div>\
+                    <div class="translateme"> 3 from same region = 4 *sp* </div> \
+                    <div class="translateme"> 4 from same region = 7 *sp* </div> \
+                    <div class="translateme"> 5 from same region = 10 *sp* </div> \
+                    <div class="translateme"> 6+ from same region = 15 *sp* </div>\
+                    <div class="translateme"> 3 different regions = 5 *sp* </div>\
                 </div> \
             </div> \
             <div class="pantry"> \

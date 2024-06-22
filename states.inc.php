@@ -147,7 +147,7 @@ $machinestates = array(
     		"description" => clienttranslate('${actplayer} may choose a market deck to reveal a card from or pass'),
     		"descriptionmyturn" => clienttranslate('${you} may choose a market deck to reveal a card from or pass'), 
     		"type" => "activeplayer",
-    		"possibleactions" => array( "reveal", "pass"),
+            "possibleactions" => array( "reveal" /*, "pass"*/),
     		"transitions" => array( "reveal" => 15, "pass" => 11)
     ),
     15 => array(

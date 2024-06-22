@@ -42,9 +42,6 @@ class view_distilled_distilled extends game_view
 
         /*********** Place your code below:  ************/
 
-        // Display a string to be translated in all languages: 
-        $this->tpl['MY_VARIABLE_ELEMENT'] = self::_("A string to be translated");
-
 
         /*********** Do not change anything below this line  ************/
   	}

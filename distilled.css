@@ -1063,6 +1063,16 @@ body > .card {
     display: inline-block;
 }
 
+.icon-du-em {
+    background: url("img/icons.png");
+    background-size: calc(29 * var(--width))  var(--width);
+    background-position-x: calc(-9 * var(--width));
+    width: var(--width);
+    height: var(--width);
+    --width: 1.5em;
+    display: inline-block;
+}
+
 .icon-fruit {
     background: url("img/icons.png");
     background-size: calc(29 * var(--width))  var(--width);
@@ -1129,7 +1139,7 @@ body > .card {
     background-position-x: calc(-1 * var(--width));
     width: var(--width);
     height: var(--width);
-    --width: 1em;
+    --width: 1.5em;
     display: inline-block;
 }
 
@@ -1151,7 +1161,7 @@ body > .card {
     background-position-x: calc(-25 * var(--width));
     width: var(--width);
     height: var(--width);
-    --width: 1em;
+    --width: 1.5em;
     display: inline-block;
 }
 
@@ -2068,4 +2078,24 @@ https://studio.boardgamearena.com:8084/data/themereleases/240320-1000/css/gamese
   color: black;
   margin: 5px -5px -5px;
   text-align: center; 
+}
+
+.distillerChoiceInner {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+
+#centerScreen {
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    gap: 10px;
+}
+
+.endgameDisplay {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
