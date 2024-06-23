@@ -5417,20 +5417,22 @@ Purchase it or return it to the bottom of the deck.`
         self::dbQuery("UPDATE player SET player_score_aux=money");
 
         $players = $this->loadPlayersBasicInfos();
+        $playerList = array_keys($players);
+        sort($playerList);
         $playerRegions = array();
         $playerRegionsWithoutHome = array();
         $playerBottles = array();
 
         $scores = $this->getCollectionFromDb("SELECT player_id, player_score FROM player");
         if (!$debug || true) {
-            self::notifyAllPlayers("playerPointsEndgameInit", "End Game Scoring", array(
+            self::notifyAllPlayers("playerPointsEndgameInit", "End game scoring!", array(
                 'scores' => $scores,
             ));
         }
 
         $result = array();
         // first get all the bottle data so we don't do it multiple times
-        foreach ($players as $player_id => $info) {
+        foreach ($playerList as $player_id) {
             $this->incStat($scores[$player_id]['player_score'], "points_ingame", $player_id);
 
             $regions = array();
@@ -5464,7 +5466,7 @@ Purchase it or return it to the bottom of the deck.`
                 'playerLabels' => $playerLabels));
         }
 
-        foreach ($players as $player_id => $info) {
+        foreach ($playerList as $player_id) {
             // Spirits in warehouse (SP on cards)
             $spirits = self::getCollectionFromDb("SELECT * FROM drink WHERE player_id=$player_id AND (location='warehouse1' or location='warehouse2') AND sold=0");
             foreach ($spirits as $spirit) {
@@ -5473,7 +5475,7 @@ Purchase it or return it to the bottom of the deck.`
                 $this->playerPointsEndgame($player_id, $value['total'], "warehouses", $this->normalizeString($spirit['location']));
             }
         }
-        foreach ($players as $player_id => $info) {
+        foreach ($playerList as $player_id) {
             // Score bottles
             $regions = $playerRegions[$player_id];
             unset($regions[""]);
@@ -5509,7 +5511,7 @@ Purchase it or return it to the bottom of the deck.`
         }
 
         $playerDuScores = array();
-        foreach ($players as $player_id => $info) {
+        foreach ($playerList as $player_id) {
             $playerDuScores[$player_id] = array(
                 DU::EQUIPMENT => 0,
                 DU::SPECIALIST => 0,
@@ -5664,7 +5666,7 @@ Purchase it or return it to the bottom of the deck.`
             }
         }
 
-        foreach ($players as $player_id => $info) {
+        foreach ($playerList as $player_id) {
             // Distillery Goals (yes or no)
             $goals = self::getCollectionFromDb("SELECT uid, card_id FROM distillery_goal WHERE player_id=$player_id AND discarded=0");
             if ($debug) {
@@ -6126,7 +6128,7 @@ Purchase it or return it to the bottom of the deck.`
             }
 
         }
-        foreach ($players as $player_id => $info) {
+        foreach ($playerList as $player_id) {
             // remaining money (multiples of 5)
             // Check to see if this player has the tour guide
             $present = self::getUniqueValueFromDb(
@@ -6135,10 +6137,10 @@ Purchase it or return it to the bottom of the deck.`
             $score = 0;
             if ($present == 1) {
                 $score = intdiv($money, 3);
-                $this->playerGains($player_id, -3 * $score, clienttranslate("end game scoring"));
+                $this->playerGains($player_id, -3 * $score, clienttranslate("converting <span class='icon-coin-em'></span>"));
             } else {
                 $score = intdiv($money, 5);
-                $this->playerGains($player_id, -5 * $score, clienttranslate("end game scoring"));
+                $this->playerGains($player_id, -5 * $score, clienttranslate("converting <span class='icon-coin-em'></span>"));
             }
             $this->playerPointsEndgame($player_id, $score, "money", "converting <span class='icon-coin-em'></span> to <span class='icon-sp-em'></span>");
 
@@ -6514,7 +6516,6 @@ Purchase it or return it to the bottom of the deck.`
             $dealt = $this->dealToIndex($deck, 1);
             $newCards[] = $dealt;
             $newCardNames[] = $this->AllCards[$dealt]->name;
-            // TODO check for reshuffles
 
             $sql = sprintf("UPDATE premium_ingredient SET location='truck'
                             WHERE location_idx=4");
@@ -6524,7 +6525,6 @@ Purchase it or return it to the bottom of the deck.`
             $dealt = $this->dealToIndex($deck, 1);
             $newCards[] = $dealt;
             $newCardNames[] = $this->AllCards[$dealt]->name;
-            // TODO check for reshuffles
             
             $sql = sprintf("UPDATE premium_item SET location='truck'
                             WHERE location_idx=4");
@@ -6534,7 +6534,6 @@ Purchase it or return it to the bottom of the deck.`
             $dealt = $this->dealToIndex($deck, 1);
             $newCards[] = $dealt;
             $newCardNames[] = $this->AllCards[$dealt]->name;
-            // TODO check for reshuffles
         }
         
         $newMarkets = array();

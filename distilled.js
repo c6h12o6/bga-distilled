@@ -1235,13 +1235,13 @@ function (dojo, declare, on, bgacards) {
                                 suffix = _("(No labels remaining)")
                             }
                             this.addActionButton('select' + recipe + barrel,  dojo.string.substitute(_('${recipe} (${barrel}) ${suffix}'), {recipe: recipe, barrel: barrel, suffix: suffix}), ()=>{
-                                this.ajaxcall( "/distilled/distilled/selectRecipe.html", {
-                                    //recipe: recipe,
+                                this.confirmButton(_("Confirm"), 'selectRecipe', {
                                     recipeSlot: X.recipeSlot,
                                     barrel: X.barrelUid,
                                     drinkId: args.drinkId,
                                     lock: true,
-                                }, this, function(result) {})});
+                                }, null, dojo.string.substitute(_("Select ${recipe} in ${barrel} ${suffix}"), {recipe: recipe, barrel: barrel, suffix: suffix}));
+                            })
                         })
                         break;
                     case 'sell':
@@ -4681,7 +4681,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             this.notifqueue.setSynchronous('endReveal', 500);
 
             dojo.subscribe('shuffleDeck', this, 'notif_shuffleDeck');
-            this.notifqueue.setSynchronous('shuffleDeck', 500);
+            this.notifqueue.setSynchronous('shuffleDeck', 1000);
 
             dojo.subscribe('roundStart', this, 'notif_roundStart');
             this.notifqueue.setSynchronous('roundStart', 100);
@@ -4819,10 +4819,35 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             let truckName = notif.args.deck_id + 'Truck'
             let deckName = notif.args.deck_id + 'Truck'
             let cards = this.decks[truckName].getCards();
-            //this.decks[truckName].removeCards(cards);
-            // TODO maybe have to do this in an async function
+
             await this.decks[notif.args.deck_id].addCards(cards, null, { autoUpdateCardNumber: false });
             this.decks[truckName].setCardNumber(0);
+
+            // Remove them so they get recreated in the future
+            console.log("removing cards", cards)
+            this.decks[notif.args.deck_id].removeCards(cards, {autoUpdateCardNumber: false})
+
+            var manager = null;
+            switch (notif.args.deck_id) {
+                case 'du':
+                    manager = this.duCardsManager;
+                    break;
+                case 'item':
+                    manager = this.itemCardsManager;
+                    break;
+                case 'ing':
+                    manager = this.ingCardsManager;
+                    break;
+            }
+            if (manager) {
+                cards.forEach(C => {
+                    console.log("adding marketCard to ", C)
+                    var elem = manager.getCardElement(C)
+                    elem.classList.add('marketCard')
+                    elem.style.zIndex = 0;
+                })
+            }
+
             this.decks[notif.args.deck_id].setCardNumber(notif.args.card_count);
         },
         notif_shuffleDeck: function(notif) {
@@ -4982,7 +5007,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
 
             var rows = ['players', 'ingame', 'warehouses', 'bottles', 'goals', 'dus', 'money', 'total']
             console.log(this.player_names)
-            this.player_list.forEach(pid => {
+            this.player_list.sort().forEach(pid => {
                 this.finalScoring[pid] = {}
                 rows.forEach(row => {
                     cellName = "score_counter_" + row + "_" + pid
@@ -5420,13 +5445,11 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 recipe.count = -notif.args.player_id
             }
 
-            // Todo increment WB card count
             // Add barrel
             notif.args.barrel.location_idx = 1;
             this.playerWashbackStock[notif.args.player_id].item.addCard(notif.args.barrel)
 
             // Add Label
-            // TODO fix copcard code
             if (recipeDeck)
                 recipeDeck.setCardNumber(recipeDeck.getCardNumber(), recipe);
 
@@ -5434,13 +5457,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             //this.playerWashbackStock[notif.args.player_id].label.addCard(recipe);
             this.placeLabelOnWashback(recipe, notif.args.player_id)
             
-            /*
-            let newRecipe = { ...recipe }
-            newRecipe.count = newRecipe.count - 1;
-            */
-            /*if (recipe.count >= 0)
-                recipeDeck.setCardNumber(recipeDeck.getCardNumber()-1);*/
-
 
         },
         notif_updateMarkets: function (notif) {
