@@ -1104,10 +1104,10 @@ Purchase it or return it to the bottom of the deck.`
 
         $flight = self::getGameStateValue("flight");
         if ($flight == '9') {
-            $flight = (rand(0, 96) % 3) + 1;
+            $flight = (bga_rand(0, 96) % 3) + 1;
             self::setGameStateValue("flight", $flight);
         } else if ($flight == '10') {
-            $flight = (rand(0, 96) % 8) + 1;
+            $flight = (bga_rand(0, 96) % 8) + 1;
             self::setGameStateValue("flight", $flight);
         }
         $this->initRecipeCard($flight);
@@ -4468,7 +4468,7 @@ Purchase it or return it to the bottom of the deck.`
 
         $key1 = array_rand($set1);
         $key2 = array_rand($set2);
-        $tmp = sprintf(clienttranslate('${player_name}\'s ${spirit_name} ${key1} ${key2} ${value} <span class="icon-coin-em"></span>'), $set1[$key1], $set2[$key2]);
+        $tmp = sprintf(clienttranslate('${player_name}\'s ${spirit_name} ${key1_rec} ${key2} ${value} <span class="icon-coin-em"></span>'), $set1[$key1], $set2[$key2]);
         return array('notif' => $tmp, 'key1'=>$set1[$key1], 'key2'=>$set2[$key2]);
     }
 
@@ -4542,7 +4542,7 @@ Purchase it or return it to the bottom of the deck.`
                     'flavor' => $flavor_card,
                     'spirit_name' => $drinkName,
                     'value' => $flavor_card->sale,
-                    'key1' => $flavorString['key1'],
+                    'key1_rec' => ['log' => $flavorString['key1'], 'args' => ['card_name'=>$flavor_card->name, 'card'=>$flavor_card]],
                     'key2' => $flavorString['key2'],
                 ));
         }
@@ -4560,7 +4560,7 @@ Purchase it or return it to the bottom of the deck.`
                     'flavor' => $flavor_card,
                     'spirit_name' => $drinkName,
                     'value' => $flavor_card->sale,
-                    'key1' => $flavorString['key1'],
+                    'key1_rec' => ['log' => $flavorString['key1'], 'args' => ['card_name'=>$flavor_card->name, 'card'=>$flavor_card]],
                     'key2' => $flavorString['key2'],
                 ));
         }
@@ -7032,10 +7032,6 @@ Purchase it or return it to the bottom of the deck.`
                     $r = $args['recipes'][0];
                     $this->selectRecipe($r['recipeSlot'], $args['drinkId'], $r['barrelUid']);
                     break;
-                case 'sell':
-                    $args = $this->argSell();
-                    $this->sellDrink($args['drinks'][0]['id'], $args['bottles'][0]->uid, -1, null, null);
-                    break;
                 case 'placeLabel2':
                     $this->placeLabel2Pass();
                     break;
@@ -7045,6 +7041,7 @@ Purchase it or return it to the bottom of the deck.`
                 case 'distill':
                     $this->gamestate->nextState('skip');
                     break;
+                case 'sell':
                 case 'selectFlavor':
                 case 'placeLabel3':
                 case 'placeLabel4':

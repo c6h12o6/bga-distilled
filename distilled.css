@@ -482,7 +482,6 @@ body > .card {
     background-size: 100% 100%;
     flex-grow: 0;
     flex-shrink: 0;
-    top: -2.5vw;
     position: relative;
 }
 .jumboCard.playerRecipeCard {
@@ -2098,4 +2097,37 @@ https://studio.boardgamearena.com:8084/data/themereleases/240320-1000/css/gamese
     display: flex;
     flex-direction: column;
     gap: 5px;
+}
+
+.mobile_version .distillerChoiceInner .dlabel {
+  --width: calc(2*var(--label-width-mobile));
+  --height: calc(2*var(--label-height-mobile));
+}
+
+.playerTab {
+    background: white; 
+    text-align: center;
+    padding: 5px;
+    cursor: pointer;
+    box-sizing: border-box;
+    border-bottom: none !important; 
+}
+
+.playerBlock {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin-bottom: 0px;
+    width: 100%;
+    justify-content: center;
+}
+
+.mobile_version .playerBlock {
+}
+
+.visibleTab {
+}
+
+.backgroundTab {
+    opacity: 0.8;
 }

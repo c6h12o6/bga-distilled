@@ -132,17 +132,6 @@ $gameinfos = array(
 // Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
 // A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
 'presentation' => array(
-    totranslate("Distilled is a highly thematic strategy card game about
-    crafting spirits in a distillery, with resource management and
-    push-your-luck elements. In the game, you have inherited a distillery and
-    are hoping to someday achieve the title of master distiller through
-    purchasing goods, building up your distillery, and creating the world's most
-    renowned spirits."),
-
-    totranslate("Use cards to purchase new ingredients and invest in upgrades to
-    your distillery, all while eventually distilling the spirit and sending it
-    to the warehouse. Once in the warehouse, age your spirit to enhance its
-    flavor and bottle it to sell it for major profits!")
 ),
 
 //////// BGA SANDBOX ONLY PARAMETERS (DO NOT MODIFY)

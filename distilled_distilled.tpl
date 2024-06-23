@@ -224,15 +224,9 @@ var jstpl_player_supplement = '\
 
 var jstpl_player_section = '\
 <div id="playerSection_${PID}" class="dwhiteblock" style="padding: 3px">\
-    <div class="dwhiteblock" style="width: fit-content; background-color: rgb(0, 0, 0, 1)">\
-        <div style="color: #${COLOR}"> \
-            <span class="clickable" id="prevPlayer_${PID}" title="Previous Player"> <  </span>\
-            <span style="font-weight: bold"> ${NAME} </span>\
-            <span class="clickable" id="nextPlayer_${PID}" title="Next Player"> > </span>\
-        </div>\
-    </div>\
     <div id="myPlayerContainer_${PID}" class="playerContainer">\
         <div id="myPlayerDistillery_${PID}_wrapper" class="playerDistilleryWrapper" style="margin-bottom: 20px">\
+            <div class="playerBlock" data-pid="${PID}"></div>\
             <div id="myPlayerDistillery_${PID}" class="playerDistillery">\
                 <div id="relativity_${PID}" style="width: 100%; height: 100%; position: relative">\
                     <div id="du1_${PID}" class="duCardSlot" style="position: absolute; top: 14.75%; left: 41%; width: 13.5%;"> </div>\

@@ -669,11 +669,6 @@ function (dojo, declare, on, bgacards) {
 
 
                 this.playerSections[player_id] = document.getElementById('playerSection_' + player_id)
-                let div = document.getElementById('nextPlayer_' + player_id)
-                dojo.connect(div, "onclick", this, 'nextPlayerVisible')
-                div = document.getElementById('prevPlayer_' + player_id)
-                dojo.connect(div, "onclick", this, 'prevPlayerVisible')
-                dojo.connect(document.getElementById('du1_' + player_id), 'onclick', this, 'shuffle');
 
                 // 1 indexed
                 flightIdx = parseInt(gamedatas.flightCard) - 1;
@@ -796,6 +791,7 @@ function (dojo, declare, on, bgacards) {
                     lbldiv.style.border = "solid black 1px"
                 }
             }
+
 
             if (!this.isSpectator) 
                 this.setVisiblePlayer(this.player_id);
@@ -959,6 +955,8 @@ function (dojo, declare, on, bgacards) {
 
             dojo.query('.recipeCardGrow').connect("onclick", this, "toggleRecipeCardSize");
 
+            this.addSectionTabsForPlayer()
+            this.setVisiblePlayer(this.visiblePlayer)
 
 
 
@@ -1032,13 +1030,7 @@ function (dojo, declare, on, bgacards) {
                 case 'playerBuyTurnReveal':
                     if ( this.isCurrentPlayerActive() ) {
                         this.connectAllCardsInComboStock(this.playerRevealStock[this.player_id])
-                        title = document.getElementById("pagemaintitletext")
-                        warnElem = document.createElement("span")
-                        warnElem.style.color = 'red'
-                        warnElem.innerHTML = _("Warning: Discounted below 0")
-                        warnElem.classList.add('invisible')
-                        warnElem.id = "buyWarning"
-                        title.parentElement.insertBefore(warnElem, title.nextSibling)
+                        this.addTitleWarning(_("Warning: Discounted below 0"))
                     }
                     break;
                 case 'distill':
@@ -1106,6 +1098,7 @@ function (dojo, declare, on, bgacards) {
 
             // never allow this to persist from state to state
             this.disconnectAllMarketCards();
+            this.removeTitleWarning();
             
             switch( stateName )
             {
@@ -1235,12 +1228,21 @@ function (dojo, declare, on, bgacards) {
                                 suffix = _("(No labels remaining)")
                             }
                             this.addActionButton('select' + recipe + barrel,  dojo.string.substitute(_('${recipe} (${barrel}) ${suffix}'), {recipe: recipe, barrel: barrel, suffix: suffix}), ()=>{
-                                this.confirmButton(_("Confirm"), 'selectRecipe', {
-                                    recipeSlot: X.recipeSlot,
-                                    barrel: X.barrelUid,
-                                    drinkId: args.drinkId,
-                                    lock: true,
-                                }, null, dojo.string.substitute(_("Select ${recipe} in ${barrel} ${suffix}"), {recipe: recipe, barrel: barrel, suffix: suffix}));
+                                if (args.recipes.length > 1) {
+                                    this.confirmButton(_("Confirm"), 'selectRecipe', {
+                                        recipeSlot: X.recipeSlot,
+                                        barrel: X.barrelUid,
+                                        drinkId: args.drinkId,
+                                        lock: true,
+                                    }, null, dojo.string.substitute(_("Select ${recipe} in ${barrel} ${suffix}"), {recipe: recipe, barrel: barrel, suffix: suffix}));
+                                } else {
+                                     this.ajaxcall( "/distilled/distilled/selectRecipe.html", {
+                                        recipeSlot: X.recipeSlot,
+                                        barrel: X.barrelUid,
+                                        drinkId: args.drinkId,
+                                        lock: true,
+                                     }, this, function(result) {});
+                                }
                             })
                         })
                         break;
@@ -1392,6 +1394,7 @@ function (dojo, declare, on, bgacards) {
                                     cardName: card.uid,
                                     marketName: args.allowedCards[uid].market,
                                     slotId: 0,
+                                    debugId: 1, phase: this.stateName,
                                     lock: true,
                                     powers: powers.join(','),
                                 }, null, description)
@@ -1477,8 +1480,9 @@ function (dojo, declare, on, bgacards) {
                                         } else {
                                             conf = prototype.confirmButton(button, "buyCard", {
                                                 cardName: C.uid,
-                                                marketName: C.market,
+                                                marketName: market,
                                                 powers: O.triggerUid,
+                                                debugId: 2, phase: this.stateName,
                                                 lock: true,
                                             })
                                             if (cost > money)
@@ -1539,6 +1543,7 @@ function (dojo, declare, on, bgacards) {
                                             marketName: C.market,
                                             slotId: 0,
                                             powers: O.triggerUid,
+                                            debugId: 3, phase: this.stateName,
                                             lock: true,
                                         }, this, function(result) {});
                                     }
@@ -1688,6 +1693,18 @@ function (dojo, declare, on, bgacards) {
                                 },
                                 fn,
                                 _("Confirm distill")); 
+                            var warnElem = this.addTitleWarning(_("You are distilling multiple types of sugars."))
+                            var sugarTypes = 0;
+                            if (this.grainCounter.getValue())
+                                sugarTypes++;
+                            if (this.plantCounter.getValue())
+                                sugarTypes++;
+                            if (this.fruitCounter.getValue()) 
+                                sugarTypes++;
+
+                            if (sugarTypes > 1) {
+                                warnElem.classList.remove('invisible')
+                            }
                         });
                         this.addTooltip("distill_button", 
                             _("Click this button to distill"), 
@@ -1754,7 +1771,7 @@ function (dojo, declare, on, bgacards) {
                         dojo.addClass('distill_button', "disabled-looking");
                         this.addActionButton('skip_button', _('Skip Distill'), ()=>{
                             this.confirmButton(_("End Distill Phase"), "skipDistill", {lock: true}, null, 
-                                "_<span style='color: red'>" + (`You are about to skip distilling for the round. Confirm?`) + "</span>" )
+                                "<span style='color: red'>" + _(`You are about to skip distilling for the round. Confirm?`) + "</span>" )
                         });
                         elem = document.getElementById('trade_card_button')
                         if (elem)
@@ -1837,7 +1854,53 @@ function (dojo, declare, on, bgacards) {
         // <a href="#" class="action-button bgabutton bgabutton_blue" onclick="return false;" id="discount1" data-uid="0">2 <span class="icon-coin-em"> </span>  off ingredient (Distiller Ability)</a>
 
         // @override
+        addSectionTabsForPlayer: function() {
+            console.log("addSectionTabs")
+            dojo.query(".playerBlock").forEach(B => {
+                Object.keys(this.player_data).forEach(K => {
+                    var P = this.player_data[K]
+                    console.log("adding section tabs for", K, P)
+                    console.log(P)
+                    var pid = P.id;
+                    var name = P.name;
+                    var color = "black"
+                    var background = "darkgray";
+                    var borderColor = "black";
+                    var extraClass = "backgroundTab";
 
+                    if (B.dataset.pid == pid) {
+                        background = "white";
+                        color = `#${P.color}`;
+                        borderColor = `#${P.color}`;
+                        extraClass = "visibleTab"
+                    }
+
+                    var tab = this.createElement(`
+                        <div class="playerTab ${extraClass}" data-pid=${pid} style="color: ${color}; background: ${background}; border: solid ${borderColor} 2px; "> 
+                            <span style="font-weight: bold"> ${name} </span>
+                        </div>
+                    `)
+                    B.appendChild(tab)
+                })
+            })
+            dojo.query(".playerTab").connect('onclick', (e) => { 
+                dojo.stopEvent(e);
+                this.setVisiblePlayer(e.currentTarget.dataset.pid);
+            })
+        },
+        addTitleWarning: function(warnText) {
+            title = document.getElementById("pagemaintitletext")
+            var warnElem = document.createElement("span")
+            warnElem.style.color = 'red'
+            warnElem.innerHTML = warnText + '&nbsp'; 
+            warnElem.classList.add('invisible')
+            warnElem.id = "titleWarning"
+            title.parentElement.insertBefore(warnElem, title)
+            return warnElem;
+        },
+        removeTitleWarning: function() {
+            document.getElementById("titleWarning")?.remove()
+        },
         addCheckmark: function(div) {
           // Check if the div exists
           if (!div) {
@@ -2531,6 +2594,7 @@ function (dojo, declare, on, bgacards) {
                 let cb = function(e) {
                     console.log("Clicked on " + T + mapping[T])
                     args.tradeTruck = mapping[T]
+                    this.showDeckModal(mapping[T] + "Truck")
                     this.tradeWithTruck_SelectCard(args)
                 }
                 if (truckElem) {
@@ -2621,7 +2685,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
 
             this.replaceActionBar(dojo.string.substitute(_("Place label for ${name}: "), {name: args.drink.name}), 'revertActionBarAndResetCards')
             this.getAvailableLabelSlots(this.player_id).reverse().forEach(S => {
-                this.addReplacementActionButton('label' + S, dojo.string.substitute(_("${s} or 2 <span class='icon-sp-em'></span>"), {s: args.labels[S]}), () => {
+                this.addReplacementActionButton('label' + S, dojo.string.substitute(_("${s} or 2 <span class='icon-sp-em'></span>"), {s: _(args.labels[S])}), () => {
                     cb(this, S)
                 })
                 console.log("connecting label slot")
@@ -2632,7 +2696,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             console.log("choose bottle");
             console.log(args)
 
-            this.replaceActionBar(dojo.string.substitute(_("Choose a bottle for ${name}: "), {name: args.drink.name}), 'revertActionBarAndResetCards')
+            this.replaceActionBar(dojo.string.substitute(_("Choose a bottle for ${name}: "), {name: _(args.drink.name)}), 'revertActionBarAndResetCards')
             args.bottles.forEach((B) => {
                 // TODO connect the cards also
                 this.addReplacementActionButton(`bottle${B.uid}`, B.name, () => {
@@ -2785,6 +2849,8 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                         }
                     } else {
                         args.duSlot = function () { return ii }(),
+                        args.debugId = 4;
+                        args.stateName = this.stateName;
                         this.confirmButton(`Place ${C.name} on slot ${ii}`, "buyCard", 
                             args)
                     }
@@ -2926,6 +2992,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 this.reconnectAllMarketCards();
             }
             dojo.removeClass(actionBar, "invisible");
+            this.removeTitleWarning();
         },
         connectCardsForDistill() {
             console.log("connect cards for distill")
@@ -3197,7 +3264,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
         },
         togglePowerButton: function(elem) {
             // updates button, adds check mark, and returns the new state
-            warning = document.getElementById("buyWarning")
+            warning = document.getElementById("titleWarning")
             if (dojo.hasClass(elem, 'activePower')) {
                 // Removing activePower
                 //console.log(elem.innerHtml)
@@ -3416,9 +3483,10 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                                         this.confirmButton(dojo.string.substitute(_("Buy ${name} for ${cost} <span class='icon-coin-em'></span>"), {name: c.name, cost:cost}),
                                             "buyCard", {
                                                 cardName: c.uid,
-                                                marketName: c.market,
+                                                marketName: market,
                                                 slotId: 0,
                                                 powers: this.stateArgs?.args.options[0].triggerUid,
+                                                debugId: 5, phase: this.stateName,
                                                 lock: true,
                                             })
                                     }
@@ -4310,6 +4378,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                                                 slotId: slotId,
                                                 lock: true,
                                                 powers: powers.join(','),
+                                                debugId: 6, phase: this.stateName,
                                             }, null, description)
                     let money = this['money_counter_' + this.player_id].getValue();
                     if (effectiveCost > money) {
@@ -4321,6 +4390,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                         cardName: cardName,
                         marketName: match[1],
                         powers: powers.join(','),
+                        debugId: 7, phase: this.stateName,
                         lock: true,
                     }, this, function(result) {});
                 }
@@ -5521,6 +5591,23 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 if (log && args && !args.processed) {
                     args.processed = true;
 
+                    /*
+                    try {
+                        if (args.key1) {
+                            args.key1 = bga_format(args.key1, {
+                                '*': (t) => {
+                                    switch (t) {
+                                        case 'fl': return _(args.card_name); break;
+                                    }
+                                }
+                            })
+                        }
+                    } catch (err) {
+                        console.log(args)
+                        this.showMessage(err.message, "error");
+                        throw err;
+                    }
+                    */
                     if (args.card_name !== undefined) {
                         let card;
                         let html = null;
