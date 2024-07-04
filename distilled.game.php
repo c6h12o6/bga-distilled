@@ -662,24 +662,24 @@ Purchase it or return it to the bottom of the deck.`
         );
 
         $this->signature_ing_cards = array(
-            new Card(1, 'Sangiovese Grapes', 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
-            new Card(2, 'Dried Juniper Berries', 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
-            new Card(3, 'Blue Agave', 0, 2, 4, CardType::SUGAR, Sugar::PLANT ),
-            new Card(4, 'Quebranta Grapes', 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
-            new Card(5, 'Almond Potatoes', 0, 2, 4, CardType::SUGAR, Sugar::PLANT ),
-            new Card(6, 'Sugarcane Juice', 0, 2, 4, CardType::SUGAR, Sugar::PLANT ),
-            new Card(7, 'Common Juniper Berries', 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
-            new Card(8, 'Nipa Palm', 0, 2, 4, CardType::SUGAR, Sugar::PLANT ),
-            new Card(9, 'Sugarcane Molasses', 0, 2, 4, CardType::SUGAR, Sugar::PLANT ),
-            new Card(10, 'Sorghum Bicolor', 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
-            new Card(11, 'Dent Corn', 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
-            new Card(12, 'Winter Rye', 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
-            new Card(13, 'Sinica Rice', 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
-            new Card(14, 'Unmalted Barley', 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
-            new Card(15, 'Bere Barley', 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
-            new Card(16, 'Pearl Millet', 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
-            new Card(17, 'Buck Wheat', 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
-            new Card(18, 'Ugni Blanc Grapes', 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
+            new Card(1,  clienttranslate('Sangiovese Grapes'), 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
+            new Card(2,  clienttranslate('Dried Juniper Berries'), 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
+            new Card(3,  clienttranslate('Blue Agave'), 0, 2, 4, CardType::SUGAR, Sugar::PLANT ),
+            new Card(4,  clienttranslate('Quebranta Grapes'), 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
+            new Card(5,  clienttranslate('Almond Potatoes'), 0, 2, 4, CardType::SUGAR, Sugar::PLANT ),
+            new Card(6,  clienttranslate('Sugarcane Juice'), 0, 2, 4, CardType::SUGAR, Sugar::PLANT ),
+            new Card(7,  clienttranslate('Common Juniper Berries'), 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
+            new Card(8,  clienttranslate('Nipa Palm'), 0, 2, 4, CardType::SUGAR, Sugar::PLANT ),
+            new Card(9,  clienttranslate('Sugarcane Molasses'), 0, 2, 4, CardType::SUGAR, Sugar::PLANT ),
+            new Card(10, clienttranslate('Sorghum Bicolor'), 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
+            new Card(11, clienttranslate('Dent Corn'), 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
+            new Card(12, clienttranslate('Winter Rye'), 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
+            new Card(13, clienttranslate('Sinica Rice'), 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
+            new Card(14, clienttranslate('Unmalted Barley'), 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
+            new Card(15, clienttranslate('Bere Barley'), 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
+            new Card(16, clienttranslate('Pearl Millet'), 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
+            new Card(17, clienttranslate('Buck Wheat'), 0, 2, 4, CardType::SUGAR, Sugar::GRAIN ),
+            new Card(18, clienttranslate('Ugni Blanc Grapes'), 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
         );
 
         // TODO need to get the values of the sig recipes
@@ -705,7 +705,7 @@ Purchase it or return it to the bottom of the deck.`
         );
 
         $this->signature_recipes = array(
-            array('name' => 'Premium Dark Rum',
+            array('name' => clienttranslate('Premium Dark Rum'),
                     'sp' => 17,
                     'sugars' => 3,
                     'value' => 3,
@@ -717,7 +717,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::PLANT)),
-            array('name' => 'Straight Bourbon Whiskey',
+            array('name' => clienttranslate('Straight Bourbon Whiskey'),
                     'sp' => 18,
                     'sugars' => 3,
                     'value' => 1,
@@ -729,7 +729,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::GRAIN)),
-            array('name' => 'Oceania-Strength Gin',
+            array('name' => clienttranslate('Oceania-Strength Gin'),
                     'sp' => 10,
                     'sugars' => 3,
                     'value' => 1,
@@ -741,7 +741,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::FRUIT)),
-            array('name' => 'VS Cognac Brandy',
+            array('name' => clienttranslate('VS Cognac Brandy'),
                     'sp' => 17,
                     'sugars' => 3,
                     'value' => 2,
@@ -753,7 +753,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::FRUIT)),
-            array('name' => 'Quezon Lambanog',
+            array('name' => clienttranslate('Quezon Lambanog'),
                     'sp' => 10,
                     'sugars' => 3,
                     'value' => 2,
@@ -765,7 +765,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::PLANT)),
-            array('name' => 'Single Malt Whisky',
+            array('name' => clienttranslate('Single Malt Whisky'),
                     'sp' => 20,
                     'sugars' => 3,
                     'value' => 3,
@@ -777,7 +777,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::GRAIN)),
-            array('name' => 'Extra Anejo Tequila',
+            array('name' => clienttranslate('Extra Anejo Tequila'),
                     'sp' => 19,
                     'sugars' => 3,
                     'value' => 1,
@@ -789,7 +789,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::PLANT)),
-            array('name' => 'London Dry Gin',
+            array('name' => clienttranslate('London Dry Gin'),
                     'sp' => 13,
                     'sugars' => 3,
                     'value' => 2,
@@ -801,7 +801,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::FRUIT)),
-            array('name' => 'Gammal Fin Aquavit',
+            array('name' => clienttranslate('Gammal Fin Aquavit'),
                     'sp' => 8,
                     'sugars' => 2,
                     'value' => 2,
@@ -813,7 +813,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::PLANT)),
-            array('name' => 'Andong Soju',
+            array('name' => clienttranslate('Andong Soju'),
                     'sp' => 7,
                     'sugars' => 3,
                     'value' => 1,
@@ -825,7 +825,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::GRAIN)),
-            array('name' => 'Single Pot Whiskey',
+            array('name' => clienttranslate('Single Pot Whiskey'),
                     'sp' => 19,
                     'sugars' => 3,
                     'value' => 2,
@@ -837,7 +837,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::GRAIN)),
-            array('name' => 'Canadian Rye Whisky',
+            array('name' => clienttranslate('Canadian Rye Whisky'),
                     'sp' => 16,
                     'sugars' => 3,
                     'value' => 1,
@@ -849,7 +849,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::GRAIN)),
-            array('name' => 'Peruvian Pisco Puro',
+            array('name' => clienttranslate('Peruvian Pisco Puro'),
                     'sp' => 14,
                     'sugars' => 3,
                     'value' => 1,
@@ -861,7 +861,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::FRUIT)),
-            array('name' => 'Royal Officer\'s Whisky',
+            array('name' => clienttranslate('Royal Officer\'s Whisky'),
                     'sp' => 11,
                     'sugars' => 2,
                     'value' => 1,
@@ -873,7 +873,7 @@ Purchase it or return it to the bottom of the deck.`
                     'region' => Region::HOME,
                     'signature' => true,
                     'allowed' => array(Sugar::GRAIN)),
-            array('name' => 'Otsurui Shōchū',
+            array('name' => clienttranslate('Otsurui Shōchū'),
                     'sp' => 14,
                     'sugars' => 2,
                     'value' => 3,
@@ -885,7 +885,7 @@ Purchase it or return it to the bottom of the deck.`
                     'include' => 'wheat',
                     'signature' => true,
                     'allowed' => array(Sugar::GRAIN)),
-            array('name' => 'Caninha Cachaça',
+            array('name' => clienttranslate('Caninha Cachaça'),
                     'sp' => 11,
                     'sugars' => 2,
                     'value' => 2,
@@ -897,7 +897,7 @@ Purchase it or return it to the bottom of the deck.`
                     'include' => 'sugarcane',
                     'signature' => true,
                     'allowed' => array(Sugar::PLANT)),
-            array('name' => 'Grappa Invecchiata',
+            array('name' => clienttranslate('Grappa Invecchiata'),
                     'sp' => 13,
                     'sugars' => 2,
                     'value' => 2,
@@ -909,7 +909,7 @@ Purchase it or return it to the bottom of the deck.`
                     'include' => 'grapes',
                     'signature' => true,
                     'allowed' => array(Sugar::FRUIT)),
-            array('name' => 'Strong Aroma Báijiŭ',
+            array('name' => clienttranslate('Strong Aroma Báijiŭ'),
                     'sp' => 15,
                     'sugars' => 3,
                     'value' => 2,
@@ -1323,7 +1323,6 @@ Purchase it or return it to the bottom of the deck.`
         $sql = "SELECT COUNT(*) FROM premium_item WHERE location='deck'";
         $result['premium_item_market_count'] = self::getUniqueValueFromDb($sql);
 
-
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
         $players = $this->loadPlayersBasicInfos();
         $result['playerCards'] = array();
@@ -1399,7 +1398,6 @@ Purchase it or return it to the bottom of the deck.`
 
         // TODO i think flavor cards can be revealed too
         $revealed = self::dbQuery("
-
             SELECT uid, 'du' as market FROM distillery_upgrade WHERE location='reveal'
             UNION ALL
             SELECT uid, 'ing' as market FROM premium_ingredient WHERE location='reveal'
@@ -1416,6 +1414,8 @@ Purchase it or return it to the bottom of the deck.`
         }
         $result['reveal'] = $revealList;
 
+        $result['spirits'] = $this->getSpirits();
+        $result['flavor_map'] = $this->getFlavorMap();
         $result['firstplayer'] = self::getUniqueValueFromDb("SELECT player_id FROM player WHERE first_player=1");
         $result['turn'] = self::getGameStateValue("turn");
         $result['cardText'] = $this->cardText;
@@ -1467,6 +1467,38 @@ Purchase it or return it to the bottom of the deck.`
         In this space, you can put any utility methods useful for your game logic
     */
 
+    function getSpirits($bottleMap = null) {
+        $spirits =  array_values(self::getCollectionFromDb("SELECT * FROM drink JOIN label on drink.label_uid=label.uid"));
+        $ret = array();
+        foreach ($spirits as $s) {
+            $card_ids = [];
+            $s['labelId'] = $this->getRecipeFromSlot($s['recipe_slot'], $s['player_id'])['label'];
+            if ($s['barrel_uid'])
+                $card_ids[] = $this->AllCards[$s['barrel_uid']]->card_id;
+            else 
+                $card_ids[] = 19;
+
+            if ($bottleMap && array_key_exists($s['id'], $bottleMap)) 
+                $card_ids[] = $this->AllCards[$bottleMap[$s['id']]]->card_id;
+            if ($s['sold'] && $s['bottle_uid']) 
+                $card_ids[] = $this->AllCards[$s['bottle_uid']]->card_id;
+            else if ($s['sold'])
+                $card_ids[] = 20;
+
+
+            $uids = explode(',', $s['cards']);
+            foreach ($uids as $uid) {
+                $card_ids[] = $this->AllCards[$uid]->card_id;
+            }
+            $s['card_ids'] = $card_ids;
+            $s['known_flavors'] = $this->getKnownFlavorCount($s['id']);
+            $ret[] = $s;
+        }
+        return $ret;
+    }
+    function getFlavorMap() {
+        return self::getCollectionFromDb("SELECT uid, card_id FROM flavor");
+    }
     function isValidSpirit($wbCards) {
         $yeast = false;
         $water = false;
@@ -1897,6 +1929,7 @@ Purchase it or return it to the bottom of the deck.`
                 "trigger_name" => $c->name,
                 // TODO make this private
                 "visible_card" => $visibleCard,
+                "spirits" => $this->getSpirits(),
             ));
         } else {
             self::notifyAllPlayers("ageDrink", clienttranslate('Flavor card added to ${player_name}\'s ${location_str}'), array(
@@ -1905,6 +1938,7 @@ Purchase it or return it to the bottom of the deck.`
                 "player_id" => $playerId,
                 "location" => $location,
                 "location_str" => $this->normalizeString($location),
+                "spirits" => $this->getSpirits(),
             ));
         }
     }
@@ -2322,7 +2356,7 @@ Purchase it or return it to the bottom of the deck.`
                 foreach ($wpList as $player_id) {
                     $value = ceil(1.0 * $saObj->sp / count($wpList));
                     self::notifyAllPlayers("spiritAward", 
-                        clienttranslate('${player_name} wins ${sa_name} Spirit Award and ${sp} <span icon="icon-sp-em"></span>'), array(
+                        clienttranslate('${player_name} wins ${sa_name} Spirit Award and ${sp} <span class="icon-sp-em"></span>'), array(
                             'i18n' => array("sa_name"),
                             'player_name' => $this->getPlayerName($player_id),
                             'player_id' => $player_id,
@@ -2521,6 +2555,14 @@ Purchase it or return it to the bottom of the deck.`
         for ($ii = 0; $ii < $distiller->startingWater; $ii++)
             $this->buyCard_internal($playerId, $this->templateCards[138]->uid, 'bm');
 
+        self::notifyAllPlayers('selectDistiller2', clienttranslate('${player_name} has selected ${distiller_name}'), array(
+            'player_name' => $this->getPlayerName($playerId),
+            'player_id' => $playerId,
+            'distiller_name' => $distiller->name,
+            'distiller_id' => $distillerId,
+            'distiller_region' => $distiller->region,
+        ));
+
         $sigCard = $this->sigCardsByCardId[$distiller->sigIngCardId];
         $sigLabel = $this->signature_recipes[$distiller->id / 2];
         $sigLabel['location'] = 'flight';
@@ -2669,6 +2711,7 @@ Purchase it or return it to the bottom of the deck.`
             $normalAmount = abs($amount);
             if ($amount >= 0) {
                 self::notifyAllPlayers( "playerGains", clienttranslate('${player_name} gains ${amount} <span class="icon-coin-em"></span> from ${card_name}'), array(
+                    'i18n' => ['card_name'],
                     'amount' => $amount,
                     'player_name' => $this->getPlayerName($playerId),
                     'player_id' => $playerId,
@@ -2678,6 +2721,7 @@ Purchase it or return it to the bottom of the deck.`
                 ));
             } else {
                 self::notifyAllPlayers( "playerGains", clienttranslate('${player_name} loses ${normal_amount} <span class="icon-coin-em"></span> from ${card_name}'), array(
+                    'i18n' => ['card_name'],
                     'amount' => $amount,
                     'player_name' => $this->getPlayerName($playerId),
                     'player_id' => $playerId,
@@ -2729,6 +2773,7 @@ Purchase it or return it to the bottom of the deck.`
         $this->incStat($amount, "points_total", $playerId);
         if ($trigger_name) {
             self::notifyAllPlayers( 'playerPointsEndgame', clienttranslate('${player_name} gains ${sp} <span class="icon-sp-em"></span> from ${card_name}'), array(
+                'i18n' => ['card_name'],
                 'sp' => $amount,
                 'player_name' => $this->getPlayerName($playerId),
                 'player_id' => $playerId,
@@ -2783,7 +2828,7 @@ Purchase it or return it to the bottom of the deck.`
 
     function selectDistillerAction_internal($distillerId, $player_id) {
         $distiller = $this->distillers[$distillerId];
-        self::notifyAllPlayers('selectDistiller', clienttranslate('${player_name} has selected ${distiller_name}'), array(
+        self::notifyPlayer($player_id, 'selectDistiller', clienttranslate('${player_name} has selected ${distiller_name}'), array(
             'player_name' => $this->getPlayerName($player_id),
             'player_id' => $player_id,
             'distiller_name' => $distiller->name,
@@ -2882,6 +2927,7 @@ Purchase it or return it to the bottom of the deck.`
             $newUid = $this->addBasicCardToPlayer($uid, $playerId);
             $this->incStat(1, "basic_cards", $playerId);
             $this->notifyAllPlayers("buyCard", clienttranslate('${player_name} gets ${card_name} from the basic market'), array(
+                'i18n' => ['card_name'],
                 'player_name' => $this->getPlayerName($playerId),
                 'player_id' => $playerId,
                 'uid' => $newUid,
@@ -2914,6 +2960,7 @@ Purchase it or return it to the bottom of the deck.`
             } else {
                 $this->moveCardToPlayer($deck, $uid, $playerId);
                 self::notifyAllPlayers("buyCard", clienttranslate('${player_name} buys ${card_name} from ${card_location}'), array(
+                    'i18n' => ['card_location', 'card_name'],
                     'player_name' => $this->getPlayerName($playerId),
                     'player_id' => $playerId,
                     'uid' => $uid,
@@ -2939,6 +2986,7 @@ Purchase it or return it to the bottom of the deck.`
                     SELECT COUNT(*) FROM ${table} WHERE location='deck'");
 
                 self::notifyAllPlayers("updateMarket", clienttranslate('All ${market} cards shift to the right. ${card_name} revealed'), array(
+                    'i18n' => ['market', 'card_name'],
                     'market' => $market,
                     'market_id' => $marketId,
                     'card_name' => $this->AllCards[$dealt]->name,
@@ -3029,6 +3077,7 @@ Purchase it or return it to the bottom of the deck.`
         for ($ii = 0; $ii < $count; $ii++) {
             $revealUid = $this->revealFromDeck($deck);
             self::notifyAllPlayers('revealCards', clienttranslate('${player_name} reveals ${card_name} from ${market_name}'), array(
+                'i18n' => ['card_name', 'market_name'],
                 'player_id' => $pid,
                 'player_name' => self::getActivePlayerName(),
                 'card_id' => $revealUid,
@@ -3170,6 +3219,7 @@ Purchase it or return it to the bottom of the deck.`
         if ($existing) {
             self::dbQuery("UPDATE distillery_upgrade set location = 'truck', player_id=null, location_idx=0 WHERE uid=$existing");
             self::notifyAllPlayers('removeDuCard', clienttranslate('${card_name} is discarded and placed in the truck'), array(
+                'i18n' => ['card_name'],
                 'player_name' => $this->getPlayerName($pid),
                 'player_id' => $pid,
                 'uid' => $existing,
@@ -3180,6 +3230,7 @@ Purchase it or return it to the bottom of the deck.`
         }
 
         self::notifyAllPlayers("placeDuCard", clienttranslate('${player_name} places ${card_name} on slot ${duSlot}'), array(
+            'i18n' => ['card_name'],
             'player_name' => self::getActivePlayerName(),
             'player_id' => self::getActivePlayerId(),
             'uid' => $uid,
@@ -4058,6 +4109,7 @@ Purchase it or return it to the bottom of the deck.`
             //self::dbQuery("UPDATE distillery_upgrade SET location='player', player_id=$pid, location_idx=$duSlot WHERE uid=$in_uid");
             self::notifyAllPlayers("placeLabel2Trade", 
                 clienttranslate('${player_name} discards ${card1_name} and draws ${card2_name} from the ${truck_name} truck'), array(
+                'i18n' => ['card1_name', 'card2_name', 'truck_name'],
                 'player_name' => self::getActivePlayerName(),
                 'player_id' => self::getActivePlayerId(),
                 'in_name' => $cardIn->name,
@@ -4149,7 +4201,7 @@ Purchase it or return it to the bottom of the deck.`
 
         // Todo place on bottom
         self::dbQuery("UPDATE flavor set location='deck' WHERE location='reveal'");
-        self::notifyPlayer(self::getActivePlayerId(), "endReveal", clienttranslate("Flavor cards are returned to the bottom of the deck"), array());
+        self::notifyAllPlayers("endReveal", clienttranslate("Flavor cards are returned to the bottom of the deck"), array());
 
 
         $d = $this->getObjectFromDb("SELECT * FROM drink WHERE id=$drink");
@@ -4526,6 +4578,24 @@ Purchase it or return it to the bottom of the deck.`
         $flavorStrings = array();
 
         $knownFlavors = $this->getKnownFlavorCount($drinkId);
+        $knownFlavorCards = $this->getKnownFlavors($drinkId);
+        foreach ($knownFlavorCards as $flavor_card) {
+            $flavorString = $this->getSellFlavorString();
+            self::notifyAllPlayers("knownFlavor",
+                $flavorString['notif'],
+                array(
+                    'i18n' => ['card_name', 'spirit_name', 'key1', 'key2'],
+                    'player_name' => $this->getPlayerName($playerId),
+                    'player_id' => $playerId,
+                    'card_name' => $flavor_card->name,
+                    'card' => $flavor_card,
+                    'flavor' => $flavor_card,
+                    'spirit_name' => $drinkName,
+                    'value' => $flavor_card->sale,
+                    'key1_rec' => ['log' => $flavorString['key1'], 'args' => ['card_name'=>$flavor_card->name, 'card'=>$flavor_card]],
+                    'key2' => $flavorString['key2'],
+                ));
+        }
         for ($ii = 0; $ii < $info["flavor_count"] - $knownFlavors; $ii++) {
             $c = $this->dealToIndex($this->flavorDeck, 1);
             $flavors[] = $c;
@@ -4545,31 +4615,16 @@ Purchase it or return it to the bottom of the deck.`
                     'key1_rec' => ['log' => $flavorString['key1'], 'args' => ['card_name'=>$flavor_card->name, 'card'=>$flavor_card]],
                     'key2' => $flavorString['key2'],
                 ));
+            self::dbQuery("UPDATE drink SET cards = CONCAT(cards, ',$c') WHERE id=$drinkId");
         }
-        $knownFlavorCards = $this->getKnownFlavors($drinkId);
-        foreach ($knownFlavorCards as $flavor_card) {
-            $flavorString = $this->getSellFlavorString();
-            self::notifyAllPlayers("knownFlavor",
-                $flavorString['notif'],
-                array(
-                    'i18n' => ['card_name', 'spirit_name', 'key1', 'key2'],
-                    'player_name' => $this->getPlayerName($playerId),
-                    'player_id' => $playerId,
-                    'card_name' => $flavor_card->name,
-                    'card' => $flavor_card,
-                    'flavor' => $flavor_card,
-                    'spirit_name' => $drinkName,
-                    'value' => $flavor_card->sale,
-                    'key1_rec' => ['log' => $flavorString['key1'], 'args' => ['card_name'=>$flavor_card->name, 'card'=>$flavor_card]],
-                    'key2' => $flavorString['key2'],
-                ));
-        }
+       
 
         $cardsWithFlavors = array_merge($cards, $flavors);
         $value = $this->getDrinkValue(self::getActivePlayerId(), $cardsWithFlavors, $info["recipe_slot"], $bottle, $info['barrel_uid']);
         $sp = $this->getDrinkSp(self::getActivePlayerId(), $cardsWithFlavors, $info["recipe_slot"], $info["flavor_count"], $bottle, $info['barrel_uid']);
 
         self::notifyAllPlayers("chooseBottle", clienttranslate('${player_name} uses ${card_name}'), array(
+            'i18n' => ['card_name'],
             'player_name' => self::getActivePlayerName(),
             'player_id' => self::getActivePlayerId(),
             'card_name' => $this->AllCards[$bottle]->name,
@@ -4640,6 +4695,7 @@ Purchase it or return it to the bottom of the deck.`
                 'flavor_sp' => $sp['flavor'],
                 "spirit_sp" => $sp['recipe'],
                 "bottle_sp" => $sp['bottle'],
+                "spirits" => $this->getSpirits([$drinkId => $bottle]),
             ));
         } else {
             $this->notifyAllPlayers("sellDrink", clienttranslate('${player_name} sold ${recipe_name} for ${value} <span class="icon-coin-em"></span> and ${sp} <span class="icon-sp-em"></span>. Money Breakdown:
@@ -4672,11 +4728,10 @@ Purchase it or return it to the bottom of the deck.`
                 'flavor_sp' => $sp['flavor'],
                 "spirit_sp" => $sp['recipe'],
                 "bottle_sp" => $sp['bottle'],
+                "spirits" => $this->getSpirits([$drinkId => $bottle]),
             ));
             $this->incStat(1, "bottles_used", self::getActivePlayerId());
         }
-
-
 
         $powerCards = $this->getPowerCards();
         foreach ($powerCards as $pc) {
@@ -4889,6 +4944,7 @@ Purchase it or return it to the bottom of the deck.`
             $r['count'] = $count;
 
         self::notifyAllPlayers("selectRecipe", clienttranslate('${player_name} distilled ${recipe_name} in ${card_name}'), array(
+            'i18n' => ['card_name'],
             "player_name" => self::getActivePlayerName(),
             "player_id" => $pid,
             "recipe_name" => $recipeName,
@@ -4896,6 +4952,7 @@ Purchase it or return it to the bottom of the deck.`
             "barrel" => $this->AllCards[$barrelUid],
             "card_name" => $this->AllCards[$barrelUid]->name,
             "card" => $this->AllCards[$barrelUid],
+            "spirits" => $this->getSpirits(),
         ));
 
         $this->gamestate->nextState("");
@@ -5258,13 +5315,13 @@ Purchase it or return it to the bottom of the deck.`
             $tmp = $this->AllCards[$pc['uid']];
             switch ($tmp->card_id) {
                 case 104:
-                    $tmp->description = "Add 2 additional alcohol";
+                    $tmp->description = clienttranslate("Add 2 additional alcohol");
                     break;
                 case 116:
-                    $tmp->description = "Remove only top card";
+                    $tmp->description = clienttranslate("Remove only top card");
                     break;
                 case 129:
-                    $tmp->description = "Add 1 additional alcohol";
+                    $tmp->description = clienttranslate("Add 1 additional alcohol");
                     break;
             }
             $result[] = $tmp;
@@ -5413,8 +5470,6 @@ Purchase it or return it to the bottom of the deck.`
         The action method of state X is called everytime the current game state is set to X.
     */
     function stEndGameScoring($debug=false) {
-        // set up tie breaking
-        self::dbQuery("UPDATE player SET player_score_aux=money");
 
         $players = $this->loadPlayersBasicInfos();
         $playerList = array_keys($players);
@@ -5425,7 +5480,7 @@ Purchase it or return it to the bottom of the deck.`
 
         $scores = $this->getCollectionFromDb("SELECT player_id, player_score FROM player");
         if (!$debug || true) {
-            self::notifyAllPlayers("playerPointsEndgameInit", "End game scoring!", array(
+            self::notifyAllPlayers("playerPointsEndgameInit", clienttranslate("End game scoring!"), array(
                 'scores' => $scores,
             ));
         }
@@ -6137,17 +6192,20 @@ Purchase it or return it to the bottom of the deck.`
             $score = 0;
             if ($present == 1) {
                 $score = intdiv($money, 3);
-                $this->playerGains($player_id, -3 * $score, clienttranslate("converting <span class='icon-coin-em'></span>"));
+                $this->playerGains($player_id, -3 * $score, clienttranslate("converting <span class='icon-coin-em'></span> to <span class='icon-sp-em'></span>"));
             } else {
                 $score = intdiv($money, 5);
-                $this->playerGains($player_id, -5 * $score, clienttranslate("converting <span class='icon-coin-em'></span>"));
+                $this->playerGains($player_id, -5 * $score, clienttranslate("converting <span class='icon-coin-em'></span> to <span class='icon-sp-em'></span>"));
             }
-            $this->playerPointsEndgame($player_id, $score, "money", "converting <span class='icon-coin-em'></span> to <span class='icon-sp-em'></span>");
-
+            $this->playerPointsEndgame($player_id, $score, "money", clienttranslate("converting <span class='icon-coin-em'></span> to <span class='icon-sp-em'></span>"));
         }
+
+        // set up tie breaking
+        self::dbQuery("UPDATE player SET player_score_aux=money");
         if ($debug) {
             return;
         }
+
         $nextPlayerId = $this->activeNextPlayer();
         while ($this->isPlayerZombie($nextPlayerId)) {
             $nextPlayerId = $this->activeNextPlayer();
@@ -6272,7 +6330,9 @@ Purchase it or return it to the bottom of the deck.`
         $turn = self::getGameStateValue("turn", 0);
         self::notifyAllPlayers("roundStart", 
             clienttranslate('Starting round ${turn}'), 
-            array('turn' => $turn));
+            array('turn' => $turn,
+                  "spirits" => $this->getSpirits(),
+        ));
         if ($turn > 1) {
             $this->rotateFirstPlayer();
         } else {
@@ -6398,13 +6458,16 @@ Purchase it or return it to the bottom of the deck.`
 
         // TODO make it possible to disable these power cards
         $powerCards = $this->getPowerCards();
+        $turn = self::getGameStateValue("turn", 0);
 
         //self::notifyAllPlayers('dbgdbg', "debug finalize", array('drink' => $playerList, 'removed' => $playerRemovedList));
         foreach ($playerList as $pid => $l) {
-            $sql = sprintf('INSERT INTO drink(cards, player_id, location)
-                            VALUES ("%s", "%d", "washback")', 
+            $sql = sprintf('INSERT INTO drink(cards, player_id, location, first_turn)
+                            VALUES ("%s", "%d", "washback", "%d")', 
                             implode(",", $l),
-                            $pid);
+                            $pid,
+                            $turn,
+                        );
             self::DbQuery($sql);
             $drinkId = self::DbGetLastId();
         
@@ -6622,7 +6685,7 @@ Purchase it or return it to the bottom of the deck.`
                     self::DbQuery($sql);
                         
                     $r = $this->getRecipeFromSlot($d["recipe_slot"], $player_id);
-                    self::notifyAllPlayers("moveToWarehouse", '${player_name}\'s ${recipe_name} moved to ${location_str}', array(
+                    self::notifyAllPlayers("moveToWarehouse", clienttranslate('${player_name}\'s ${recipe_name} moved to ${location_str}'), array(
                         "player_name" => $this->getPlayerName($player_id),
                         "player_id" => $player_id,
                         "location" => $dest,
@@ -6733,6 +6796,7 @@ Purchase it or return it to the bottom of the deck.`
         self::notifyAllPlayers("moveSignature", 
             clienttranslate('${player_name} moves signature ingredient ${card_name} to the pantry'),
             array(
+                'i18n' => ['card_name'],
                 'player_name' => self::getActivePlayerName(),
                 'player_id' => self::getActivePlayerId(),
                 'card_name' => $sigCard->name,
@@ -6881,6 +6945,7 @@ Purchase it or return it to the bottom of the deck.`
                     $c2 = $this->revealFromDeck($this->flavorDeck);
                     $c3 = $this->revealFromDeck($this->flavorDeck);
                     self::notifyPlayer($playerId, 'revealCards', clienttranslate('${player_name} reveals ${card_name} from flavor deck'), array(
+                        'i18n' => ['card_name'],
                         'player_id' => $playerId,
                         'player_name' => self::getActivePlayerName(),
                         'card_id' => $c1,
@@ -6889,6 +6954,7 @@ Purchase it or return it to the bottom of the deck.`
                         'market_id' => 'ing',
                     ));
                     self::notifyPlayer($playerId, 'revealCards', clienttranslate('${player_name} reveals ${card_name} from flavor deck'), array(
+                        'i18n' => ['card_name'],
                         'player_id' => $playerId,
                         'player_name' => self::getActivePlayerName(),
                         'card_id' => $c2,
@@ -6897,6 +6963,7 @@ Purchase it or return it to the bottom of the deck.`
                         'market_id' => 'ing',
                     ));
                     self::notifyPlayer($playerId, 'revealCards', clienttranslate('${player_name} reveals ${card_name} from flavor deck'), array(
+                        'i18n' => ['card_name'],
                         'player_id' => $playerId,
                         'player_name' => self::getActivePlayerName(),
                         'card_id' => $c3,
@@ -7265,8 +7332,13 @@ Purchase it or return it to the bottom of the deck.`
         $info = self::getObjectFromDb("select * from drink where id=$drinkId");
         $loc = $info['location'];
         $pid = $info['player_id'];
-        $flavorsInLocation = self::getUniqueValueFromDb("SELECT COUNT(*) FROM flavor WHERE location='$loc' AND player_id=$pid");
-        return $flavorsInLocation;
+        $cards = explode(',', $info['cards']);
+        $count = 0;
+        foreach ($cards as $c) {
+            if ($this->AllCards[$c]->type == CardType::FLAVOR)
+                $count++;
+        }
+        return $count;
     }
     function getKnownFlavors($drinkId) {
         $info = self::getObjectFromDb("select * from drink where id=$drinkId");
@@ -7337,13 +7409,16 @@ Purchase it or return it to the bottom of the deck.`
             $pantryList[] = $tmp;
         }
 
-        $sql = sprintf("SELECT flavor_count, location, id FROM drink
+        $sql = sprintf("SELECT id, flavor_count, location FROM drink
                         WHERE player_id=%d AND sold=0 AND
                         (location='warehouse1' OR location='warehouse2')", $player_id);
         $counts = self::getCollectionFromDb($sql);
 
+
+        $pantryList[] = array('location' => 'debug', 'counts' => $counts);
         foreach ($counts as $count) {
             $known = $this->getKnownFlavorCount($count['id']);
+            $pantryList[] = array('location' => 'debug', 'id' => $count['id'], 'known_flavors' => $known);
             for ($i = 0; $i < $count["flavor_count"] - $known; $i++) {
                 $pantryList[] = array('type'=>CardType::FLAVOR, 'location'=>$count["location"], 'market'=>'flavor');
             }
@@ -7546,6 +7621,7 @@ Purchase it or return it to the bottom of the deck.`
             $card1 = array_shift($cards);
             self::notifyAllPlayers("removeCards", clienttranslate('${card1_name} was removed from ${player_name}\'s washback.'), 
                 array(
+                    'i18n' => ['card1_name'],
                     "card1_name" => $this->AllCards[$card1]->name,
                     "card2_name" => null,
                     "card1_id" => $card1,
@@ -7562,6 +7638,7 @@ Purchase it or return it to the bottom of the deck.`
             // Check to see if there's any post-removal steps.
             self::notifyAllPlayers("removeCards", clienttranslate('${card1_name} and ${card2_name} were removed from ${player_name}\'s washback.'), 
                 array(
+                    'i18n' => ['card1_name', 'card2_name'],
                     "card1_name" => $this->AllCards[$card1]->name,
                     "card2_name" => $this->AllCards[$card2]->name,
                     "card1_id" => $card1,
@@ -7598,6 +7675,7 @@ Purchase it or return it to the bottom of the deck.`
                         // Worm Tub
                         self::notifyAllPlayers("powerCard", clienttranslate('Adding 2 additional alcohol (${card_name})'),
                             array('trigger_name' => $this->AllCards[$pc]->name,
+                                  'i18n' => ['card_name'],
                                   'card_name' => $this->AllCards[$pc]->name,
                                   'card' => $this->AllCards[$pc]));
                         $count += 2;
@@ -7606,6 +7684,7 @@ Purchase it or return it to the bottom of the deck.`
                         // Coppersmith
                         self::notifyAllPlayers("powerCard", clienttranslate('Adding 1 additional alcohol (${card_name})'),
                             array('trigger_name' => $this->AllCards[$pc]->name,
+                                  'i18n' => ['card_name'],
                                   'card_name' => $this->AllCards[$pc]->name,
                                   'card' => $this->AllCards[$pc]));
                         $count += 1;
@@ -7622,9 +7701,10 @@ Purchase it or return it to the bottom of the deck.`
         }
         self::notifyAllPlayers("addAlcohols", clienttranslate('${player_name} adds ${count} ${card_name} to their spirit.'),
             array(
+                'i18n' => ['card_name'],
                 "player_name" => $this->getActivePlayerName(),
                 "player_id" => $this->getActivePlayerId(),
-                "card_name" => "alcohol",
+                "card_name" => "Alcohol",
                 "card_id" => 0,
                 "count" => $count,
                 "new_cards" => $newCards,

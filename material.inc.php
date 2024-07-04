@@ -203,6 +203,22 @@ $miscTranslate = array(
   clienttranslate("Overlap"),
   clienttranslate("Top"),
   clienttranslate("Expanded"),
+  clienttranslate("Players"),
+  clienttranslate("In-Game"),
+  clienttranslate("Warehouses"),
+  clienttranslate("Bottles"),
+  clienttranslate("Distillery Upgrades"),
+  clienttranslate("Distillery Upgrade"),
+  clienttranslate("Distiller Ability"),
+  clienttranslate("Premium Item"),
+  clienttranslate("Premium Ingredient"),
+  clienttranslate("Goals"),
+  clienttranslate("Money"),
+  clienttranslate("washback"),
+  clienttranslate("market"),
+  clienttranslate("reveal"),
+  clienttranslate("tasting"),
+  clienttranslate("Total"),
 );
 
 $this->distiller_text = array(

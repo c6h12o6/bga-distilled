@@ -37,25 +37,25 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
         <div id="game-scoring" class="invisible" style="background-color: rgba(255, 255, 255, 0.95); height: auto; border-radius: 1vw;">
             <table class="scoringTable">
                 <tr id="scoring-row-players" class="line-below">
-                    <td class="first-column">Players</td>
+                    <td class="first-column translateme">Players</td>
                 </tr>
                 <tr id="scoring-row-ingame">
-                    <td class="first-column">In-Game</td>
+                    <td class="first-column translateme">In-Game</td>
                 </tr>
                 <tr id="scoring-row-warehouses">
-                    <td class="first-column">Warehouses</td>
+                    <td class="first-column translateme">Warehouses</td>
                 </tr>
                 <tr id="scoring-row-bottles">
-                    <td class="first-column">Bottles</td>
+                    <td class="first-column translateme">Bottles</td>
                 </tr>
                 <tr id="scoring-row-dus">
-                    <td class="first-column">Distillery Upgrades</td>
+                    <td class="first-column translateme">Distillery Upgrades</td>
                 </tr>
                 <tr id="scoring-row-goals">
-                    <td class="first-column">Goals</td>
+                    <td class="first-column translateme">Goals</td>
                 </tr>
                 <tr id="scoring-row-money">
-                    <td class="first-column">Money</td>
+                    <td class="first-column translateme">Money</td>
                 </tr>
                 <tr id="scoring-row-total" class="line-above">
                     <td id="text-total" class="first-column">Total</td>
@@ -196,23 +196,23 @@ var jstpl_player_supplement = '\
             </div>\
         </div>\
         <div id="bottles_board_${PID}" class="player_board">\
-            <div class="player_board" title="Americas bottles in display case">\
+            <div class="player_board translatetitle" title="Americas bottles in display case">\
                 <span id="americas_counter_${PID}"></span>\
                 <span class="icon-americas-em"></span>\
             </div>\
-            <div class="player_board" title="Europe bottles in display case">\
+            <div class="player_board translatetitle" title="Europe bottles in display case">\
                 <span id="europe_counter_${PID}" ></span>\
                 <span class="icon-europe-em"></span>\
             </div>\
-            <div class="player_board" title="Asia & Oceania bottles in display case">\
+            <div class="player_board translatetitle" title="Asia & Oceania bottles in display case">\
                 <span id="asia_counter_${PID}" ></span>\
                 <span class="icon-asia-em"></span>\
             </div>\
-            <div class="player_board" title="Home bottles in display case">\
+            <div class="player_board translatetitle" title="Home bottles in display case">\
                 <span id="home_counter_${PID}" ></span>\
                 <span class="icon-home"></span>\
             </div>\
-            <div class="player_board" title="Bottles without region in display case">\
+            <div class="player_board translatetitle" title="Bottles without region in display case">\
                 <span id="bottle_counter_${PID}" ></span>\
                 <span class="icon-bottle"></span>\
             </div>\
@@ -223,7 +223,7 @@ var jstpl_player_supplement = '\
 ';
 
 var jstpl_player_section = '\
-<div id="playerSection_${PID}" class="dwhiteblock" style="padding: 3px">\
+<div id="playerSection_${PID}" class="dwhiteblock" style="padding: 3px; border: 2px solid #${COLOR}">\
     <div id="myPlayerContainer_${PID}" class="playerContainer">\
         <div id="myPlayerDistillery_${PID}_wrapper" class="playerDistilleryWrapper" style="margin-bottom: 20px">\
             <div class="playerBlock" data-pid="${PID}"></div>\

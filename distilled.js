@@ -30,6 +30,11 @@ function (dojo, declare, on, bgacards) {
             var x = [_("Market"),
                     _("Deck"),
                     _("Truck"),
+                    _("Americas bottles in display case"),
+                    _("Europe bottles in display case"),
+                    _("Asia & Oceania bottles in display case"),
+                    _("Home bottles in display case"),
+                    _("Bottles without region in display case"),
             ];
             console.log('distilled constructor');
             this.cardsToCombos = {}
@@ -460,8 +465,6 @@ function (dojo, declare, on, bgacards) {
             text = this.sa_text[card.uid];
             var image = document.createElement("image_" + card.uid);
 
-            console.log(xBack)
-            console.log(yBack)
             image.innerHTML = `
                 <div class="tooltipContainer">
                     <div class="spiritAward" 
@@ -507,6 +510,7 @@ function (dojo, declare, on, bgacards) {
             this.sa_text = gamedatas.sa_text;
             this.goal_text = gamedatas.goal_text;
             this.distiller_text = gamedatas.distiller_text;
+            this.flavor_map = gamedatas.flavor_map;
 
             this.playerSections = {}
             this.duPlayerStock = {}
@@ -915,7 +919,12 @@ function (dojo, declare, on, bgacards) {
             })
             this.recipeFlight = gamedatas.recipeFlight;
 
-            //dojo.query('div[id^="du-card"]').connect('onclick', this, 'onDuCardClick');
+            console.log(gamedatas.spirits)
+            this.spiritContents = []
+            gamedatas.spirits?.forEach(S => {
+                this.addTinyLabel(S, S.player_id);
+            })
+
             let div = document.getElementById("collapseMarketButton")
             dojo.connect(div, 'onclick', this, 'collapseMarket');
             div = document.getElementById("expandMarketButton");
@@ -1055,6 +1064,21 @@ function (dojo, declare, on, bgacards) {
                     // add location to message
                     document.getElementById("pagemaintitletext").innerText += " " + (
                         dojo.string.substitute(_('for ${location}'), {location: this.getProperSubtype(args.args.location)}));
+
+                    Object.keys(args.args.allowedCards).forEach(C => {
+                            let card = this.activeCards[C];
+                            console.log(card)
+                            console.log(card.uid)
+                            var elem = document.getElementById(`ing-card-${card.uid}`)
+                            elem.classList.add("marketBuyable")
+                            dojo.connect(elem, "onclick", this, () => {
+                                this.confirmButton(_("Confirm"), "selectFlavor", {
+                                    flavor: C,
+                                    drink: args.args.drink,
+                                    lock: true,
+                                }, null, dojo.string.substitute(_("Select ${flavor}"), {flavor: _(card.name)}))
+                            })
+                        })
                     break;
 
             case 'discardGoals':
@@ -1191,8 +1215,8 @@ function (dojo, declare, on, bgacards) {
                                 {
                                     amount: D.amount,
                                     coinSpan: coinSpan,
-                                    typename: typename,
-                                    cardName: cardName
+                                    typename: _(typename),
+                                    cardName: _(cardName),
                                 });
                             var btn = this.addActionButton('discount' + D.triggerCard.uid, s,
                                 (evt)=>{
@@ -1203,6 +1227,9 @@ function (dojo, declare, on, bgacards) {
                             var elem = document.getElementById('discount' + D.triggerCard.uid);
                             elem.dataset["uid"] = (D.triggerCard.market == 'du') ? D.triggerCard.uid : 0; // 0 indicates a distiller ability
                             elem.classList.add('powerCard')
+                            console.log("user pref", this.getGameUserPreference(100), elem)
+                            if (this.getGameUserPreference(100) == 1)
+                                this.togglePowerButton(elem, 'playerBuyTurn');
                         })
 
                         this.addActionButton('pass_button', _('End Market Phase'), ()=>{
@@ -1439,8 +1466,10 @@ function (dojo, declare, on, bgacards) {
                             elem.dataset["uid"] = (D.triggerCard.market == 'du') ? D.triggerCard.uid : 0; // 0 indicates a distiller ability
                             elem.classList.add("powerButton")
                             elem.classList.add("powerCard")
+                            if (this.getGameUserPreference(100) == 1)
+                                this.togglePowerButton(elem, 'playerBuyTurnReveal');
                         })
-                        this.addActionButton('returnButton', 'Pass', () => {
+                        this.addActionButton('returnButton', _('Pass'), () => {
                             this.ajaxcall( "/distilled/distilled/pass.html", {lock: true}, this, function(r) {})
                         })
                         break;
@@ -1524,9 +1553,9 @@ function (dojo, declare, on, bgacards) {
                                 this.addActionButton('buyButton' + C.uid, 
                                     dojo.string.substitute(_('${action} ${name} <span class="icon-${iconType}-em"></span> (${triggerName})'), {
                                         action: action,
-                                        name: C.name,
+                                        name: _(C.name),
                                         iconType: iconType.toLowerCase(),
-                                        triggerName: O.triggerName,
+                                        triggerName: _(O.triggerName),
                                         }), () => {
                                     if (C.market == 'du') {
                                         this.clientStateArgs = {
@@ -1575,6 +1604,8 @@ function (dojo, declare, on, bgacards) {
                         })
                        break;
                     case 'selectFlavor':
+                        
+                            /*
                         Object.keys(args.allowedCards).forEach(C => {
                             let card = this.activeCards[C];
                             this.addActionButton('buyButton' + card.uid, dojo.string.substitute(_('Select ${name}'), {name: card.name}),  () => {
@@ -1585,6 +1616,7 @@ function (dojo, declare, on, bgacards) {
                                     }, this, function(result) {});
                                 })
                         })
+                        */
                         break;
 
                     case 'distill':
@@ -1694,6 +1726,8 @@ function (dojo, declare, on, bgacards) {
                                 fn,
                                 _("Confirm distill")); 
                             var warnElem = this.addTitleWarning(_("You are distilling multiple types of sugars."))
+                            console.log(warnElem)
+
                             var sugarTypes = 0;
                             if (this.grainCounter.getValue())
                                 sugarTypes++;
@@ -1703,7 +1737,7 @@ function (dojo, declare, on, bgacards) {
                                 sugarTypes++;
 
                             if (sugarTypes > 1) {
-                                warnElem.classList.remove('invisible')
+                                //warnElem.classList.remove('invisible')
                             }
                         });
                         this.addTooltip("distill_button", 
@@ -1854,6 +1888,13 @@ function (dojo, declare, on, bgacards) {
         // <a href="#" class="action-button bgabutton bgabutton_blue" onclick="return false;" id="discount1" data-uid="0">2 <span class="icon-coin-em"> </span>  off ingredient (Distiller Ability)</a>
 
         // @override
+        resetSpirits: function(spirits) {
+            dojo.query('.tinyLabelOuter').remove()
+            spirits.forEach(S => {
+                console.log(S)
+                this.addTinyLabel(S, S.player_id);
+            })
+        },
         addSectionTabsForPlayer: function() {
             console.log("addSectionTabs")
             dojo.query(".playerBlock").forEach(B => {
@@ -1972,6 +2013,7 @@ function (dojo, declare, on, bgacards) {
           checkmark.style.background = "rgba(0, 0, 0, 0.8)"
           checkmark.style.borderRadius = "5px"
           checkmark.style.display = "flex"
+          checkmark.style.zIndex = 11;
         
           // Create the checkmark symbol using content property
           checkmark.innerHTML = `${amount} <span style="font-size: 1.3em" class='icon-sp-em'></span>`;  // Unicode checkmark character
@@ -2016,6 +2058,9 @@ function (dojo, declare, on, bgacards) {
                     var cardElems = [];
                     var regions = {}
                     this.playerDisplayStock[player_id].item.getCards().forEach(C => {
+                        if (!C.subtype)
+                            return;
+
                         var effectiveRegion = C.subtype
                         if (C.subtype && C.subtype == "HOME") 
                             effectiveRegion = this.player_data[player_id].region
@@ -2133,6 +2178,13 @@ function (dojo, declare, on, bgacards) {
                     }
                 })
                 D.innerHTML = translation;
+
+            })
+            divs = dojo.query('.translatetitle')
+            divs.forEach( D => {
+                if (D.title) {
+                    D.title = _(D.title);
+                }
             })
         },
         resetRegionCounters(player_id) {
@@ -2188,17 +2240,27 @@ function (dojo, declare, on, bgacards) {
         },
         addTinyLabel(label, playerId) {
             // Fake labels
-            console.log("add tiny label for")
-            console.log(label)
-            console.log(label.count)
-            if (label.count <= 0) {
-                return;
-            }
+            console.log("add tiny label for", label)
 
-            var labelIdx = label.label;
+            label.signature = parseInt(label.signature)
+            var labelIdx = label.labelId;
             if (label.signature)
                 labelIdx += 18
 
+            this.spiritContents[label.uid] = []
+            // need to count flavors here
+            label.card_ids.forEach( C => {
+                this.spiritContents[label.uid].push(C)
+            })
+            var known_flavors = parseInt(label.known_flavors);
+            var fc = parseInt(label.flavor_count)
+            if (fc) {
+                var ukf = fc - known_flavors;
+                for (var ii = 0; ii < ukf; ii++) 
+                    this.spiritContents[label.uid].push(10000)
+            }
+
+            // Deal with flavors
             const xBack = (labelIdx %  6)
             const yBack = Math.floor(labelIdx / 6)
 
@@ -2208,20 +2270,25 @@ function (dojo, declare, on, bgacards) {
             if (existing) {
                 return;
             }
-            var order = this.labelOrder[label.name]
-            if (label.signature) 
-                order = 10
+            var order = parseInt(0)
 
             var tinyLabel = `
-            <div id="${id}" data-order=${order} data-name="${label.name}" data-side="front" class="card labelSlot" style="width: var(--width); flex-basis: var(--width); height: var(--height);" title="${label.name}">
+            <div id="${id}" data-order=${order} data-name="${label.label}" data-side="front" class="card tinyLabelOuter" 
+                style="width: var(--width); flex-basis: var(--width); height: var(--height);" 
+                title="${_(label.label)};">
                 <div class="card-sides">
                     <div class="card-side front dlabel tinyLabel" style="background-position-y: calc(-${yBack} * var(--height)); background-position-x: calc(-${xBack} * var(--width));">
                     </div>
                 </div>
             </div>`
 
-            var tinyLabelElem = this.createElement(tinyLabel);
 
+            var tinyLabelElem = this.createElement(tinyLabel);
+            dojo.connect(tinyLabelElem, 'onclick', this, () => this.showSpiritModal(label.uid))
+
+            if (label.count == 0) {
+                tinyLabelElem.classList.add('nolabel')
+            }
             var boardDiv = document.getElementById(`player_label_board_${playerId}`)
             if (boardDiv.children.length == 0) {
                 boardDiv.appendChild(tinyLabelElem)
@@ -2258,7 +2325,7 @@ function (dojo, declare, on, bgacards) {
             if (document.getElementById(id)) 
                 return;
 
-            this.addTinyLabel(label, playerId)
+            //this.addTinyLabel(label, playerId)
         
         },
         addLabelToBoard(label, playerId, slot) {
@@ -2271,7 +2338,7 @@ function (dojo, declare, on, bgacards) {
                 return
             }
 
-            this.addTinyLabel(label, playerId)
+            //this.addTinyLabel(label, playerId)
 
         },
         addBottleToDisplay(bottleCard, playerId) {
@@ -2418,25 +2485,25 @@ function (dojo, declare, on, bgacards) {
             this.clientStateArgs = args
             switch (args.labelSlot) {
                 case 3:
-                    this.replaceActionBar(`Place Label Bonus: Select card to collect`, 
+                    this.replaceActionBar(_(`Place Label Bonus: Select card to collect`), 
                         'revertActionBarAndResetCards')
                     console.log('ing')
                     this.connectAllCardsWithClass('onMarketClickLabelReward', 'ing-card');
                     break;
                 case 5:
-                    this.replaceActionBar(`Place Label Bonus: Select card to collect`, 
+                    this.replaceActionBar(_(`Place Label Bonus: Select card to collect`), 
                         'revertActionBarAndResetCards')
                     console.log('item')
                     this.connectAllCardsWithClass('onMarketClickLabelReward', 'item-card');
                     break;
                 case 6: 
-                    this.replaceActionBar(`Place Label Bonus: Select card to collect`, 
+                    this.replaceActionBar(_(`Place Label Bonus: Select card to collect`), 
                         'revertActionBarAndResetCards')
                     console.log('du')
                     this.connectAllCardsWithClass('onMarketClickLabelReward', 'du-card');
                     break;
                 case 4:
-                    this.replaceActionBar(`Place Label Bonus: Select recipe to collect`, 
+                    this.replaceActionBar(_(`Place Label Bonus: Select recipe to collect`), 
                         'revertActionBarAndResetCards')
                     console.log('recipe')
                     this.connectAllRecipeSlots('onRecipeCubeClickLabelReward', true);
@@ -2699,7 +2766,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             this.replaceActionBar(dojo.string.substitute(_("Choose a bottle for ${name}: "), {name: _(args.drink.name)}), 'revertActionBarAndResetCards')
             args.bottles.forEach((B) => {
                 // TODO connect the cards also
-                this.addReplacementActionButton(`bottle${B.uid}`, B.name, () => {
+                this.addReplacementActionButton(`bottle${B.uid}`, _(B.name), () => {
                     stock = this.getStockForDrink(args.drink)
                     B.location_idx = 1
                     // TODO add location code here
@@ -2818,9 +2885,9 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
 
             if (placeLabelArgs) {
                 args = placeLabelArgs
-                this.replaceActionBar(dojo.string.substitute(_("Place ${name} on: "), {name: C.name}), 'revertActionBarAndResetCards')
+                this.replaceActionBar(dojo.string.substitute(_("Place ${name} on: "), {name: _(C.name)}), 'revertActionBarAndResetCards')
             } else {
-                this.replaceActionBar(dojo.string.substitute(_('Buy ${name} for ${cost} <span class="icon-coin-em"></span>. Place on: '), {name: C.name, cost: cost}))
+                this.replaceActionBar(dojo.string.substitute(_('Buy ${name} for ${cost} <span class="icon-coin-em"></span>. Place on: '), {name: _(C.name), cost: cost}))
             }
 
             for (let ii = 3; ii > 0; ii--) {
@@ -2831,7 +2898,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                     existing = this.activeCards[elem.dataset.uid].name
                 } 
 
-                this.addReplacementActionButton(`btn_slot`+ii, dojo.string.substitute(_("Slot ${ii} (${existing})"), {ii: ii, existing: existing}), () => {
+                var btn = this.addReplacementActionButton(`btn_slot`+ii, dojo.string.substitute(_("Slot ${ii} (${existing})"), {ii: ii, existing: existing}), () => {
                     if (placeLabelArgs) { // Indicates place label stage
                         if (args.discard) {
                             discard = this.activeCards[args.discard].name
@@ -2842,7 +2909,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                                 'revertActionBarAndResetCards')
                         } else {
                             args.duSlot = function () { return ii }();
-                            this.confirmButton(`Collect ${C.name} on slot ${ii}`, 
+                            this.confirmButton(dojo.string.substitute(_("Collect ${name} on slot ${ii}"), {name: _(C.name), ii: ii}), 
                                 'sellDrink',
                                 this.getAjaxArgsFromArgs(args),
                                 'revertActionBarAndResetCards')
@@ -2881,7 +2948,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                     if (!cardIcon)
                         cardIcon = this.activeCards[card_no].type.toLowerCase();
                     let cardNameSave = function () {return cardName}()
-                    this.addReplacementActionButton(`btn_${card_no}`, `${cardName} <span class='icon-${cardIcon}-em'></span>`, () => {
+                    this.addReplacementActionButton(`btn_${card_no}`, _(cardName) + ` <span class='icon-${cardIcon}-em'></span>`, () => {
                         titleElement.innerHTML = ""
                         button = dojo.string.substitute(_("Trade: Discard ${swap} and draw ${cardNameSave}"), {swap: swap.name, cardNameSave: cardNameSave})
                         this.confirmButton(button, "trade", {
@@ -3103,7 +3170,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                             this.playerWarehouse1Stock[pid].item.addCard(X);
                         if (X.market == 'label') {
                             this.playerWarehouse1Stock[pid].label.addCard(X);
-                            this.addTinyLabel(X, pid)
+                            //this.addTinyLabel(X, pid)
                         }
                         if (X.market == 'flavor')  {
                             this.playerWarehouse1Stock[pid].ing.addCard(this.newFlavorBack());
@@ -3116,7 +3183,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                             this.playerWarehouse2Stock[pid].item.addCard(X);
                         if (X.market == 'label') {
                             this.playerWarehouse2Stock[pid].label.addCard(X);
-                            this.addTinyLabel(X, pid)
+                            //this.addTinyLabel(X, pid)
                         }
                         if (X.market == 'flavor') 
                             this.playerWarehouse2Stock[pid].ing.addCard(this.newFlavorBack());
@@ -3262,7 +3329,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             }
 
         },
-        togglePowerButton: function(elem) {
+        togglePowerButton: function(elem, stateName) {
             // updates button, adds check mark, and returns the new state
             warning = document.getElementById("titleWarning")
             if (dojo.hasClass(elem, 'activePower')) {
@@ -3270,15 +3337,17 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 //console.log(elem.innerHtml)
                 elem.innerHTML = elem.innerHTML.substring(0, elem.innerHTML.length - 2)
                 dojo.removeClass(elem, 'activePower');
-                if (this.stateName == 'playerBuyTurnReveal') {
+                if (this.stateName == 'playerBuyTurnReveal' || stateName == 'playerBuyTurnReveal') {
                     buyButton = document.getElementById("buyButton")
                     uid = buyButton.dataset.uid
                     cost = this.getEffectiveCost(uid) 
                     if (cost < 0) {
                         cost = 0
-                        dojo.removeClass(warning, "invisible")
+                        if (warning)
+                            dojo.removeClass(warning, "invisible")
                     } else {
-                        dojo.addClass(warning, "invisible")
+                        if (warning)
+                            dojo.addClass(warning, "invisible")
                     }
 
                     title = document.getElementById("pagemaintitletext")
@@ -3301,15 +3370,17 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 // Adding Active Power
                 elem.innerHTML += ' \u2713' 
                 dojo.addClass(elem, 'activePower');
-                if (this.stateName == 'playerBuyTurnReveal') {
+                if (this.stateName == 'playerBuyTurnReveal' || stateName == 'playerBuyTurnReveal') {
                     buyButton = document.getElementById("buyButton")
                     uid = buyButton.dataset.uid
                     cost = this.getEffectiveCost(uid) 
                     if (cost < 0) {
                         cost = 0
-                        dojo.removeClass(warning, "invisible")
+                        if (warning)
+                            dojo.removeClass(warning, "invisible")
                     } else {
-                        dojo.addClass(warning, "invisible")
+                        if (warning)
+                            dojo.addClass(warning, "invisible")
                     }
 
                     card = this.activeCards[uid]
@@ -3423,7 +3494,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 front.dataset.uid = card_id;
                 back.dataset.uid = card_id;
                 
-                console.log("adding tooltip to flippy card" + card_id)
                 this.addTooltipForCard(this.activeCards[card_id], card)
             }
 
@@ -3437,6 +3507,43 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             })
 
             return card;
+        },
+        showSpiritModal: function(spiritUid) {
+            if (!this.contentNode) {
+                this.showMessage(`Please report this error as a bug in showSpiritModal`, "error");
+                return;
+            }
+            console.log(spiritUid)
+            var contents = this.spiritContents[spiritUid];
+            console.log(contents)
+
+            var dummy = this.ingCardsManager.getCardElement({uid: 0})
+            if (dummy == null) 
+                dummy = this.ingCardsManager.createCardElement(this.activeCards[0])
+            console.log(dummy)
+            
+            contents.forEach(C => {
+                var main = dummy.cloneNode(true)
+                main.id = null;
+                var div = main.firstElementChild.firstElementChild
+                div.id = null;
+                console.log(div)
+                const xBack = (C %  14) * 122;
+                const yBack = Math.floor(C / 14) * 190;
+                div.style.backgroundPositionX = "-" + xBack + "px";
+                div.style.backgroundPositionY = "-" + yBack + "px";
+                console.log(div)
+
+                if (C == 10000) { // unknown flavor
+                    div.style.backgroundPositionX = "0";
+                    div.style.backgroundPositionY = "0";
+                    div.classList.add("flavorCardBack")
+                    div.classList.remove("dcard")
+                }
+
+                this.contentNode.appendChild(main)
+            })
+            this.modal.show()
         },
         showDeckModal: function(srcName) {
             if (!this.contentNode) {
@@ -3705,7 +3812,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 div.style.backgroundPositionY = `calc(-${yBack} * var(--height))`
                 div.style.backgroundPositionX = `calc(-${xBack} * var(--width))`
 
-                if (card.count <= 0) {
+                if (card.count < 0) {
                     div.classList.add('fade');
                     if (div.children.length == 0)
                         dojo.place(this.format_block('jstpl_label_x', {}), div, 'last');
@@ -3838,6 +3945,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
        animateDistill: async function(wbCards) {
        },
        animateDistillRemoval: async function(notif) {
+        try {
             let wbCards = notif.args.wb_cards;
 
             // Count the alcohols
@@ -3956,11 +4064,13 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             console.log(wbCardObjects);
             wbCardObjects.forEach(C => {
                 C.location_idx = 1;
+                this.activeCards[C.uid] = C;
                 // Adding ingredients card to washback
                 console.log("setting zIndex to 0")
                 let element = this.playerWashbackStock[player_id].ing.getCardElement(C);
                 element.style.zIndex = 0;
                 this.playerWashbackStock[player_id].ing.addCard(C);
+                this.setCardVisible(C, true)
                 this.market2Pantry(element, 'pantryCard');
             });
             await new Promise(r => setTimeout(r, 1000));
@@ -3977,10 +4087,11 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 this.activeCards[notif.args.card1_id], 
             );
             dojo.destroy(tempPantry);
-
-       },
-       shuffle: function(evt) {
-            console.log('shuffle')
+        }
+        catch (e) {
+            console.log(e)
+        }
+        this.notifqueue.setSynchronousDuration(0);
        },
        flippy: function(evt) {
             console.log(evt)
@@ -4490,7 +4601,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             }
             element.classList.remove('marketCard');
             element.classList.add(newClass);
-            element.zIndex = null;
+            element.style.zIndex = null;
 
             // TODO check to see if we're in the distill phase before we start setting this up
             //this.pantrySelection[card.uid] = false;
@@ -4716,13 +4827,13 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             this.notifqueue.setSynchronous('moveToWashback', 500);
 
             dojo.subscribe('removeCards', this, 'notif_removeCards');
-            this.notifqueue.setSynchronous('removeCards', 3000);
+            this.notifqueue.setSynchronous('removeCards', null);
 
             dojo.subscribe('deleteCards', this, 'notif_deleteCards');
             this.notifqueue.setSynchronous('deleteCards', 500);
 
             dojo.subscribe('sellDrink', this, 'notif_sellDrink');
-            this.notifqueue.setSynchronous('sellDrink', 500);
+            this.notifqueue.setSynchronous('sellDrink', null);
             dojo.subscribe('placeLabel', this, 'notif_placeLabel');
             this.notifqueue.setSynchronous('placeLabel', 1000);
             dojo.subscribe('chooseBottle', this, 'notif_chooseBottle');
@@ -4761,6 +4872,8 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
 
             dojo.subscribe('selectDistiller', this, 'notif_selectDistiller');
             this.notifqueue.setSynchronous('selectDistiller', 500);
+            dojo.subscribe('selectDistiller2', this, 'notif_selectDistiller');
+            this.notifqueue.setSynchronous('selectDistiller2', 500);
 
             dojo.subscribe('sigIngredient', this, 'notif_sigIngredient');
             this.notifqueue.setSynchronous('sigIngredient', 500);
@@ -4781,6 +4894,11 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
 
             dojo.subscribe('removeDuCard', this, 'notif_removeDuCard');
             this.notifqueue.setSynchronous('removeDuCard', 50);
+
+
+            this.notifqueue.setIgnoreNotificationCheck( 
+                'selectDistiller2', 
+                (notif) => { return notif.args.player_id == this.player_id} );
 
             // TODO: here, associate your game notifications with local methods
             
@@ -4884,6 +5002,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
         notif_roundStart: function (notif) {
             this.showTurn(notif.args.turn)
             this.expandMarket();
+            this.resetSpirits(notif.args.spirits)
         },
         animateShuffleDeck: async function(notif) {
             let truckName = notif.args.deck_id + 'Truck'
@@ -4998,17 +5117,20 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 this.decks.ingTruck.removeCard(cardIn, {autoUpdateCardNumber: false})
                 this.playerPantryStock[playerId][truck].addCard(cardIn, {autoUpdateCardNumber: false});
                 this.decks.ingTruck.setCardNumber(this.decks.ingTruck.getCardNumber()-1, null)
+                this.ingCardsManager.getCardElement(cardIn).dataset.side = "front";
             }
             else if (truck == 'item')  {
                 console.log(2)
                 this.decks.itemTruck.removeCard(cardIn, {autoUpdateCardNumber: false})
                 this.playerStoreStock[playerId][truck].addCard(cardIn, {autoUpdateCardNumber: false});
                 this.decks.itemTruck.setCardNumber(this.decks.itemTruck.getCardNumber()-1, null)
+                this.itemCardsManager.getCardElement(cardIn).dataset.side = "front";
             }
             else if (truck == 'du') {
                 var currentCount = this.decks.duTruck.getCardNumber()
                 this.decks.duTruck.removeCard(cardIn, {autoUpdateCardNumber: false});
                 this.decks.duTruck.setCardNumber(currentCount - 1, null)
+                this.duCardsManager.getCardElement(cardIn).dataset.side = "front";
             }
 
             if (cardOut.uid > 1000 || cardOut.card_id <= 18) {
@@ -5070,10 +5192,13 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             console.log("endgame init")
             console.log(notif)
             // Initialize game scoring
-            dojo.removeClass("game-scoring", "invisible")
-            dojo.query(".centerScreen").removeClass("invisible")
             this.finalScoring = {}
             window.scrollTo(0, 0);
+            var cs = document.getElementById("centerScreen")
+            cs.childNodes.forEach(E => E.classList?.add("invisible"))
+
+            dojo.query(".centerScreen").removeClass("invisible")
+            dojo.removeClass("game-scoring", "invisible")
 
             var rows = ['players', 'ingame', 'warehouses', 'bottles', 'goals', 'dus', 'money', 'total']
             console.log(this.player_names)
@@ -5230,6 +5355,8 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             console.log("age drink");
             console.log(notif)
 
+            this.resetSpirits(notif.args.spirits)
+
             var dest;
             if (notif.args.location == "warehouse1") {
                 dest = this.playerWarehouse1Stock[notif.args.player_id];
@@ -5320,10 +5447,12 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             }
         },
         notif_sellDrink: function(notif) {
+          try {
             this.disableNextMoveSound();
             // TODO play ca-ching
             console.log("sell drink");
             console.log(notif);
+            this.resetSpirits(notif.args.spirits)
 
             this.incMoney(notif.args.player_id, notif.args.value);
             this['score_counter_' + notif.args.player_id].incValue(notif.args.sp);
@@ -5389,6 +5518,10 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                     this.addCardToTruck(C, 'item', this.decks.itemTruck)
                 }
             })
+          } catch (e) {
+            console.log(e)
+          }
+          this.notifqueue.setSynchronousDuration(0);
 
         },
         notif_addAlcohols: function(notif) {
@@ -5515,6 +5648,9 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 recipe.count = -notif.args.player_id
             }
 
+            // Redraw tiny labels
+            this.resetSpirits(notif.args.spirits)
+
             // Add barrel
             notif.args.barrel.location_idx = 1;
             this.playerWashbackStock[notif.args.player_id].item.addCard(notif.args.barrel)
@@ -5591,23 +5727,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 if (log && args && !args.processed) {
                     args.processed = true;
 
-                    /*
-                    try {
-                        if (args.key1) {
-                            args.key1 = bga_format(args.key1, {
-                                '*': (t) => {
-                                    switch (t) {
-                                        case 'fl': return _(args.card_name); break;
-                                    }
-                                }
-                            })
-                        }
-                    } catch (err) {
-                        console.log(args)
-                        this.showMessage(err.message, "error");
-                        throw err;
-                    }
-                    */
                     if (args.card_name !== undefined) {
                         let card;
                         let html = null;
@@ -5621,7 +5740,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                         }
                         if (card) {
                             uid = Date.now() + args.card_name
-                            args.card_name = `<span class="log-tooltip" id="log-${uid}">${args.card_name}</span>`;
+                            args.card_name = `<span class="log-tooltip" id="log-${uid}">${_(args.card_name)}</span>`;
                             if (html == null) 
                                 html = this.getTooltipForCard(card)
                             this.registerCustomTooltip(html, `log-${uid}`)

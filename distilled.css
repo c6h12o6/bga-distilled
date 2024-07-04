@@ -959,11 +959,14 @@ body > .card {
     cursor: pointer;
 }
 
+/*
 .selected {
     border-color: green;
     border-style: solid;
     border-width: 4px;
-}
+    box-sizing: border-box;
+    border-radius: 14px;
+}*/
 
 #bga-zoom-wrapper #bga-zoom-controls button:not(.disabled) {
   cursor: pointer;
@@ -2130,4 +2133,67 @@ https://studio.boardgamearena.com:8084/data/themereleases/240320-1000/css/gamese
 
 .backgroundTab {
     opacity: 0.8;
+}
+
+/*
+checkmark.style.position = "absolute";
+          checkmark.style.top = "-0.2em";
+          checkmark.style.right = "0";
+          checkmark.style.fontSize = "5em"; // Adjust font size as needed
+          checkmark.style.fontWeight = "bold"; // Adjust font size as needed
+          checkmark.style.color = "red";
+          checkmark.style.textShadow = "1px 1px 2px black"; // Adjust font size as needed
+          */
+.tinyLabelOuter {
+    position: relative;
+}
+.tinyLabelOuter.nolabel::after {
+    content: 'x';
+    top: -7px;
+    font-size: 25px;
+    right: 0;
+    color: red;
+    font-weight: bold;
+    display: block;
+    height: var(--height);
+    width: var(--width);
+    position: absolute;
+    overflow: visible;
+    text-align: left;
+    text-shadow:1px 1px 1px lightgray; 
+}
+
+.card.selected::after {
+    content: '✓';
+    font-size: 100px;
+    color: green;
+    font-weight: bold;
+    display: block;
+    height: 190px;
+    width: 122px;
+    position: absolute;
+    text-align: center;
+    line-height: 190px;
+    text-shadow: 4px 4px 4px black; 
+}
+
+.goalsCard.selected::after {
+    content: 'X';
+    font-size: 100px;
+    color: red;
+    font-weight: bold;
+    display: block;
+    height: 190px;
+    width: 122px;
+    position: absolute;
+    text-align: center;
+    line-height: 100px;
+    text-shadow: 4px 4px 4px black; 
+}
+
+
+.marketBuyable:hover {
+    overflow: visible;
+    transition: transform 0.2s ease-in-out;
+    transform: translateY(-5px)
 }
