@@ -58,7 +58,7 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
                     <td class="first-column translateme">Money</td>
                 </tr>
                 <tr id="scoring-row-total" class="line-above">
-                    <td id="text-total" class="first-column">Total</td>
+                    <td id="text-total" class="first-column translateme">Total</td>
                 </tr>
             </table>
         </div>

@@ -103,6 +103,10 @@ body > .card {
   overflow: hidden;
 }
 
+.scaledMarketCard.back {
+    left: 0 !important;
+}
+
 .card .card-sides .back {
   left: auto;
 }

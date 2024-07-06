@@ -888,7 +888,7 @@ Purchase it or return it to the bottom of the deck.`
             array('name' => clienttranslate('Caninha Cachaça'),
                     'sp' => 11,
                     'sugars' => 2,
-                    'value' => 2,
+                    'value' => 1,
                     'aged' => false,
                     'barrel' => Barrel::METAL,
                     'cube' => 'sig',
@@ -2758,6 +2758,7 @@ Purchase it or return it to the bottom of the deck.`
                     'player_id' => $playerId,
                     'trigger_name' => $trigger_name,
                     'normal_amount' => $normalAmount,
+                    'i18n' => ['trigger_name'],
                 ));
 
             }
@@ -4944,7 +4945,7 @@ Purchase it or return it to the bottom of the deck.`
             $r['count'] = $count;
 
         self::notifyAllPlayers("selectRecipe", clienttranslate('${player_name} distilled ${recipe_name} in ${card_name}'), array(
-            'i18n' => ['card_name'],
+            'i18n' => ['card_name', 'recipe_name'],
             "player_name" => self::getActivePlayerName(),
             "player_id" => $pid,
             "recipe_name" => $recipeName,
@@ -6598,6 +6599,17 @@ Purchase it or return it to the bottom of the deck.`
             $newCards[] = $dealt;
             $newCardNames[] = $this->AllCards[$dealt]->name;
         }
+
+        $newCardTokens = [];
+        $newCardArgs = [];
+        $idx = 0;
+        foreach ($newCardNames as $ncn) {
+            $tmp = "new_card_${idx}";
+            $newCardTokens['${'.$tmp.'}'] = $ncn;
+            $newCardArgs[$tmp] = $ncn;
+            $idx++;
+        }
+        $newCardArgs['i18n'] = array_keys($newCardArgs);
         
         $newMarkets = array();
         $newMarkets['item'] = $this->getMarket($this->itemsDeck);
@@ -6612,7 +6624,10 @@ Purchase it or return it to the bottom of the deck.`
         self::notifyAllPlayers("updateMarkets", 
             clienttranslate('Markets update at the end of the market phase, ${new_cards} added'), 
             array(
-                'new_cards' => implode(', ', $newCardNames),
+                'new_cards' => array(
+                    'log' => implode(', ', array_keys($newCardTokens)),
+                    'args' => $newCardArgs,
+                ),
                 'new_markets' => $newMarkets,
                 'removed_slot' => (count($players) < 2) ? 3 : 4,
                 'removed_cards' => $removedCards,
