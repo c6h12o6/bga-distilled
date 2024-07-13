@@ -1423,7 +1423,9 @@ function (dojo, declare, on, bgacards) {
 
                             let money = this['money_counter_' + this.player_id].getValue();
                             if (args.allowedCards[uid].market == 'du') {
-                                this.placeDuPrompt(args.allowedCards[uid], powers.join(','))
+                                var C = this.activeCards[uid]
+                                C.market = args.allowedCards.market
+                                this.placeDuPrompt(C, powers.join(','))
                             } else {
                                 button = dojo.string.substitute(_('Confirm buy ${name} for ${cost}'), {name: _(card.name), cost: cost}
                                 )   + '<span class="icon-coin-em"> </span>';
@@ -2594,7 +2596,7 @@ function (dojo, declare, on, bgacards) {
                 console.log(this.clientStateArgs);
                 var discard = this.activeCards[args.discard].name
                 args.lock = true
-                this.confirmButton(dojo.string.substitute(_('Discard ${discard} and collect ${name}'), {discard: discard, name: C.name}), 
+                this.confirmButton(dojo.string.substitute(_('Discard ${discard} and collect ${name}'), {discard: _(discard), name: _(C.name)}), 
                     "sellDrink", 
                     this.getAjaxArgsFromArgs(args),
                     'revertActionBarAndResetCards',
@@ -2624,7 +2626,7 @@ function (dojo, declare, on, bgacards) {
             var cards = this.playerPantryStock[this.player_id].ing.getCards();
             cards.forEach(C => {
                 this.addReplacementActionButton('discard' + C.uid + "Button",
-                    C.name,
+                    _(C.name),
                     () => {
                         Ccopy = {}
                         Object.assign(Ccopy, C);
@@ -2816,7 +2818,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                         args.bottle = B
                         args.optForSp = false
                         this.confirmButton(
-                            `Sell ${args.drink.name}`, 
+                            dojo.string.substitute(_('Sell ${name}'), {name: args.drink.name}), 
                             'sellDrink',
                             this.getAjaxArgsFromArgs(args),
                             'revertActionBarAndResetCards')
@@ -2924,6 +2926,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 args = placeLabelArgs
                 this.replaceActionBar(dojo.string.substitute(_("Place ${name} on: "), {name: _(C.name)}), 'revertActionBarAndResetCards')
             } else {
+                console.log(C, C.name, _(C.name))
                 this.replaceActionBar(dojo.string.substitute(_('Buy ${name} for ${cost} <span class="icon-coin-em"></span>. Place on: '), {name: _(C.name), cost: cost}))
             }
 
@@ -5415,12 +5418,14 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             remaining = this.playerWashbackStock[notif.args.player_id].ing.getCards();
             remaining.forEach(C => {
                 dest.ing.addCard(C)
+                dest.ing.getCardElement(C).classList.remove('pantryCard')
             })
 
             // Remove barrels
             remaining = this.playerWashbackStock[notif.args.player_id].item.getCards();
             remaining.forEach(C => {
                 dest.item.addCard(C);
+                dest.item.getCardElement(C).classList.remove('storeCard')
             })
         },
         notif_ageDrink: function(notif) {

@@ -4005,10 +4005,10 @@ Purchase it or return it to the bottom of the deck.`
         $pid = self::getActivePlayerId();
         $check = self::getUniqueValueFromDb("
             SELECT count(*) from (
-                SELECT uid, player_id FROM bottomless_card
-                UNION ALL SELECT uid, player_id FROM premium_ingredient
-                UNION ALL SELECT uid, player_id FROM premium_item) as t
-            WHERE uid=$out AND player_id=$pid");
+                SELECT uid, player_id, location FROM bottomless_card
+                UNION ALL SELECT uid, player_id, location FROM premium_ingredient
+                UNION ALL SELECT uid, player_id, location FROM premium_item) as t
+            WHERE uid=$out AND player_id=$pid AND location='player'");
         if ($check != 1) {
             throw new BgaSystemException("Invalid Card - not your cards");
         }
@@ -4397,7 +4397,7 @@ Purchase it or return it to the bottom of the deck.`
         return array('sp' => $barrelBonusSp, 'value' => $barrelBonusValue);
     }
 
-    function getDrinkValue($playerId, $cards, $recipeSlot, $bottleUid, $barrelUid)  {
+    function getDrinkValue($playerId, $cards, $recipeSlot, $bottleUid, $barrelUid, $debug=false)  {
         $value = 0;
         $maxFlavor = 0;
         foreach ($cards as $card) { // This is used for abilities like warehouse manager
@@ -4406,6 +4406,9 @@ Purchase it or return it to the bottom of the deck.`
             if ($c->type == CardType::FLAVOR) {
                 $maxFlavor = ($maxFlavor < $c->sale) ? $c->sale : $maxFlavor;
             }
+        }
+        if ($debug) {
+            self::notifyAllPlayers("dbgdbg", "maxFlavor: ${maxFlavor}", array('maxFlavor' => $maxFlavor));
         }
 
         $bonus = 0;
@@ -4561,6 +4564,81 @@ Purchase it or return it to the bottom of the deck.`
         return array('notif' => $tmp, 'key1'=>$set1[$key1], 'key2'=>$set2[$key2]);
     }
 
+    function debugDrinkValue($playerId, $drinkId) {
+        // Dont try to handle sell args yet
+        $bottle = self::getUniqueValueFromDb("SELECT bottle_uid FROM drink WHERE id=$drinkId");
+        self::notifyAllPlayers("dbgdbg", 'bottle is ${bottle}', array('bottle' => $bottle));
+
+        $sql = sprintf("SELECT cards, recipe_slot, drink.location, flavor_count, label_uid, label.count as label_count, barrel_uid, label
+                        FROM drink JOIN label on label.uid=label_uid WHERE id='%s'", $drinkId);
+        $info = self::getObjectFromDb($sql);
+        $cards = explode(',', $info["cards"]);
+        $cardList = array();
+        $sigCard = null;
+        foreach ($cards as $card) {
+            // Signature ingredients don't go in the truck
+            if ($this->isSignatureCard($this->AllCards[$card])) {
+                $sigCard = $card;
+                continue;
+            }
+            $cardList[] = sprintf("'%d'", $card);
+        }
+        $cardListStr = implode(',', $cardList);
+
+        $drinkName = $this->getRecipeNameFromSlot($info["recipe_slot"], $playerId);
+
+        $flavors = array();
+        $flavorStrings = array();
+
+        $knownFlavors = $this->getKnownFlavorCount($drinkId);
+        $knownFlavorCards = $this->getKnownFlavors($drinkId);
+        foreach ($knownFlavorCards as $flavor_card) {
+            $flavorString = $this->getSellFlavorString();
+            self::notifyAllPlayers("knownFlavor",
+                $flavorString['notif'],
+                array(
+                    'i18n' => ['card_name', 'spirit_name', 'key1', 'key2'],
+                    'player_name' => $this->getPlayerName($playerId),
+                    'player_id' => $playerId,
+                    'card_name' => $flavor_card->name,
+                    'card' => $flavor_card,
+                    'flavor' => $flavor_card,
+                    'spirit_name' => $drinkName,
+                    'value' => $flavor_card->sale,
+                    'key1_rec' => ['log' => $flavorString['key1'], 'args' => ['card_name'=>$flavor_card->name, 'card'=>$flavor_card]],
+                    'key2' => $flavorString['key2'],
+                ));
+        }
+        for ($ii = 0; $ii < $info["flavor_count"] - $knownFlavors; $ii++) {
+            $c = $this->dealToIndex($this->flavorDeck, 1);
+            $flavors[] = $c;
+            $flavor_card = $this->AllCards[$c];
+            $flavorString = $this->getSellFlavorString();
+            self::notifyAllPlayers("revealFlavor",
+                $flavorString['notif'],
+                array(
+                    'i18n' => ['card_name', 'spirit_name', 'key1', 'key2'],
+                    'player_name' => $this->getPlayerName($playerId),
+                    'player_id' => $playerId,
+                    'card_name' => $flavor_card->name,
+                    'card' => $flavor_card,
+                    'flavor' => $flavor_card,
+                    'spirit_name' => $drinkName,
+                    'value' => $flavor_card->sale,
+                    'key1_rec' => ['log' => $flavorString['key1'], 'args' => ['card_name'=>$flavor_card->name, 'card'=>$flavor_card]],
+                    'key2' => $flavorString['key2'],
+                ));
+            self::dbQuery("UPDATE drink SET cards = CONCAT(cards, ',$c') WHERE id=$drinkId");
+        }
+       
+
+        $cardsWithFlavors = array_merge($cards, $flavors);
+        $value = $this->getDrinkValue(self::getActivePlayerId(), $cardsWithFlavors, $info["recipe_slot"], $bottle, $info['barrel_uid'], true);
+        $sp = $this->getDrinkSp(self::getActivePlayerId(), $cardsWithFlavors, $info["recipe_slot"], $info["flavor_count"], $bottle, $info['barrel_uid'], true);
+
+        self::notifyAllPlayers("dbgdbg", "sp, value", array("sp" => $sp, "value" => $value));
+    }
+
     function sellDrink($drinkId, $bottle, $labelSlot, $optForSp, $sellArgs) {
         self::checkAction("sellDrink");
         return $this->sellDrink_internal($drinkId, $bottle, $labelSlot, $optForSp, $sellArgs);
@@ -4568,9 +4646,6 @@ Purchase it or return it to the bottom of the deck.`
     function sellDrink_internal($drinkId, $bottle, $labelSlot, $optForSp, $sellArgs) {
         $playerId = self::getActivePlayerId();
 
-        // Check that player has drink
-        /*if (!self::getUniqueValueFromDb("SELECT COUNT(*) FROM drink WHERE id=$drinkId AND player_id=$playerId"))
-            throw new BgaSystemException("Invalid drink - Not sellable");*/
         // Check that drink can be sold (aged/unaged)
         $drinks = $this->getSellableDrinks($playerId);
         $found = false;
@@ -7783,6 +7858,17 @@ Purchase it or return it to the bottom of the deck.`
     }
     function cardName($id) {
         self::notifyAllPlayers('dbgdbg', '${card_name}', array("card_name" => $this->AllCards[$id]->name));
+    }
+    function debugSpiritAward($player_id, $sa) {
+        $saObj = $this->spirit_awards[$sa];
+        self::notifyAllPlayers("spiritAward", 
+                clienttranslate('${player_name} wins ${sa_name} Spirit Award and ${sp} <span class="icon-sp-em"></span>'), array(
+                    'i18n' => array("sa_name"),
+                    'player_name' => $this->getPlayerName($player_id),
+                    'player_id' => $player_id,
+                    'sp' => 100,
+                    'sa_name' => $saObj->name,
+            ));
     }
 
 
