@@ -3080,7 +3080,6 @@ Purchase it or return it to the bottom of the deck.`
                     $distiller = false;
                 }
                 $this->recordPower($card_uid, $pid, $distiller);
-
             }
 
             self::notifyAllPlayers("noaction", clienttranslate('${player_name} chooses not to reveal cards'), array(
@@ -6897,26 +6896,9 @@ Purchase it or return it to the bottom of the deck.`
             $this->gamestate->setAllPlayersMultiactive();
             return;
         }
-        /*
-        while ($this->isPlayerZombie($playerId) && array_key_exists($playerId, $passedPlayers))
-            $playerId = self::activeNextPlayer();
-        */
 
         $playerId = self::activeNextPlayer();
         if (array_key_exists($playerId, $passedPlayers)) {
-            /*
-            self::notifyAllPlayers("dbgdbg", '${player_name} player cant play', array(
-                'playerId' => $playerId,
-                'player_name' => $this->getPlayerName($playerId),
-                'passedPlayers' => $passedPlayers));
-                */
-            //$playerId = self::activeNextPlayer();
-            /*
-            self::notifyAllPlayers("dbgdbg", '${player_name} player cant play 2', array(
-                'playerId' => $playerId,
-                'player_name' => $this->getPlayerName($playerId),
-                'passedPlayers' => $passedPlayers));
-                */
             $this->gamestate->nextState("cantPlay");
             return;
         }
@@ -7135,13 +7117,19 @@ Purchase it or return it to the bottom of the deck.`
     function zombieTurn( $state, $active_player )
     {
     	$statename = $state['name'];
+        $turn = self::getGameStateValue("turn");
     	
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
                 case 'playerBuyTurn':
                     //self::notifyAllPlayers("dbgdbg", '3 zombie ${state}', array('state' => $this->getStateName()));
                 case 'playerBuyTurnRevealSelect':
-                    //self::notifyAllPlayers("dbgdbg", '2 zombie ${state}', array('state' => $this->getStateName()));
+                    // TODO not handling zombies properly here
+                    $sql = sprintf("INSERT INTO market_purchase (player_id, market_pass, turn) 
+                                    VALUES ('%s', '%d', '%d')", $active_player, 1, $turn);
+                    self::DbQuery($sql);
+                    $this->waterReveal('Pass');
+                    break;
                 case 'playerBuyTurnReveal':
                     $this->marketPass();
 

@@ -1073,20 +1073,20 @@ function (dojo, declare, on, bgacards) {
                     document.getElementById("pagemaintitletext").innerText += " " + (
                         dojo.string.substitute(_('for ${location}'), {location: this.getProperSubtype(args.args.location)}));
 
-                    Object.keys(args.args.allowedCards).forEach(C => {
-                            let card = this.activeCards[C];
-                            console.log(card)
-                            console.log(card.uid)
-                            var elem = document.getElementById(`ing-card-${card.uid}`)
-                            elem.classList.add("marketBuyable")
-                            dojo.connect(elem, "onclick", this, () => {
-                                this.confirmButton(_("Confirm"), "selectFlavor", {
-                                    flavor: C,
-                                    drink: args.args.drink,
-                                    lock: true,
-                                }, null, dojo.string.substitute(_("Select ${flavor}"), {flavor: _(card.name)}))
+                    if (this.isCurrentPlayerActive()) { // only connect for the active player
+                        Object.keys(args.args.allowedCards).forEach(C => {
+                                let card = this.activeCards[C];
+                                var elem = document.getElementById(`ing-card-${card.uid}`)
+                                elem.classList.add("marketBuyable")
+                                dojo.connect(elem, "onclick", this, () => {
+                                    this.confirmButton(_("Confirm"), "selectFlavor", {
+                                        flavor: C,
+                                        drink: args.args.drink,
+                                        lock: true,
+                                    }, null, dojo.string.substitute(_("Select ${flavor}"), {flavor: _(card.name)}))
+                                })
                             })
-                        })
+                    }
                     break;
 
             case 'discardGoals':
@@ -1460,7 +1460,7 @@ function (dojo, declare, on, bgacards) {
                             // TODO consider passing through the distiller name
                             var cardName = (D.triggerCard.market == 'du') ? this.activeCards[D.triggerCard.uid].name : "Distiller Ability";
                             var coinSpan = '<span class="icon-coin-em"> </span> ';
-                            var s = dojo.string.substitute(_('${amount} ${coinSpan} off ${type} (${name}))'), {
+                            var s = dojo.string.substitute(_('${amount} ${coinSpan} off ${type} (${name})'), {
                                 amount: D.amount,
                                 coinSpan: coinSpan,
                                 type: _(typename),
@@ -2176,7 +2176,6 @@ function (dojo, declare, on, bgacards) {
             if (cardElem) {
                 cardElem.classList.remove("storeCard")
                 cardElem.classList.remove("pantryCard")
-                cardElem.classList.remove("marketCard")
                 cardElem.style.zIndex = 0;
             }
 
@@ -3613,7 +3612,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 market = 'du'
             }
             cards = truck.getCards()
-            let money = this['money_counter_' + this.player_id].getValue();
+
             cards.forEach(c => {
                 console.log("deck modal", c)
                 // Don't show fake cards
@@ -3631,26 +3630,29 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                     if (this.stateName == 'roundStartAction' && this.stateArgs?.args?.powercard == 123) {
                         console.log("in")
                         let cost = this.getEffectiveCost(c.uid)
-                        if (cost <= money) {
-                            dojo.connect(clone, 'onclick', this, () => {
-                                    if (c.market == 'du') {
-                                        this.placeDuPrompt(c, this.stateArgs?.args.options[0].triggerUid)
-                                    }
-                                    else {
-                                        this.confirmButton(dojo.string.substitute(_("Buy ${name} for ${cost} <span class='icon-coin-em'></span>"), {name: _(c.name), cost:cost}),
-                                            "buyCard", {
-                                                cardName: c.uid,
-                                                marketName: market,
-                                                slotId: 0,
-                                                powers: this.stateArgs?.args.options[0].triggerUid,
-                                                debugId: 5, phase: this.stateName,
-                                                lock: true,
-                                            })
-                                    }
-                                    this.modal.hide()
-                                })
-                        } else {
-                            dojo.addClass(clone, 'disabledMarket')
+                        if (!this.isSpectator) {
+                            let money = this['money_counter_' + this.player_id].getValue();
+                            if (cost <= money) {
+                                dojo.connect(clone, 'onclick', this, () => {
+                                        if (c.market == 'du') {
+                                            this.placeDuPrompt(c, this.stateArgs?.args.options[0].triggerUid)
+                                        }
+                                        else {
+                                            this.confirmButton(dojo.string.substitute(_("Buy ${name} for ${cost} <span class='icon-coin-em'></span>"), {name: _(c.name), cost:cost}),
+                                                "buyCard", {
+                                                    cardName: c.uid,
+                                                    marketName: market,
+                                                    slotId: 0,
+                                                    powers: this.stateArgs?.args.options[0].triggerUid,
+                                                    debugId: 5, phase: this.stateName,
+                                                    lock: true,
+                                                })
+                                        }
+                                        this.modal.hide()
+                                    })
+                            } else {
+                                dojo.addClass(clone, 'disabledMarket')
+                            }
                         }
                     } 
                     if (this.stateName == 'sell' && this.tradeWithTruckArgs) {
