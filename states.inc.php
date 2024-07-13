@@ -249,8 +249,8 @@ $machinestates = array(
 
     30 => array(
         "name" => "sell",
-        "descriptionmyturn" => clienttranslate('${you} must choose a drink to sell'),
-        "description" => clienttranslate('${actplayer} must choose a drink to sell'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a spirit to sell'),
+        "description" => clienttranslate('${actplayer} must choose a spirit to sell'),
         "type" => "activeplayer",
         "args" => "argSell",
         "possibleactions" => array("sellDrink", "skipSale", "pass"),

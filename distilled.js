@@ -60,6 +60,16 @@ function (dojo, declare, on, bgacards) {
             })
             this.contentNode = contentNode
 
+            console.log("CONNECTING DISTILLER CHOICES")
+            dojo.query(".minimizeDistillerChoice").connect("onclick", this, () => {
+                console.log("HELLLLO")
+                dojo.query("#distillerChoice").addClass("minimized");
+            })
+            dojo.query(".maximizeDistillerChoice").connect("onclick", this, () => {
+                console.log("GOODBYE")
+                dojo.query("#distillerChoice").removeClass("minimized");
+            })
+
             this.cardSize = (card) => {
                 if (card.label < 20 || card.location != 'flight') {
                     return [6.25, 4.375];
@@ -683,7 +693,6 @@ function (dojo, declare, on, bgacards) {
                 elem.style.backgroundPositionX = xPos + '%';
                 elem.style.backgroundPositionY =  + yPos + '%';
 
-                console.log(this.activeCards)
 
                 this.playerDisplayStock[player_id] = this.makeComboStock('display_', player_id);
                 this.playerLabelStock[player_id] = {}
@@ -696,7 +705,6 @@ function (dojo, declare, on, bgacards) {
                 this.playerSignatureStock[player_id] = new CardStock(
                         this.ingCardsManager,
                         document.getElementById("signature_" + player_id));
-                console.log(this.activeCards)
 
 
                 // Place floating stocks
@@ -1117,6 +1125,8 @@ function (dojo, declare, on, bgacards) {
             remaining = document.getElementById("remainingDiv")
             dojo.addClass(remaining, "invisible")
 
+            dojo.query(".selected").removeClass("selected")
+            dojo.query(".deckSelect").removeClass("deckSelect")
             dojo.query('.dijitTooltip').removeClass('dijitTooltip')
             dojo.query('.dijitTooltipConnector').removeClass('dijitTooltipConnector')
 
@@ -1413,7 +1423,7 @@ function (dojo, declare, on, bgacards) {
 
                             let money = this['money_counter_' + this.player_id].getValue();
                             if (args.allowedCards[uid].market == 'du') {
-                                this.placeDuPrompt(card, powers.join(','))
+                                this.placeDuPrompt(args.allowedCards[uid], powers.join(','))
                             } else {
                                 button = dojo.string.substitute(_('Confirm buy ${name} for ${cost}'), {name: _(card.name), cost: cost}
                                 )   + '<span class="icon-coin-em"> </span>';
@@ -1508,7 +1518,7 @@ function (dojo, declare, on, bgacards) {
                                         } else {
                                             conf = prototype.confirmButton(button, "buyCard", {
                                                 cardName: C.uid,
-                                                marketName: _(market),
+                                                marketName: market,
                                                 powers: O.triggerUid,
                                                 debugId: 2, phase: this.stateName,
                                                 lock: true,
@@ -1651,6 +1661,7 @@ function (dojo, declare, on, bgacards) {
                     case 'distill_post_trade':
                         console.log("connecting cards for distil")
 
+                        console.log("recreating action button")
                         this.addActionButton('distill_button', _('Distill Selected Cards') + `
                             <span id="yc_wrap"> <span id="yc"> </span> <span class="icon-yeast-em">   </span> </span>
                             <span id="wc_wrap"> <span id="wc"> </span> <span class="icon-water-em">   </span> </span>
@@ -1686,6 +1697,8 @@ function (dojo, declare, on, bgacards) {
                                 this.playerStoreStock[this.player_id].item.getCards().forEach( C => {
                                     this.pantrySelection[C.uid] = false
                                 });
+                                dojo.query(".selected").removeClass("selected")
+                                this.revertActionBar();
 
                                 console.log("hide yc_wrap")
                                 this.yeastCounter.setValue(0);
@@ -1711,8 +1724,6 @@ function (dojo, declare, on, bgacards) {
                                 console.log(this.playerPantryStock[this.player_id])
                                 console.log("connecting cards for distill from restart")
                                 this.connectCardsForDistill()
-                                this.revertActionBar();
-                                console.log("done")
                                 return;
                             }
                             distillButton = document.getElementById("distill_button")
@@ -1748,6 +1759,7 @@ function (dojo, declare, on, bgacards) {
                         counter.create("yc");
                         counter.setValue(0);
                         this.yeastCounter = counter;
+                        console.log("setting to invisible in onUpdate")
                         dojo.addClass("yc_wrap", "invisible")
 
                         counter = new ebg.counter();
@@ -1888,6 +1900,9 @@ function (dojo, declare, on, bgacards) {
 
         // @override
         resetSpirits: function(spirits) {
+            if (!spirits) 
+                return;
+
             dojo.query('.tinyLabelOuter').remove()
             spirits.forEach(S => {
                 console.log(S)
@@ -2158,8 +2173,12 @@ function (dojo, declare, on, bgacards) {
             }
             let truckCount = truck.getCardNumber();
             var cardElem = manager.getCardElement(card);
-            if (cardElem)
+            if (cardElem) {
+                cardElem.classList.remove("storeCard")
+                cardElem.classList.remove("pantryCard")
+                cardElem.classList.remove("marketCard")
                 cardElem.style.zIndex = 0;
+            }
 
             truck.addCard(card, {autoUpdateCardNumber: false});
             truck.setCardNumber(truckCount + 1, null);
@@ -2264,17 +2283,30 @@ function (dojo, declare, on, bgacards) {
             const xBack = (labelIdx %  6)
             const yBack = Math.floor(labelIdx / 6)
 
-            var id = `tinyLabel-${label.label}-${label.count}`
 
             let existing = document.getElementById(id)
             if (existing) {
+                console.log("returning because existing")
                 return;
             }
-            var order = parseInt(0)
+
+            console.log("playerid for board is ", playerId)
+            var boardDiv = document.getElementById(`player_label_board_${playerId}`)
+
+            var order = label.first_turn
+            // This is just a hack for old games that didnt set first_turn on unaged spirits
+            if (!order)
+                order = label.sold_turn
+            if (!order) {
+                // I think i'd be surprised to make it here
+                order = boardDiv.children.length + 1
+            }
+            console.log("order ended up being", order)
+            var id = `tinyLabel-${label.label}-${label.order}`
 
             var tinyLabel = `
             <div id="${id}" data-order=${order} data-name="${label.label}" data-side="front" class="card tinyLabelOuter" 
-                style="width: var(--width); flex-basis: var(--width); height: var(--height);" 
+                style="width: var(--width); flex-basis: var(--width); height: var(--height); grid-column-start: ${order}" 
                 title="${_(label.label)}">
                 <div class="card-sides">
                     <div class="card-side front dlabel tinyLabel" style="background-position-y: calc(-${yBack} * var(--height)); background-position-x: calc(-${xBack} * var(--width));">
@@ -2289,12 +2321,12 @@ function (dojo, declare, on, bgacards) {
             if (label.count == 0) {
                 tinyLabelElem.classList.add('nolabel')
             }
-            var boardDiv = document.getElementById(`player_label_board_${playerId}`)
+
+            console.log("boardDiv is", boardDiv)
             if (boardDiv.children.length == 0) {
                 boardDiv.appendChild(tinyLabelElem)
                 return
             }
-
             if (label.signature) {
                 // Signature always goes last
                 boardDiv.appendChild(tinyLabelElem)
@@ -2445,6 +2477,10 @@ function (dojo, declare, on, bgacards) {
         },
         getAjaxArgsFromArgs(args) {
             console.log(args)
+            if (args.cardIn && typeof args.cardIn == 'string' && args.cardIn?.endsWith("Truck")) {
+                this.showMessage(`Please report this error as a bug in tradeWithTruck`, "error");
+                return
+            }
             tmp = {
                 labelSlot: args.labelSlot,
                 bottle: args.bottle?.uid,
@@ -3076,10 +3112,12 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             storeCards = dojo.query(".storeCard")
             storeCards.forEach(pc => {
                 card_id = this.activeCards[pc.dataset.uid].card_id
+                // Don't connect these
                 if (card_id == 19 || card_id == 20)
                     return;
 
                 let handle = dojo.connect(pc, 'onclick', this, 'onPantryClick');
+                console.log("adding handle for store cards", pc.id, handle)
                 this.marketClickHandles[pc.id] = handle
             })
 
@@ -3094,11 +3132,13 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
         },
         setupPlayerCards(pid, playerCards) {
             console.log("setup player cards for " + pid)
+            console.log(playerCards)
             // remove some cards to ensure idempotency
             // Remove cards over 10,000 which are unknown flavor cards
             removeFlavor = function (C, stock) {
-                if (C.uid > 10000)
+                if (C.uid >= 10000) {
                     stock[pid].ing.removeCard(C);
+                }
             }
 
             this.playerWashbackStock[pid].ing.getCards().forEach(C => {
@@ -3575,6 +3615,11 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             cards = truck.getCards()
             let money = this['money_counter_' + this.player_id].getValue();
             cards.forEach(c => {
+                console.log("deck modal", c)
+                // Don't show fake cards
+                if (c.uid.toString().endsWith("Truck")) {
+                    return
+                }
                 clone = truck.getCardElement(c).cloneNode(true);
                 if (clone) {
                     clone.dataset["side"] = "front";
@@ -3635,7 +3680,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             return slots
         },
         newFlavorBack: function() {
-            return {uid: this.nextFlavor++, location_idx: 0, name: "Unknown Flavor", flavor: true, type: "FLAVOR"}
+            return {uid: this.nextFlavor++, location_idx: 0, name: _("Unknown Flavor"), flavor: true, type: "FLAVOR"}
         },
         makeComboStock: function(divbase, player_id, hideWhenEmpty=false) {
             console.log(`make combo stock for ${divbase} ${player_id}`)
@@ -3838,7 +3883,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                        PID:player_id,
                         UID: card.uid,
                         TYPE: type.toLowerCase(),
-                        TOOLTIP: card.name,
+                        TOOLTIP: _(card.name),
                         DIVBASE: divbase,
                     })
                     block = document.createElement("div")
@@ -4358,6 +4403,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 dojo.removeClass('yc_wrap', 'invisible')
                 this.yeastCounter.setValue(yeast);
             } else {
+                console.log("hiding yc wrap here")
                 dojo.addClass('yc_wrap', 'invisible')
             }
 
@@ -4474,6 +4520,12 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             });
             if (evt.currentTarget.classList.contains('du-card')) {
                 // For distillery upgrade cards, we put you in a position to pick which slot you want.
+                let effectiveCost = this.getEffectiveCost(cardName);
+                let money = this['money_counter_' + this.player_id].getValue();
+                if (effectiveCost > money) {
+                    this.showMessage(_("Not enough money"), "error");
+                    return;
+                }
                 this.placeDuPrompt(this.activeCards[cardName], powers.join(','), null, slotId)
             } else {
                 if (this.stateName == 'playerBuyTurn'  || this.stateName == 'playerBuyTurnReveal') {
@@ -4736,7 +4788,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
 
             dojo.query(".disabledMarket").removeClass("disabledMarket")
             dojo.query(".marketBuyable").removeClass("marketBuyable")
-            dojo.query(".selected").removeClass("selected")
             Object.keys(this.marketClickHandles).forEach(divid => {
                 dojo.disconnect(this.marketClickHandles[divid]);
                 delete this.marketClickHandles[divid];
@@ -4936,6 +4987,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             this.playerStoreStock[pid].item.removeCards(this.playerStoreStock[pid].item.getCards())
 
             console.log("Calling connect cards")
+            this.resetRegionCounters(pid)
             this.setupPlayerCards(notif.args.player_id, notif.args.player_cards);
             this.revertActionBar();
 
@@ -5015,6 +5067,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             let cards = this.decks[truckName].getCards();
 
             await this.decks[notif.args.deck_id].addCards(cards, null, { autoUpdateCardNumber: false });
+            this.decks[truckName].removeCards(cards, {autoUpdateCardNumber: false})
             this.decks[truckName].setCardNumber(0);
 
             // Remove them so they get recreated in the future
@@ -5033,14 +5086,20 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                     manager = this.ingCardsManager;
                     break;
             }
+            /*
             if (manager) {
                 cards.forEach(C => {
                     console.log("adding marketCard to ", C)
-                    var elem = manager.getCardElement(C)
-                    elem.classList.add('marketCard')
-                    elem.style.zIndex = 0;
+                    var elem = this.decks[truckName].getCardElement(C)
+                    if (elem) {
+                        elem.classList.add('marketCard')
+                        elem.style.zIndex = 0;
+                    } else {
+                        this.showMessage(`An error has occurred. Please report a bug in shuffleDeck() on card ${C.name}`, "error");
+                    }
                 })
             }
+            */
 
             this.decks[notif.args.deck_id].setCardNumber(notif.args.card_count);
         },
@@ -5302,6 +5361,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             this.disableNextMoveSound();
             console.log('moveToWashback')
             console.log(notif)
+            dojo.query(".selected").removeClass("selected")
 
             // Remove the old temporary trade out card
             this.playerPantryStock[notif.args.player_id].ing.removeCard({uid: 9999, type: "ing"})
@@ -5507,13 +5567,8 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 }
 
                 // Skip Signature cards
-                if (C.type == 'BARREL' || C.type == 'BOTTLE') {
-                    C.location = 'truck'
-                    this.addCardToTruck(C, 'item', this.decks.itemTruck)
-                } else {
-                    C.location = 'truck'
-                    this.addCardToTruck(C, 'ing', this.decks.ingTruck)
-                }
+                C.location = 'truck'
+                this.addCardToTruck(C, 'ing', this.decks.ingTruck)
             })
 
             // Remove barrels
@@ -5526,6 +5581,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                     this.itemVoidStock.addCard(C)
                 } else {
                     C.location = 'truck'
+                    // ZZZ possible culprit
                     this.addCardToTruck(C, 'item', this.decks.itemTruck)
                 }
             })
@@ -5650,7 +5706,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             console.log("selectRecipe");
             console.log(notif);
 
-            let recipeName = notif.args.recipe_name;
+            let recipeName = notif.args.recipe.name;
             let recipeDeck = this.decks[recipeName];
             let recipe = notif.args.recipe;
 
@@ -5667,8 +5723,9 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             this.playerWashbackStock[notif.args.player_id].item.addCard(notif.args.barrel)
 
             // Add Label
-            if (recipeDeck)
+            if (recipeDeck) {
                 recipeDeck.setCardNumber(recipeDeck.getCardNumber(), recipe);
+            }
 
             recipe.location = 'washback';
             //this.playerWashbackStock[notif.args.player_id].label.addCard(recipe);
@@ -5734,7 +5791,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
          *  @Override
          */
         format_string_recursive(log, args) {
-            console.log(log, args)
             try {
                 if (log && args && !args.processed) {
                     args.processed = true;

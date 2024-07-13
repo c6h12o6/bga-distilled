@@ -25,11 +25,13 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
     </div>
 </div>
 
-<div id="distillerChoice" class="distillerChoice invisible" style="position: absolute; justify-content: center; align-items: center; width: 100%; height: 30vw; display: flex; z-index: 1; background-color: rgba(230, 230, 230, 0.0); gap: 10px; top: 100px;">
-    <div style="position: absolute; top: 5vw; justify-content: center; align-items: top; width: 100%; height: auto; display: flex; z-index: 20; background-color: rgba(230, 230, 230, 0.8); gap: 10px; padding: 10px;">
+<div id="distillerChoice" class="distillerChoice invisible" >
+    <div class='distillerChoice2'>
         <div class="distillerChoiceInner"><div id="distiller1"> </div> <div id="label1choice" class="dlabel"></div></div>
         <div class="distillerChoiceInner"><div id="distiller2"> </div> <div id="label2choice" class="dlabel"></div></div>
     </div>
+    <div class="minimizeDistillerChoice"> - </div>
+    <div class='maximizeDistillerChoice'> <div> + </div> </div>
 </div>
 
 <div class="centerScreen invisible" style="position: absolute; justify-content: center; align-items: center; width: 100%; height: auto; display: flex; z-index: 100; gap: 10px">
@@ -191,7 +193,7 @@ var jstpl_player_supplement = '\
                 <span class="icon-sp-em"></span>\
             </div>\
             <div></div>\
-            <div style="display: flex" title="First Player">\
+            <div class="translatetitle" style="display: flex" title="First Player">\
                 <span id="first_player_${PID}" class="firstPlayer"> </span>\
             </div>\
         </div>\
