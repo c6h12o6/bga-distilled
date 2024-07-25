@@ -265,7 +265,9 @@ $machinestates = array(
             "skipSale" => 29, 
             "sellDrinkNoLabel" => 29, 
             "placeLabelForSP" => 29,
-            'zombiePass' => 29),
+            'zombiePass' => 29,
+            'wait' => 97,
+        ),
     ),
 
     48 => array(

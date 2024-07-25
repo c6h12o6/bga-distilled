@@ -1430,9 +1430,6 @@ Purchase it or return it to the bottom of the deck.`
         $result['distiller_text'] = $this->distiller_text;
         // Only do this if distillers have been selected
         $result['whatCanIMake'] = $this->getWCIM();
-        /*if ($this->getStateName() != "chooseDistiller")
-            $result['state'] = $this->gamestate->state();
-        */
         return $result;
     }
 
@@ -3985,9 +3982,10 @@ Purchase it or return it to the bottom of the deck.`
         $this->gamestate->nextState('skip');
     }
     function skipSale($playerId = null) {
-        if (!$playerId)
+        if (!$playerId) {
             $playerId = self::getActivePlayerId();
-        self::checkAction("skipSale");
+            self::checkAction("skipSale");
+        }
         $sql = sprintf("INSERT INTO market_purchase (sell_pass, turn, player_id) VALUES (1, %d, %d)",
             self::getGameStateValue("turn"), $playerId);
         self::dbQuery($sql);
@@ -7198,6 +7196,8 @@ Purchase it or return it to the bottom of the deck.`
             switch ($statename) {
                 case 'playerBuyTurn':
                     //self::notifyAllPlayers("dbgdbg", '3 zombie ${state}', array('state' => $this->getStateName()));
+                    $this->marketPass();
+                    break;
                 case 'playerBuyTurnRevealSelect':
                     // TODO not handling zombies properly here
                     $sql = sprintf("INSERT INTO market_purchase (player_id, market_pass, turn) 
@@ -7226,6 +7226,7 @@ Purchase it or return it to the bottom of the deck.`
                     $this->gamestate->nextState('skip');
                     break;
                 case 'sell':
+                    //$this->gamestate->nextState( "wait" );
                     $this->skipSale($active_player);
                     break;
                 case 'selectFlavor':
@@ -7250,7 +7251,6 @@ Purchase it or return it to the bottom of the deck.`
                     $available = self::getUniqueValueFromDb("SELECT card_id FROM distiller WHERE player_id=$active_player LIMIT 1");
                     //self::notifyAllPlayers("dbgdbg", "choosing distiller", array('available' => $available, 'active_player'=>$active_player));
                     $this->selectDistillerAction($available, $active_player);
-
                     break;
                 case 'distill':
                     $this->skipDistill($active_player);
@@ -7261,8 +7261,6 @@ Purchase it or return it to the bottom of the deck.`
                 case 'discardGoals':
                     $goalUid = self::getUniqueValueFromDb("SELECT uid FROM distillery_goal WHERE player_id=$active_player LIMIT 1");
                     $this->discardGoal($goalUid, $active_player);
-                    return;
-                    //$this->gamestate->nextState("zombiePass");
                     break;
             }
             $this->gamestate->setPlayerNonMultiactive( $active_player, '' );
@@ -7958,4 +7956,27 @@ Purchase it or return it to the bottom of the deck.`
   
       $this->reloadPlayersBasicInfos();
     }
+
+function callZombie($numCycles = 1) { // Runs zombieTurn() on all active players
+    // Note: isMultiactiveState() doesn't work during this! It crashes without yielding an error.
+    self::notifyAllPlayers('dbgdbg', '<u>zombietest1 ${cycles} !</u>', ['cycles'=>$numCycles]);
+    for ($cycle = 0; $cycle < $numCycles; $cycle++) {
+        self::notifyAllPlayers('dbgdbg', '<u>zombietestLoop</u>', []);
+      $state = $this->gamestate->state();
+      $activePlayers = $this->gamestate->getActivePlayerList(); // this works in both active and multiactive states
+        self::notifyAllPlayers('dbgdbg', '<u>zombietest players ${count}</u>', 
+        ['count'=>count($activePlayers), 'players' => $activePlayers]);
+
+      // You can remove the notification if you find it too noisy
+      self::notifyAllPlayers('notifyZombie', '<u>ZombieTest cycle ${cycle} for ${statename}</u>', [
+        'cycle'     => $cycle+1,
+        'statename' => $state['name']
+      ]);
+
+      // Make each active player take a zombie turn
+      foreach ($activePlayers as $key => $playerId) {
+        self::zombieTurn($state, (int)$playerId);
+      }
+    }
+  }
 }

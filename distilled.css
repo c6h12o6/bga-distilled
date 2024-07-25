@@ -1759,6 +1759,7 @@ body > .card {
 
 .bgabutton.disabled-looking {
     background: #787878;
+    cursor: not-allowed;
 }
 .bgabutton.disabled-looking:hover {
     background: #787878;

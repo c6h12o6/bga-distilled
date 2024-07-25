@@ -21,6 +21,6 @@
             "0": { "name": "No"},
             "1": { "name": "Yes"}
         },
-        "default": "1"
+        "default": 1
     }
 }
