@@ -1264,7 +1264,7 @@ function (dojo, declare, on, bgacards) {
                             if (X.labelCount == 0) {
                                 suffix = _("(No labels remaining)")
                             }
-                            this.addActionButton('select' + recipe + barrel,  dojo.string.substitute(_('${recipe} (${barrel}) ${suffix}'), {recipe: _(recipe), barrel: _(barrel), suffix: suffix}), ()=>{
+                            this.addActionButton('select' + recipe + X.barrelUid,  dojo.string.substitute(_('${recipe} (${barrel}) ${suffix}'), {recipe: _(recipe), barrel: _(barrel), suffix: suffix}), ()=>{
                                 if (args.recipes.length > 1) {
                                     this.confirmButton(_("Confirm"), 'selectRecipe', {
                                         recipeSlot: X.recipeSlot,
@@ -2970,7 +2970,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                         args.duSlot = function () { return ii }(),
                         args.debugId = 4;
                         args.stateName = this.stateName;
-                        this.confirmButton(dojo.string.substitute(_('Place ${name} on slot ${ii}'), {name: _(C.name)}), "buyCard", 
+                        this.confirmButton(dojo.string.substitute(_('Place ${name} on slot ${ii}'), {name: _(C.name), ii: ii}), "buyCard", 
                             args)
                     }
                 })

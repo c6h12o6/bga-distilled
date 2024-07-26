@@ -265,8 +265,8 @@ $machinestates = array(
             "skipSale" => 29, 
             "sellDrinkNoLabel" => 29, 
             "placeLabelForSP" => 29,
-            'zombiePass' => 29,
-            'wait' => 97,
+            'zombiePass' => 96,
+            'wait' => 96,
         ),
     ),
 
@@ -339,6 +339,12 @@ $machinestates = array(
 
     ),
 
+    96 => array(
+        'name' => 'nextPlayerWait',
+        'type' => 'game',
+        'action' => 'stNextPlayerWait',
+        'transitions' => array('' => 97),
+    ),
     97 => array(
         "name" => "wait",
         "type" => "activeplayer",

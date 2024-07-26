@@ -3341,6 +3341,11 @@ Purchase it or return it to the bottom of the deck.`
         }
         $this->gamestate->nextState("nextPlayer");
     }
+    function stNextPlayerWait() {
+        $pid = self::activeNextPlayer();
+        self::notifyAllPlayers('dbgdbg', 'here', []);
+        $this->gamestate->nextState('');
+    }
 
     function argPreDistill($player_id) {
         // TODO remove all traces of predistill, i dont think it does anything anymore
@@ -5502,17 +5507,17 @@ Purchase it or return it to the bottom of the deck.`
                 $mustSellAged = true;
             }
         }
-        $cardList = $this->getPlayerCardList($pid, $pid == self::getCurrentPlayerId());
+        $cardList = $this->getPlayerCardList($pid, false /*$pid == self::getCurrentPlayerId()*/);
         return array("drinks" => $drinks, 
                      "bottles" => $bottles, 
                      "labels" => $this->labelBenefits, 
                      "mustSellAged" => $mustSellAged,
                      "playerCards" => $cardList, 
-                     'whatCanIMake' => $this->getWCIM(),
+                     //'whatCanIMake' => $this->getWCIM(),
                      // Debug only
-                    "slot" => $slot,
-                    "recipe" => $recipe,
-                    "recipes" => $this->getRecipes(),
+                    //"slot" => $slot,
+                    //"recipe" => $recipe,
+                    //"recipes" => $this->getRecipes(),
                 );
     }
 
@@ -5544,7 +5549,6 @@ Purchase it or return it to the bottom of the deck.`
 
     function argSelectRecipe() {
 
-        //self::notifyAllPlayers("dbgdbg", "arg select recipe", array());
         $sql = sprintf('SELECT id, cards FROM drink WHERE player_id="%d" AND `recipe_slot` IS NULL',
             self::getActivePlayerId());
         $entry = self::getObjectFromDb($sql);
@@ -7119,7 +7123,10 @@ Purchase it or return it to the bottom of the deck.`
         $this->gamestate->nextState('nextPlayerDistill');
     }
     function stNextPlayerSellHack() {
-        self::activeNextPlayer();
+        $pid = self::activeNextPlayer();
+        while ($this->isPlayerZombie($pid)) {
+            $pid = self::activeNextPlayer();
+        }
         $this->gamestate->nextState();
     }
     function stNextPlayerSell() {
@@ -7136,24 +7143,13 @@ Purchase it or return it to the bottom of the deck.`
                         $turn);
         $passes = self::getCollectionFromDb($sql);
 
-        if (count($sellable) == 0 || array_key_exists($playerId, $passes)) {
-            /*self::notifyAllPlayers("dbgdbg", 'sellable is 0 or pass for ${player_name}', 
-                array(
-                    'player_name' => $this->getPlayerName($playerId),
-                    'player_id' => $playerId,
-                ));*/
+        if (count($sellable) == 0 || array_key_exists($playerId, $passes) || $this->isPlayerZombie($playerId)) {
             $allDone = true;
             $players = $this->loadPlayersBasicInfos();
             foreach ($players as $pid => $info) {
                 $sellable = $this->getSellableDrinks($pid);
                 if (count($sellable) != 0 && !array_key_exists($pid, $passes) && !$this->isPlayerZombie($pid)) {
                     $allDone = false;
-                    /*self::notifyAllPlayers("dbgdbg", '${player_name} is not done yet', 
-                        array(
-                            'player_name' => $this->getPlayerName($pid),
-                            'player_id' => $pid,
-                            'sellable' => $sellable,
-                        ));*/
                 }
             }
 
@@ -7226,7 +7222,6 @@ Purchase it or return it to the bottom of the deck.`
                     $this->gamestate->nextState('skip');
                     break;
                 case 'sell':
-                    //$this->gamestate->nextState( "wait" );
                     $this->skipSale($active_player);
                     break;
                 case 'selectFlavor':
@@ -7471,8 +7466,6 @@ Purchase it or return it to the bottom of the deck.`
     }
     function getPlayerCardList($player_id, $isCurrent) {
         // Get the premium item market cards
-        $current_player_id = self::getCurrentPlayerId();
-
         $sql = sprintf("SELECT uid, location, 'item' as market, location_idx
                 FROM premium_item WHERE player_id='%s'
                 UNION ALL
