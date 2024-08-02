@@ -2833,7 +2833,13 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             this.replaceActionBar(dojo.string.substitute(_("Choose a bottle for ${name}: "), {name: _(args.drink.name)}), 'revertActionBarAndResetCards')
             args.bottles.forEach((B) => {
                 // TODO connect the cards also
-                this.addReplacementActionButton(`bottle${B.uid}`, _(B.name), () => {
+                var icon = ''
+                if (B.subtype) {
+                    icon = ` <span class='icon-${B.subtype.toLowerCase()}-em'></span>`
+                } else {
+                    icon = ` <span class='icon-bottle-em'></span>`
+                }
+                this.addReplacementActionButton(`bottle${B.uid}`, _(B.name) + icon, () => {
                     stock = this.getStockForDrink(args.drink)
                     B.location_idx = 1
                     // TODO add location code here

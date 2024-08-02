@@ -1239,6 +1239,15 @@ body > .card {
     width: 1em;
     height: 1em;
 }
+.icon-bottle-em {
+    background: url("img/icons.png");
+    display: inline-block;
+    background-position-x: calc(-5*var(--width));
+    --width: 1.5em;
+    background-size: calc(29*var(--width)) var(--width);
+    width: var(--width);
+    height: var(--width);
+}
 .icon-americas-em {
     background: url("img/icons.png");
     display: inline-block;
