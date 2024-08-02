@@ -1509,59 +1509,9 @@ function (dojo, declare, on, bgacards) {
                     case 'roundStartAction':
                         console.log(args)
                         console.log(this)
-                        var cb = (market) => {
-                            console.log(this)
-                            console.log(args)
-                            this.replaceActionBar(_("Choose a card to buy"), 
-                                () => {
-                                    console.log("cancel trucker");
-                                    this.connectTrucksWithCb(cb, null, true);
-                                })
-                            args.options.forEach(O => {
-                                console.log(args, market)
-                                O.allowedCards.forEach(C => {
-                                    if (C.market != market) {
-                                        return;
-                                    }
-
-                                    let money = this['money_counter_' + this.player_id].getValue();
-                                    let cost = this.getEffectiveCost(C.uid)
-                                    let btn = this.addReplacementActionButton(`btn_${C.card_id}`, C.name, () => {
-                                        console.log(this)
-                                        button = dojo.string.substitute(_('Buy ${name} for ${cost} <span class="icon-coin-em"></span>'), {name: _(C.name), cost: cost})
-
-                                        // Handle DU here
-                                        if (market == 'du') {
-                                            this.placeDuPrompt(C, O.triggerUid, null)
-                                        } else {
-                                            conf = this.confirmButton(button, "buyCard", {
-                                                cardName: C.uid,
-                                                marketName: market,
-                                                powers: O.triggerUid,
-                                                debugId: 2, phase: this.stateName,
-                                                lock: true,
-                                            })
-                                            if (cost > money)
-                                                dojo.addClass(conf, "disabled")
-                                        }
-                                    })
-                                    if (cost > money)
-                                        dojo.addClass(document.getElementById(`btn_${C.card_id}`), "disabled")
-                                    this.addTooltipForCard(C, document.getElementById(`btn_${C.card_id}`))
-                                })
-                            })
-                            this.showDeckModal(market)
-                        }
+                        
                         if (args.powercard == 123) {
-
-                            this.connectTrucksWithCb((X) => cb(X), true);
-                            this.addReplacementActionButton("passBtn", _("Skip Trucker"), () => {
-                                this.revertActionBar();
-                                this.ajaxcall( "/distilled/distilled/roundStartPass.html", {
-                                    power: args.options[0].triggerUid,
-                                    lock: true,
-                                }, this, () => {})
-                            })
+                            this.connectTrucksWithCb((X) => this.truckerCallback(X), true);
                             return;
                         }
                         args.options.forEach(O => {
@@ -1917,6 +1867,53 @@ function (dojo, declare, on, bgacards) {
         // <a href="#" class="action-button bgabutton bgabutton_blue" onclick="return false;" id="discount1" data-uid="0">2 <span class="icon-coin-em"> </span>  off ingredient (Distiller Ability)</a>
 
         // @override
+        truckerCallback(market)  {
+            args = this.stateArgs.args
+
+            console.log(this)
+            console.log(args)
+            this.replaceActionBar(_("Choose a card to buy"), 
+                () => {
+                    console.log("cancel trucker");
+                    this.connectTrucksWithCb((X) => this.truckerCallback(X), null, true);
+                })
+            args.options.forEach(O => {
+                console.log(args, market)
+                O.allowedCards.forEach(C => {
+                    if (C.market != market) {
+                        return;
+                    }
+
+                    let money = this['money_counter_' + this.player_id].getValue();
+                    let cost = this.getEffectiveCost(C.uid)
+                    let btn = this.addReplacementActionButton(`btn_${C.card_id}`, C.name, () => {
+                        console.log(this)
+                        button = dojo.string.substitute(_('Buy ${name} for ${cost} <span class="icon-coin-em"></span>'), {name: _(C.name), cost: cost})
+
+                        // Handle DU here
+                        if (market == 'du') {
+                            this.placeDuPrompt(C, O.triggerUid, null)
+                        } else {
+                            // confirmButton(buttonText, url, args, cb, title) {
+                            console.log("confirmation button for card")
+                            conf = this.confirmButton(button, "buyCard", {
+                                cardName: C.uid,
+                                marketName: market,
+                                powers: O.triggerUid,
+                                debugId: 2, phase: this.stateName,
+                                lock: true,
+                            }, () => {console.log('confirm cancel'); this.connectTrucksWithCb((X) => this.truckerCallback(X), null, true)})
+                            if (cost > money)
+                                dojo.addClass(conf, "disabled")
+                        }
+                    })
+                    if (cost > money)
+                        dojo.addClass(document.getElementById(`btn_${C.card_id}`), "disabled")
+                    this.addTooltipForCard(C, document.getElementById(`btn_${C.card_id}`))
+                })
+            })
+            this.showDeckModal(market)
+        },
         resetSpirits: function(spirits) {
             if (!spirits) 
                 return;
@@ -2681,14 +2678,26 @@ function (dojo, declare, on, bgacards) {
         connectTrucksWithCb(cb, hideCancel) {
             console.log('connect Truck')
 
+            dojo.query('.deckSelect').remove()
             let mapping = {
                 'Item Truck': 'item',
                 'Ingredient Truck': 'ing',
                 'Distillery Upgrade Truck': 'du',
             }
 
-            this.replaceActionBar(_("Place Label Bonus: Select a truck"), 
+
+            this.replaceActionBar(_("Select a truck"), 
                 'revertActionBarAndResetCards', hideCancel)
+            if (hideCancel) {
+                // Trucker
+                this.addReplacementActionButton("passBtn", _("Skip Trucker"), () => {
+                    this.revertActionBar();
+                    this.ajaxcall( "/distilled/distilled/roundStartPass.html", {
+                        power: this.stateArgs.args.options[0].triggerUid,
+                        lock: true,
+                    }, this, () => {})
+                })
+            }
             Object.keys(mapping).forEach(T => {
                 var truckElem;
                 switch (mapping[T]) {
@@ -2947,7 +2956,17 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 this.replaceActionBar(dojo.string.substitute(_("Place ${name} on: "), {name: _(C.name)}), 'revertActionBarAndResetCards')
             } else {
                 console.log(C, C.name, _(C.name))
-                this.replaceActionBar(dojo.string.substitute(_('Buy ${name} for ${cost} <span class="icon-coin-em"></span>. Place on: '), {name: _(C.name), cost: cost}))
+
+                var cb = null;
+                console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                if (this.stateName == 'roundStartAction' && this.stateArgs?.args?.powercard == 123) {
+                    // trucker
+                    console.log("Setting up cb")
+                    cb = () => {console.log("trucker cb"); this.connectTrucksWithCb((X) => this.truckerCallback(X), true);}
+                }
+                this.replaceActionBar(
+                    dojo.string.substitute(_('Buy ${name} for ${cost} <span class="icon-coin-em"></span>. Place on: '), 
+                    {name: _(C.name), cost: cost}), cb)
             }
 
             for (let ii = 3; ii > 0; ii--) {
@@ -2981,7 +3000,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                         args.debugId = 4;
                         args.stateName = this.stateName;
                         this.confirmButton(dojo.string.substitute(_('Place ${name} on slot ${ii}'), {name: _(C.name), ii: ii}), "buyCard", 
-                            args)
+                            args, cb)
                     }
                 })
             }
@@ -3025,6 +3044,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
         // function confirmButton
         confirmButton(buttonText, url, args, cb, title) {
             console.log("Confirm button", this.decks.duTruck.getCards())
+            console.log("confirm button cb", cb)
             if (title)
                 this.replaceActionBar(title, cb);
             else 
@@ -3639,7 +3659,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             cards = truck.getCards()
 
             cards.forEach(c => {
-                console.log("deck modal", c)
                 // Don't show fake cards
                 if (c.uid.toString().endsWith("Truck")) {
                     return
@@ -3649,11 +3668,9 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                     clone.dataset["side"] = "front";
                     elem = document.getElementById(clone.id + "-front")
                     clone.id += "-clone"
-                    //console.log(clone);
                     this.contentNode.appendChild(clone)
                     this.addTooltipForCard(c, clone)
                     if (this.stateName == 'roundStartAction' && this.stateArgs?.args?.powercard == 123) {
-                        console.log("in")
                         let cost = this.getEffectiveCost(c.uid)
                         if (!this.isSpectator) {
                             let money = this['money_counter_' + this.player_id].getValue();
@@ -3663,7 +3680,10 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                                             this.placeDuPrompt(c, this.stateArgs?.args.options[0].triggerUid)
                                         }
                                         else {
-                                            this.confirmButton(dojo.string.substitute(_("Buy ${name} for ${cost} <span class='icon-coin-em'></span>"), {name: _(c.name), cost:cost}),
+                                            // confirmButton(buttonText, url, args, cb, title) {
+                                            console.log("Adding this confirm button")
+                                            this.confirmButton(
+                                                dojo.string.substitute(_("Buy ${name} for ${cost} <span class='icon-coin-em'></span>"), {name: _(c.name), cost:cost}),
                                                 "buyCard", {
                                                     cardName: c.uid,
                                                     marketName: market,
@@ -3671,7 +3691,11 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                                                     powers: this.stateArgs?.args.options[0].triggerUid,
                                                     debugId: 5, phase: this.stateName,
                                                     lock: true,
-                                                })
+                                                }, () => {
+                                                    console.log("cancel trucker 2");
+                                                    this.connectTrucksWithCb((X) => this.truckerCallback(X), null, true);
+                                                }
+                                            )
                                         }
                                         this.modal.hide()
                                     })
