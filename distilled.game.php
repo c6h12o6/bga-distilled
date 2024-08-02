@@ -1680,6 +1680,11 @@ Purchase it or return it to the bottom of the deck.`
         );
     }
     public function canPlayerBuy($playerId) {
+
+        // This is a protection for zombie mode
+        if ($this->isPlayerZombie($playerId)) 
+            return false;
+
         $basics = $this->basicRemaining($playerId);
         if ($basics> 0) {
             return "basic";
@@ -3041,6 +3046,9 @@ Purchase it or return it to the bottom of the deck.`
             SELECT uid, 'item' as market FROM premium_item WHERE location='reveal'");
         return $cards;
     }
+    function debug_gains($playerId, $amount) {
+        $this->playerGains($playerId, $amount, "debug");
+    }
     function dbgactiveplayer() {
         $pid = self::getActivePlayerId();
         self::notifyAllPlayers("dbgdbg", 'active player is ${pid} ${player_name}', array(
@@ -3158,6 +3166,7 @@ Purchase it or return it to the bottom of the deck.`
 
         if ($triggerCard) {
             self::notifyAllPlayers("buyRecipeCube", clienttranslate('${player_name} unlocks recipe for ${recipe_name} (${trigger_card})'), array(
+                'i18n' => ['recipe_name', 'trigger_card'],
                 'player_name' => $this->getPlayerName($playerId),
                 'player_id' => $playerId,
                 'cost' => $cost,
@@ -3169,6 +3178,7 @@ Purchase it or return it to the bottom of the deck.`
             
         } else {
             self::notifyAllPlayers("buyRecipeCube", clienttranslate('${player_name} pays ${cost} to unlock recipe for ${recipe_name}'), array(
+                'i18n' => ['recipe_name'],
                 'player_name' => $this->getPlayerName($playerId),
                 'player_id' => $playerId,
                 'cost' => $cost,
@@ -3213,8 +3223,9 @@ Purchase it or return it to the bottom of the deck.`
 
         $this->gamestate->nextState("pass");
     }
-    function marketPass() {
-        self::checkAction("pass");
+    function marketPass($skip = false) {
+        if (!$skip) 
+            self::checkAction("pass");
 
         if ($this->getStateName() == 'playerBuyTurnReveal') {
         } else {
@@ -6610,7 +6621,7 @@ Purchase it or return it to the bottom of the deck.`
                                 $this->placeOnBottom($this->flavorDeck, $c1);
                             }
                             self::notifyPlayer($pid, "doig", clienttranslate('${trigger_name} reveals ${card1_name} and ${card2_name}. ${winner_name} selected.'), array(
-                                'i18n' => ['card1_name', 'card2_name'],
+                                'i18n' => ['trigger_name', 'card1_name', 'card2_name', 'winner_name'],
                                 "trigger_name" => $this->AllCards[$pc['uid']]->name,
                                 'card1_name' => $card1->name,
                                 'card1_id' => $card1->uid,
@@ -7190,22 +7201,13 @@ Purchase it or return it to the bottom of the deck.`
     	
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
-                case 'playerBuyTurn':
                     //self::notifyAllPlayers("dbgdbg", '3 zombie ${state}', array('state' => $this->getStateName()));
-                    $this->marketPass();
-                    break;
                 case 'playerBuyTurnRevealSelect':
                     // TODO not handling zombies properly here
                     $sql = sprintf("INSERT INTO market_purchase (player_id, market_pass, turn) 
                                     VALUES ('%s', '%d', '%d')", $active_player, 1, $turn);
                     self::DbQuery($sql);
                     $this->waterReveal('Pass');
-                    break;
-                case 'playerBuyTurnReveal':
-                    $this->marketPass();
-
-                    //self::notifyAllPlayers("dbgdbg", '1 zombie ${state}', array('state' => $this->getStateName()));
-                    //$this->gamestate->nextState('pass');
                     break;
                 case 'selectRecipe':
                     $args = $this->argSelectRecipe();
@@ -7224,6 +7226,8 @@ Purchase it or return it to the bottom of the deck.`
                 case 'sell':
                     $this->skipSale($active_player);
                     break;
+                case 'playerBuyTurnReveal':
+                case 'playerBuyTurn':
                 case 'selectFlavor':
                 case 'placeLabel3':
                 case 'placeLabel4':

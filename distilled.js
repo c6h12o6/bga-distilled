@@ -281,7 +281,7 @@ function (dojo, declare, on, bgacards) {
                     div.style.backgroundPositionY = `calc(-${yBack} * var(--height))`
                     div.style.backgroundPositionX = `calc(-${xBack} * var(--width))`
 
-                    if (card.count <= 0) {
+                    if (card.count < 0) {
                         div.classList.add('fade');
                         if (div.children.length == 0)
                             dojo.place(this.format_block('jstpl_label_x', {}), div, 'last');
@@ -959,12 +959,12 @@ function (dojo, declare, on, bgacards) {
             dojo.connect(div, "onclick", this, "closeFloaters");
 
             div = document.getElementById('premiumIngredientsTruck')
-            dojo.connect(div, "onclick", this, () => this.showDeckModal("ingTruck"))
+            dojo.connect(div, "onclick", this, () => this.showDeckModal("ing"))
             div = document.getElementById('premiumItemsTruck')
-            dojo.connect(div, "onclick", this, () => this.showDeckModal("itemTruck"))
+            dojo.connect(div, "onclick", this, () => this.showDeckModal("item"))
 
             div = document.getElementById('distilleryUpgradeTruck')
-            dojo.connect(div, "onclick", this, () => this.showDeckModal("duTruck"))
+            dojo.connect(div, "onclick", this, () => this.showDeckModal("du"))
             
             div = document.getElementById("floatingStoreroomButton");
             dojo.connect(div, "onclick", this, "showFloatingStoreRoom");
@@ -1509,26 +1509,28 @@ function (dojo, declare, on, bgacards) {
                     case 'roundStartAction':
                         console.log(args)
                         console.log(this)
-                        let cb = function(prototype, market) {
+                        var cb = (market) => {
                             console.log(this)
-                            prototype.replaceActionBar("Choose a card to buy") 
+                            console.log(args)
+                            this.replaceActionBar(_("Choose a card to buy"))
                             args.options.forEach(O => {
+                                console.log(args, market)
                                 O.allowedCards.forEach(C => {
                                     if (C.market != market) {
                                         return;
                                     }
 
-                                    let money = prototype['money_counter_' + prototype.player_id].getValue();
-                                    let cost = prototype.getEffectiveCost(C.uid)
-                                    let btn = prototype.addReplacementActionButton(`btn_${C.card_id}`, C.name, () => {
-                                        console.log(prototype)
+                                    let money = this['money_counter_' + this.player_id].getValue();
+                                    let cost = this.getEffectiveCost(C.uid)
+                                    let btn = this.addReplacementActionButton(`btn_${C.card_id}`, C.name, () => {
+                                        console.log(this)
                                         button = dojo.string.substitute(_('Buy ${name} for ${cost} <span class="icon-coin-em"></span>'), {name: _(C.name), cost: cost})
 
                                         // Handle DU here
                                         if (market == 'du') {
-                                            prototype.placeDuPrompt(C, O.triggerUid, null)
+                                            this.placeDuPrompt(C, O.triggerUid, null)
                                         } else {
-                                            conf = prototype.confirmButton(button, "buyCard", {
+                                            conf = this.confirmButton(button, "buyCard", {
                                                 cardName: C.uid,
                                                 marketName: market,
                                                 powers: O.triggerUid,
@@ -1541,20 +1543,19 @@ function (dojo, declare, on, bgacards) {
                                     })
                                     if (cost > money)
                                         dojo.addClass(document.getElementById(`btn_${C.card_id}`), "disabled")
-                                    prototype.addTooltipForCard(C, document.getElementById(`btn_${C.card_id}`))
+                                    this.addTooltipForCard(C, document.getElementById(`btn_${C.card_id}`))
                                 })
                             })
+                            this.showDeckModal(market)
                         }
                         if (args.powercard == 123) {
-                            console.log("123")
-                            this.addActionButton("showDu", _("Distillery Upgrade Truck"), () => cb(this, "du"))
-                            this.addActionButton("showItem", _("Premium Item Truck"), () => cb(this, "item"))
-                            this.addActionButton("showIng", _("Premium Ingredient Truck"), () => cb(this, "ing"))
-                            this.addActionButton("passBtn", _("Skip Trucker"), () => {
+
+                            this.connectTrucksWithCb((X) => cb(X));
+                            this.addReplacementActionButton("passBtn", _("Skip Trucker"), () => {
                                 this.ajaxcall( "/distilled/distilled/roundStartPass.html", {
                                     power: args.options[0].triggerUid,
                                     lock: true,
-                                }, this, function(r) {})
+                                })
                             })
                             return;
                         }
@@ -2672,17 +2673,14 @@ function (dojo, declare, on, bgacards) {
             });
 
         },
-        tradeWithTruck_SelectTruck(args) {
-            console.log('trade with truck')
-            console.log(args)
+        connectTrucksWithCb(cb) {
+            console.log('connect Truck')
 
             let mapping = {
                 'Item Truck': 'item',
                 'Ingredient Truck': 'ing',
                 'Distillery Upgrade Truck': 'du',
             }
-
-            this.tradeWithTruckArgs = args;
 
             // TODO make the trucks selectable
             this.replaceActionBar(_("Place Label Bonus: Select a truck"), 
@@ -2706,19 +2704,27 @@ function (dojo, declare, on, bgacards) {
                         truckElem = document.getElementById("premiumItemsTruck")
                         break;
                 }
-                let cb = function(e) {
-                    console.log("Clicked on " + T + mapping[T])
-                    args.tradeTruck = mapping[T]
-                    this.showDeckModal(mapping[T] + "Truck")
-                    this.tradeWithTruck_SelectCard(args)
-                }
                 if (truckElem) {
                     truckElem.appendChild(this.createElement('<div class="deckSelect"></div>'))
                 }
                 this.addReplacementActionButton('view' + (mapping[T]) + 'TruckButton', 
-                    T, cb
+                    T, () => cb(mapping[T])
                 )
             })
+        },
+        tradeWithTruck_SelectTruck(args) {
+            console.log(args)
+
+            this.tradeWithTruckArgs = args;
+
+            var cb = (truck) => {
+                console.log(truck, args)
+                console.log("Clicked on " + truck)
+                args.tradeTruck = truck
+                this.showDeckModal(truck)
+                this.tradeWithTruck_SelectCard(args)
+            }
+            this.connectTrucksWithCb((X) => {console.log(X); cb(X)});
         },
         rewardOrSp(args) {
             console.log("client select reward") 
@@ -3612,15 +3618,15 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             let cards = [];
             let truck = null;
             let market = null;
-            if (srcName == 'itemTruck') {
+            if (srcName == 'item') {
                 truck = this.decks.itemTruck;
                 this.modal.title = _("Item Truck")
                 market = 'item'
-            } else if (srcName == 'ingTruck') {
+            } else if (srcName == 'ing') {
                 truck = this.decks.ingTruck
                 this.modal.title = _("Ingredients Truck")
                 market = 'ing'
-            } else if (srcName == 'duTruck') {
+            } else if (srcName == 'du') {
                 truck = this.decks.duTruck
                 this.modal.title = _("Distillery Upgrades Truck")
                 market = 'du'
@@ -3868,6 +3874,8 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 div.style.width = `var(--width)`
                 div.style.flexBasis = `var(--width)`
                 div.style.height = `var(--height)`
+                div.classList.remove("fade")
+                div.innerHTML = ""; // remove the red X if there is one
 
                 label = card.label
                 if (card.location != 'flight' && card.signature == true) {

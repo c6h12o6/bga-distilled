@@ -134,7 +134,7 @@ $machinestates = array(
     		"descriptionmyturn" => clienttranslate('${you} must buy a card, buy a recipe, or pass'),
     		"type" => "activeplayer",
     		"possibleactions" => array( "buyCard", "buyRecipe", "pass"),
-    		"transitions" => array( "buyCard" => 11, "buyWater" => 14, /*"buyDuCard" => 12, */ "buyRecipe"=>11, "pass" => 12)
+    		"transitions" => array( "buyCard" => 11, "buyWater" => 14, /*"buyDuCard" => 12, */ "buyRecipe"=>11, "pass" => 12, "zombiePass" => 12),
     ),
     12 => array(
         "name" => "marketPass",
@@ -157,7 +157,7 @@ $machinestates = array(
     		"type" => "activeplayer",
     		"possibleactions" => array( "buyCard", "pass"),
             "args" => "argPlayerBuyTurnReveal",
-    		"transitions" => array( "buyCard" => 16, "pass" => 16)
+    		"transitions" => array( "buyCard" => 16, "pass" => 16, "zombiePass" => 16)
     ),
     16 => array(
         "name" => "playerBuyTurnRevealCleanup",
