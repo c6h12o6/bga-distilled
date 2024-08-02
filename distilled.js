@@ -1512,7 +1512,11 @@ function (dojo, declare, on, bgacards) {
                         var cb = (market) => {
                             console.log(this)
                             console.log(args)
-                            this.replaceActionBar(_("Choose a card to buy"))
+                            this.replaceActionBar(_("Choose a card to buy"), 
+                                () => {
+                                    console.log("cancel trucker");
+                                    this.connectTrucksWithCb(cb, null, true);
+                                })
                             args.options.forEach(O => {
                                 console.log(args, market)
                                 O.allowedCards.forEach(C => {
@@ -1550,12 +1554,13 @@ function (dojo, declare, on, bgacards) {
                         }
                         if (args.powercard == 123) {
 
-                            this.connectTrucksWithCb((X) => cb(X));
+                            this.connectTrucksWithCb((X) => cb(X), true);
                             this.addReplacementActionButton("passBtn", _("Skip Trucker"), () => {
+                                this.revertActionBar();
                                 this.ajaxcall( "/distilled/distilled/roundStartPass.html", {
                                     power: args.options[0].triggerUid,
                                     lock: true,
-                                })
+                                }, this, () => {})
                             })
                             return;
                         }
@@ -2673,7 +2678,7 @@ function (dojo, declare, on, bgacards) {
             });
 
         },
-        connectTrucksWithCb(cb) {
+        connectTrucksWithCb(cb, hideCancel) {
             console.log('connect Truck')
 
             let mapping = {
@@ -2682,9 +2687,8 @@ function (dojo, declare, on, bgacards) {
                 'Distillery Upgrade Truck': 'du',
             }
 
-            // TODO make the trucks selectable
             this.replaceActionBar(_("Place Label Bonus: Select a truck"), 
-                'revertActionBarAndResetCards')
+                'revertActionBarAndResetCards', hideCancel)
             Object.keys(mapping).forEach(T => {
                 var truckElem;
                 switch (mapping[T]) {
@@ -2724,7 +2728,7 @@ function (dojo, declare, on, bgacards) {
                 this.showDeckModal(truck)
                 this.tradeWithTruck_SelectCard(args)
             }
-            this.connectTrucksWithCb((X) => {console.log(X); cb(X)});
+            this.connectTrucksWithCb((X) => {console.log(X); cb(X)}, false);
         },
         rewardOrSp(args) {
             console.log("client select reward") 
@@ -3055,7 +3059,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             this.actionBarReplacement.insertAdjacentElement("afterbegin", button)
             return button
         },
-        replaceActionBar(title, cancelCb) {
+        replaceActionBar(title, cancelCb, hideCancel) {
             actionBar = document.getElementById("generalactions")
             if (!this.actionBarParent)
                 this.actionBarParent = actionBar.parentElement
@@ -3084,7 +3088,8 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 titleElement.innerHTML = title;
 
             this.actionBarReplacement = clone
-            this.addReplacementActionButton('cancel_button', _('Cancel'), cb)
+            if (!hideCancel)
+                this.addReplacementActionButton('cancel_button', _('Cancel'), cb)
             //this.actionBarParent.appendChild(clone)
             this.actionBarParent.insertBefore(clone, actionBar)
         },
