@@ -457,6 +457,7 @@ class distilled extends Table
             "distillersSelected" => 16,
             "flight" => 100,
             "pairings" => 101,
+            "setup" => 102,
         ) );
         
 
@@ -1080,20 +1081,27 @@ Purchase it or return it to the bottom of the deck.`
         self::setGameStateInitialValue( 'distillersSelected', false);
         //self::setGameStateInitialValue( 'playerPassedSell', array());
 
+        $this->globals->set("DISTILLERS_SELECTED", []);
+
+        $firstTaste = self::getGameStateValue("setup") == 2;
         
         $this->distilleryDeck->init();
+        $this->ingredientsDeck->init();
+        $this->itemsDeck->init();
+
+        if ($firstTaste)
+            $this->setupFirstTaste();
+
         $this->dealToIndex($this->distilleryDeck, 1);
         $this->dealToIndex($this->distilleryDeck, 2);
         $this->dealToIndex($this->distilleryDeck, 3);
         $this->dealToIndex($this->distilleryDeck, 4);
 
-        $this->ingredientsDeck->init();
         $this->dealToIndex($this->ingredientsDeck, 1);
         $this->dealToIndex($this->ingredientsDeck, 2);
         $this->dealToIndex($this->ingredientsDeck, 3);
         $this->dealToIndex($this->ingredientsDeck, 4);
 
-        $this->itemsDeck->init();
         $this->dealToIndex($this->itemsDeck, 1);
         $this->dealToIndex($this->itemsDeck, 2);
         $this->dealToIndex($this->itemsDeck, 3);
@@ -1102,13 +1110,17 @@ Purchase it or return it to the bottom of the deck.`
         $this->flavorDeck->init();
 
 
-        $flight = self::getGameStateValue("flight");
-        if ($flight == '9') {
-            $flight = (bga_rand(0, 96) % 3) + 1;
-            self::setGameStateValue("flight", $flight);
-        } else if ($flight == '10') {
-            $flight = (bga_rand(0, 96) % 8) + 1;
-            self::setGameStateValue("flight", $flight);
+        if ($firstTaste) {
+            $flight = 1;
+        } else {
+            $flight = self::getGameStateValue("flight");
+            if ($flight == '9') {
+                $flight = (bga_rand(0, 96) % 3) + 1;
+                self::setGameStateValue("flight", $flight);
+            } else if ($flight == '10') {
+                $flight = (bga_rand(0, 96) % 8) + 1;
+                self::setGameStateValue("flight", $flight);
+            }
         }
         $this->initRecipeCard($flight);
         $this->initLabels();
@@ -1227,14 +1239,40 @@ Purchase it or return it to the bottom of the deck.`
             implode(',', $saList));
         self::dbQuery($sql);
 
+        if ($firstTaste) {
+            $this->firstTasteDistillers = [
+                $this->distillers[2],
+                $this->distillers[14],
+                $this->distillers[16],
+                $this->distillers[18],
+                $this->distillers[30],
+            ];
+
+            $this->firstTasteGoals = [
+                [165, 167, 151],
+                [158, 148, 162],
+                [152, 163, 160],
+                [159, 161, 150],
+                [153, 166, 156],
+            ];
+        }
+
+
         $firstPlayer = true;
         foreach( $players as $player_id => $player ) {
             if ($firstPlayer) {
                 self::dbQuery("UPDATE player SET first_player = 1 WHERE player_id=$player_id");
                 $firstPlayer = false;
             }
-            $this->dealDistillers($player_id);
-            $this->dealStartingCards($player_id);
+
+            // Distillers
+            if ($firstTaste) {
+                $this->setupFirstTasteDistillers($player_id);
+                $this->dealStartingCardsFirstTaste($player_id);
+            } else {
+                $this->dealDistillers($player_id);
+                $this->dealStartingCards($player_id);
+            }
         }
 
         /************ End of the game initialization *****/
@@ -1430,6 +1468,9 @@ Purchase it or return it to the bottom of the deck.`
         $result['distiller_text'] = $this->distiller_text;
         // Only do this if distillers have been selected
         $result['whatCanIMake'] = $this->getWCIM();
+        $result['firstTaste'] = self::getGameStateValue("setup") == 2;
+        $result['distillersSelectedArray'] = $this->globals->get("DISTILLERS_SELECTED"); 
+
         return $result;
     }
 
@@ -1467,6 +1508,56 @@ Purchase it or return it to the bottom of the deck.`
         In this space, you can put any utility methods useful for your game logic
     */
 
+    function setupFirstTaste() {
+        // Glassblower 19
+        // Tour guide 23
+        // Copper Smith 26
+        // Natural Spring 5
+
+        self::dbQuery("UPDATE distillery_upgrade SET location_idx = location_idx + 4");
+        self::dbQuery("UPDATE distillery_upgrade SET location_idx = 3 WHERE uid = 5");
+        self::dbQuery("UPDATE distillery_upgrade SET location_idx = 2 WHERE uid = 26");
+        self::dbQuery("UPDATE distillery_upgrade SET location_idx = 1 WHERE uid = 23");
+        self::dbQuery("UPDATE distillery_upgrade SET location_idx = 0 WHERE uid = 19");
+
+        // juniper berries 32
+        // rye 55
+        // potatoes 40
+        // sorghum 53
+
+        self::dbQuery("UPDATE premium_ingredient SET location_idx = location_idx + 4");
+        self::dbQuery("UPDATE premium_ingredient SET location_idx = 3 WHERE uid = 53");
+        self::dbQuery("UPDATE premium_ingredient SET location_idx = 2 WHERE uid = 40");
+        self::dbQuery("UPDATE premium_ingredient SET location_idx = 1 WHERE uid = 55");
+        self::dbQuery("UPDATE premium_ingredient SET location_idx = 0 WHERE uid = 32");
+        
+        // ex bourbon 93
+        // canister 77
+        // steel 85
+        // plastic liter 68
+        self::dbQuery("UPDATE premium_item SET location_idx = location_idx + 4");
+        self::dbQuery("UPDATE premium_item SET location_idx = 3 WHERE uid = 68");
+        self::dbQuery("UPDATE premium_item SET location_idx = 2 WHERE uid = 85");
+        self::dbQuery("UPDATE premium_item SET location_idx = 1 WHERE uid = 77");
+        self::dbQuery("UPDATE premium_item SET location_idx = 0 WHERE uid = 93");
+    }
+    function setupFirstTasteDistillers($player_id) {
+        // distillers for first taste
+        $distiller = null;
+        $distiller = array_pop($this->firstTasteDistillers);
+        //$distiller = $this->distillers[34];
+        $sql = sprintf("INSERT INTO distiller (card_id, player_id)
+                        VALUES (%d, %d)", $distiller->id, $player_id);
+        self::dbQuery($sql);
+
+        self::notifyPlayer($player_id, "revealDistiller", clienttranslate('${player_name} may select ${distiller_name}'), array(
+            'distiller_name' => $distiller->name,
+            'player_id' => $player_id,
+            'player_name' => $this->getPlayerName($player_id),
+            'distiller_id' => $distiller->id,
+            'slot' => 1,
+        ));
+    }
     function getSpirits($bottleMap = null) {
         $spirits =  array_values(self::getCollectionFromDb("SELECT * FROM drink JOIN label on drink.label_uid=label.uid"));
         $ret = array();
@@ -2607,7 +2698,6 @@ Purchase it or return it to the bottom of the deck.`
             $slot = $this->getRecipeSlotFromName("Whiskey");
             $this->buyRecipe_internal($playerId, $slot, array(), $this->distillers[22]->name);
         }
-
     }
     function dealDistillers($player_id) {
         $distiller = null;
@@ -2642,6 +2732,22 @@ Purchase it or return it to the bottom of the deck.`
                 $i--;
                 continue; 
             }
+
+            $sql = sprintf("INSERT INTO distillery_goal (uid, card_id, player_id) 
+                            VALUES ('%s', %d, %d)", $c->uid, $c->card_id, $player_id);
+            self::DbQuery($sql);
+        }
+    }
+    function dealStartingCardsFirstTaste($player_id) {
+        // Basic Items
+        for( $i = 19; $i <= 20; $i++) {
+            $newC = $this->AllCards[$this->newBottomlessCard($i, $player_id, true)];
+        }
+
+        // Goals
+        $goals = array_pop($this->firstTasteGoals);
+        for ($i = 0; $i < 3; $i++) {
+            $c = $this->AllCards[$goals[$i]];
 
             $sql = sprintf("INSERT INTO distillery_goal (uid, card_id, player_id) 
                             VALUES ('%s', %d, %d)", $c->uid, $c->card_id, $player_id);
@@ -2850,6 +2956,13 @@ Purchase it or return it to the bottom of the deck.`
             'distiller_region' => $distiller->region,
         ));
         self::dbQuery("UPDATE distiller SET discarded=1 WHERE player_id=${player_id} AND card_id != ${distillerId}");
+
+        $distillersSelected = $this->globals->get("DISTILLERS_SELECTED");
+        if (!$distillersSelected) // This is because not all games will have done this
+            $distillersSelected = [];
+
+        $distillersSelected[] = $player_id;
+        $this->globals->set("DISTILLERS_SELECTED", $distillersSelected);
 
         $this->gamestate->setPlayerNonMultiactive($player_id, 'selectDistiller'); 
     }

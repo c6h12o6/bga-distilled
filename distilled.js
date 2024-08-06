@@ -551,6 +551,12 @@ function (dojo, declare, on, bgacards) {
                 return;
             }
 
+            var thisPlayerSelected = false;
+            if (gamedatas.distillersSelectedArray?.includes(''+this.player_id)) {
+                thisPlayerSelected = true;
+            }
+            console.log("thisPlayerSelected", thisPlayerSelected);
+
             for( var player_id in gamedatas.players )
             {
                 document.getElementById("player_score_" + player_id).classList.add("invisible")
@@ -598,7 +604,6 @@ function (dojo, declare, on, bgacards) {
                 regions.forEach(R => {
                     var regionCounter = new ebg.counter();
                     var counterName = `${R}_counter_${player_id}`
-                    console.log(counterName)
                     regionCounter.create(counterName)
                     regionCounter.setValue(0)
                     this[counterName] = regionCounter;
@@ -720,12 +725,14 @@ function (dojo, declare, on, bgacards) {
                         document.getElementById("distillerygoals_" + player_id),
                         {direction: "row", center: false});
 
-                if (gamedatas.distillers[player_id]?.length != 1) {
+                if (gamedatas.distillers[player_id]?.length != 1 || (gamedatas.firstTaste && !thisPlayerSelected)) {
                     if (player_id == this.player_id) {
                         dojo.query('.distillerChoice').removeClass('invisible')
                     }
                 }
-                if (gamedatas.distillers[player_id]?.length == 1) {
+                console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                console.log("distillersSelectedArray", gamedatas.distillersSelectedArray)
+                if (gamedatas.distillers[player_id]?.length == 1 && (!gamedatas.firstTaste || thisPlayerSelected)) {
                     console.log("placing chosen distiller")
                     if (player_id == this.player_id) {
                         dojo.query('.distillerChoice').addClass('invisible')
@@ -780,12 +787,16 @@ function (dojo, declare, on, bgacards) {
             })
 
             // Place the distiller choice bar
-            if (gamedatas.distillersSelected == 0 && gamedatas.distillers[this.player_id]?.length == 2) {
+            console.log("thisPlayerSelected", thisPlayerSelected)
+            if ((gamedatas.firstTaste && !thisPlayerSelected) || (gamedatas.distillersSelected == 0 && gamedatas.distillers[this.player_id]?.length == 2)) {
+                if (gamedatas.firstTaste) {
+                    document.getElementById("label2choice").remove();
+                }
                 console.log("placing distillers for choice")
-                console.log(gamedatas.distillers[this.player_id][0].label.label)
-                console.log(gamedatas.distillers[this.player_id][1].label.label)
                 
-                for (var ii = 2; ii >= 1; ii--) {
+                console.log("distillers length", gamedatas.distillers[this.player_id], gamedatas.distillers[this.player_id].length)
+                for (var ii = gamedatas.distillers[this.player_id].length; ii >= 1; ii--) {
+                    console.log("loopdy freaking doo", ii)
                     this.placeFlippyCard(this.player_id, `distiller${ii}`, 'distiller', 
                         gamedatas.distillers[this.player_id][ii-1].id);
 
@@ -3740,7 +3751,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             return {uid: this.nextFlavor++, location_idx: 0, name: _("Unknown Flavor"), flavor: true, type: "FLAVOR"}
         },
         makeComboStock: function(divbase, player_id, hideWhenEmpty=false) {
-            console.log(`make combo stock for ${divbase} ${player_id}`)
             let topElement = document.getElementById(divbase + player_id);
             let ret = {
                 coin: 0,

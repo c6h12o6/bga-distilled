@@ -22,5 +22,13 @@
             "1": { "name": "Yes"}
         },
         "default": 1
+    },
+    "102": {
+        "name": "Game Setup",
+        "values": {
+            "1": { "name": "Normal" },
+            "2": { "name": "First Taste (Tutorial)" }
+        },
+        "default": 1
     }
 }
