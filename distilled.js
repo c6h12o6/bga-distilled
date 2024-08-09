@@ -551,6 +551,9 @@ function (dojo, declare, on, bgacards) {
                 return;
             }
 
+            if (gamedatas.firstTaste && !gamedatas.recipeFlight) {
+                return;
+            }
             var thisPlayerSelected = false;
             if (gamedatas.distillersSelectedArray?.includes(''+this.player_id)) {
                 thisPlayerSelected = true;
@@ -1239,13 +1242,16 @@ function (dojo, declare, on, bgacards) {
                                     typename: _(typename),
                                     cardName: _(cardName),
                                 });
-                            var btn = this.addActionButton('discount' + D.triggerCard.uid, s,
+                            console.log(D.triggerCard)
+                            console.log(D.triggerCard.uid)
+                            var btnName = 'discount' + D.triggerCard.uid + D.triggerCard.market
+                            var btn = this.addActionButton(btnName, s,
                                 (evt)=>{
-                                    var elem = document.getElementById('discount' + D.triggerCard.uid);
+                                    var elem = document.getElementById(btnName);
                                     this.togglePowerButton(elem);
                                 }
                             );
-                            var elem = document.getElementById('discount' + D.triggerCard.uid);
+                            var elem = document.getElementById(btnName);
                             elem.dataset["uid"] = (D.triggerCard.market == 'du') ? D.triggerCard.uid : 0; // 0 indicates a distiller ability
                             elem.classList.add('powerCard')
                             console.log("user pref", this.getGameUserPreference(100), elem)
@@ -1489,13 +1495,16 @@ function (dojo, declare, on, bgacards) {
                                 type: _(typename),
                                 name: _(cardName),
                             });
-                            var btn = this.addActionButton('discount' + D.triggerCard.uid, s,
+                            console.log(D.triggerCard)
+                            console.log(D.triggerCard.uid)
+                            var btnName = 'discount' + D.triggerCard.uid + D.triggerCard.market;
+                            var btn = this.addActionButton(btnName, s,
                                 (evt)=>{
-                                    var elem = document.getElementById('discount' + D.triggerCard.uid);
+                                    var elem = document.getElementById(btnName)
                                     this.togglePowerButton(elem);
                                 }
                             );
-                            var elem = document.getElementById('discount' + D.triggerCard.uid);
+                            var elem = document.getElementById(btnName)
                             elem.dataset["uid"] = (D.triggerCard.market == 'du') ? D.triggerCard.uid : 0; // 0 indicates a distiller ability
                             elem.classList.add("powerButton")
                             elem.classList.add("powerCard")
