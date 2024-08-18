@@ -34,15 +34,17 @@ class view_distilled_distilled extends game_view
         return "distilled";
     }
     
-  	function build_page( $viewArgs )
-  	{		
-  	    // Get players & players number
+    function build_page( $viewArgs )
+    {       
+        // Get players & players number
         $players = $this->game->loadPlayersBasicInfos();
         $players_nbr = count( $players );
+        $solo_mode = $players_nbr == 1;
 
-        /*********** Place your code below:  ************/
-
-
-        /*********** Do not change anything below this line  ************/
-  	}
+        if (!$solo_mode) {
+          // hide the solo goals section
+          $this->page->begin_block("distilled_distilled.tpl", "solo_goals");
+          $this->page->insert_template("solo_goals", '', []);
+        }
+    }
 }

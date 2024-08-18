@@ -111,6 +111,21 @@
       "id": 40,
       "name": "Total Points",
       "type": "int"
+    },
+    "solo_goals": {
+      "id": 70,
+      "name": "Solo Goals Achieved",
+      "type": "int"
+    },
+    "points_solo": {
+      "id": 71,
+      "name": "Solo Goals Target",
+      "type": "int"
+    },
+    "solo_swap_used": {
+      "id": 72,
+      "name": "Solo Goals Swap Used",
+      "type": "bool"
     }
   }
 }

@@ -62,6 +62,9 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
                 <tr id="scoring-row-total" class="line-above">
                     <td id="text-total" class="first-column translateme">Total</td>
                 </tr>
+                <tr id="scoring-row-target" class="invisible">
+                    <td class="first-column translateme">Target</td>
+                </tr>
             </table>
         </div>
     </div>
@@ -78,7 +81,25 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
 
 <div id="revealedCards" class="invisible"> </div>
 <div id="mainShared" class="mainShared">
-    <div id="market" class="dwhiteblock market">
+<!-- BEGIN solo_goals -->
+    <div id="mainTabs" class="mainTabsContainer invisible">
+        <div id="mainTabMarket" class="mainTab selectedTab translateme">Market</div>
+        <div id="mainTabSoloGoals" class="mainTab translateme">Solo Goals</div>
+    </div>
+    <div id="soloGoals" class="dwhiteblock soloGoals invisible" style="margin-top: 0">
+        <div id="soloGoalsTarget">
+            <div id="soloGoalsTargetLabel" class="translateme">Solo Target</div>
+            <div id="soloGoalsTargetValue"> </div>
+        </div>
+        <div id="soloGoalsSwap"> </div>
+        <div id="soloGoals5" class="soloGoalsRow"> </div>
+        <div id="soloGoals4" class="soloGoalsRow"> </div>
+        <div id="soloGoals3" class="soloGoalsRow"> </div>
+        <div id="soloGoals2" class="soloGoalsRow"> </div>
+        <div id="soloGoals1" class="soloGoalsRow"> </div>
+    </div>
+<!-- END solo_goals -->
+    <div id="market" class="dwhiteblock market" style="margin-top: 0">
         <div id="whatCanIMake" class="whatCanIMake"> </div>
         <div id="remainingDiv" class="invisible"></div>
         <div id="basicMarket2" class="basicMarket">
@@ -190,6 +211,7 @@ var jstpl_player_supplement = '\
             <div></div>\
             <div class="player_board">\
                 <span id="score_counter_${PID}" class="money_board"></span>\
+                <span id="solo_goal_target_container" class="invisible"> / <span id="solo_goal_target"></span></span>\
                 <span class="icon-sp-em"></span>\
             </div>\
             <div></div>\
@@ -220,6 +242,13 @@ var jstpl_player_supplement = '\
             </div>\
         </div>\
         <div id="player_label_board_${PID}" class="player_label_supplement">\
+        </div>\
+        <div id="player_board_soloGoals" class="soloGoals_pb invisible">\
+            <div id="soloGoals5_pb" class="soloGoalsRow_pb"> </div>\
+            <div id="soloGoals4_pb" class="soloGoalsRow_pb"> </div>\
+            <div id="soloGoals3_pb" class="soloGoalsRow_pb"> </div>\
+            <div id="soloGoals2_pb" class="soloGoalsRow_pb"> </div>\
+            <div id="soloGoals1_pb" class="soloGoalsRow_pb"> </div>\
         </div>\
     </div>\
 ';
@@ -295,6 +324,8 @@ var jstpl_player_section = '\
 var jstpl_flight_card='<div id="myFlightCard" class="flightCard"> </div>';
 
 var jstpl_card='<div id="bm-card-${UID}-front" class="marketCard dcard2" style="background-position-x: -${X_OFF}px; background-position-y: -${Y_OFF}px"> </div>';
+
+var jstpl_solo_goal='<div id="soloGoal-card-${UID}" class="card soloGoalCard ${STATE}" style="background-position-x: -${X_OFF}px; background-position-y: -${Y_OFF}px"> </div>';
 
 var jstpl_cube='<div id="recipe-cube" class="${COLOR}Cube"> </div>';
 

@@ -56,6 +56,12 @@ class Region {
     const AMERICAS = "AMERICAS";
 }
 
+class CUBENAME {
+    const BRONZE = "bronze";
+    const SILVER = "silver";
+    const GOLD = "gold";
+}
+
 class Card {
     public int $uid;
     public int $card_id;
@@ -134,6 +140,77 @@ class SpiritAward {
     }
 }
 
+class SoloGoalType {
+    const DISTILL = 1;
+    const SELL = 2;
+    const COLLECT = 3;
+    const EARN = 4;
+    const SWAP = 5;
+}
+
+class SoloGoal {
+    public int $uid;
+    public int $type;
+    public string $tier;
+    public int $awardSP;
+    public int $awardMoney;
+    public int $goalPoints;
+    public array $market;
+    public bool $revealed;
+    public bool $unlocked;
+    public bool $completed;
+    public bool $achieved;
+    public int $imgF;
+    public int $imgB;
+
+    function __construct($uid, $type, $imgF, $imgB, $tier, $awardSP, $awardMoney, $goalPoints = 0, $market = [], $unlocked = false) {
+        $this->uid = $uid;
+        $this->type = $type;
+        $this->imgF = $imgF;
+        $this->imgB = $imgB;
+        $this->tier = $tier;
+        $this->awardSP = $awardSP;
+        $this->awardMoney = $awardMoney;
+        $this->goalPoints = $goalPoints;
+        $this->market = $market;
+        $this->unlocked = $unlocked;
+    }
+}
+
+class SoloDeck {
+    public string $tier;
+    public $cards = array();
+
+    function __construct($tier, $cards, $app) {
+        $this->tier = $tier;
+        $this->app = $app;
+
+        foreach ($cards as $card) {
+            $this->cards[] = $card;
+        }
+    }
+
+    function init() {
+        shuffle($this->cards);
+
+        $sql = "INSERT INTO solo_goal (uid, type, tier) VALUES ";
+        $values = array();
+        foreach ($this->cards as $card) {
+            $values[] = sprintf("(%d, %d, '%s')", $card->uid, $card->type, $this->tier);
+        }
+        $sql .= implode(',', $values);
+        $this->app->DbQuery( $sql );
+    }
+
+    function remove( $uid ) {
+        foreach ($this->cards as $key=>$card) {
+            if ($this->cards[$key]->uid == $uid) {
+                unset($this->cards[$key]);
+            }
+        }
+    }
+}
+
 class Cube {
     const BRONZE = 0;
     const SILVER = 1;
@@ -202,7 +279,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => false,
                         'barrel' => Barrel::METAL,
-                        'cube' => 'bronze',
+                        'cube' => CUBENAME::BRONZE,
                         'region' => Region::AMERICAS,
                         'label' => 11,
                         'allowed' => array(Sugar::PLANT)),
@@ -212,7 +289,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => false,
                         'barrel' => Barrel::METAL,
-                        'cube' => 'bronze',
+                        'cube' => CUBENAME::BRONZE,
                         'region' => Region::ASIA,
                         'label' => 13,
                         'allowed' => array(Sugar::GRAIN)),
@@ -222,7 +299,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => false,
                         'barrel' => Barrel::METAL,
-                        'cube' => 'silver',
+                        'cube' => CUBENAME::SILVER,
                         'region' => Region::EUROPE,
                         'label' => 9,
                         'allowed' => array(Sugar::FRUIT)),
@@ -232,7 +309,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => true,
                         'barrel' => Barrel::WOOD,
-                        'cube' => 'silver',
+                        'cube' => CUBENAME::SILVER,
                         'region' => Region::HOME,
                         'label' => 15,
                         'allowed' => array(Sugar::GRAIN)),
@@ -242,7 +319,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => true,
                         'barrel' => Barrel::WOOD,
-                        'cube' => 'silver',
+                        'cube' => CUBENAME::SILVER,
                         'region' => Region::AMERICAS,
                         'label' => 6,
                         'allowed' => array(Sugar::PLANT)),
@@ -252,7 +329,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => true,
                         'barrel' => Barrel::CLAY,
-                        'cube' => 'gold',
+                        'cube' => CUBENAME::GOLD,
                         'region' => Region::ASIA,
                         'label' => 10,
                         'allowed' => array(Sugar::GRAIN)),
@@ -262,7 +339,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => true,
                         'barrel' => Barrel::WOOD,
-                        'cube' => 'gold',
+                        'cube' => CUBENAME::GOLD,
                         'label' => 14,
                         'region' => Region::EUROPE,
                         'allowed' => array(Sugar::FRUIT)),
@@ -272,7 +349,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => false,
                         'barrel' => Barrel::METAL,
-                        'cube' => 'bronze',
+                        'cube' => CUBENAME::BRONZE,
                         'label' => 16,
                         'region' => Region::EUROPE,
                         'allowed' => array(Sugar::GRAIN, Sugar::PLANT)),
@@ -282,7 +359,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => true,
                         'barrel' => Barrel::CLAY,
-                        'cube' => 'bronze',
+                        'cube' => CUBENAME::BRONZE,
                         'label' => 12,
                         'region' => Region::ASIA,
                         'allowed' => array(Sugar::GRAIN)),
@@ -292,7 +369,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => false,
                         'barrel' => Barrel::METAL,
-                        'cube' => 'silver',
+                        'cube' => CUBENAME::SILVER,
                         'label' => 18,
                         'region' => Region::ASIA,
                         'allowed' => array(Sugar::PLANT)),
@@ -302,7 +379,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => true,
                         'barrel' => Barrel::CLAY,
-                        'cube' => 'silver',
+                        'cube' => CUBENAME::SILVER,
                         'label' => 20,
                         'region' => Region::EUROPE,
                         'allowed' => array(Sugar::FRUIT)),
@@ -312,7 +389,7 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => false,
                         'barrel' => Barrel::METAL,
-                        'cube' => 'silver',
+                        'cube' => CUBENAME::SILVER,
                         'label' => 19,
                         'region' => Region::AMERICAS,
                         'allowed' => array(Sugar::FRUIT)),
@@ -322,14 +399,14 @@ class distilled extends Table
                         'value' => 0,
                         'aged' => true,
                         'barrel' => Barrel::WOOD,
-                        'cube' => 'gold',
+                        'cube' => CUBENAME::GOLD,
                         'label' => 7,
                         'region' => Region::AMERICAS,
                         'allowed' => array(Sugar::PLANT)),
         );
 
         switch ($flight) {
-            case '1':
+            case '1': // A
                 $this->recipeFlight = array(
                     $this->recipeMap['cachaca'],
                     $this->recipeMap['soju'],
@@ -340,7 +417,7 @@ class distilled extends Table
                     $this->recipeMap['brandy']
                 );
                 break;
-            case '2':
+            case '2': // B
                 $this->recipeFlight = array(
                     $this->recipeMap['aquavit'],
                     $this->recipeMap['shochu'],
@@ -351,7 +428,7 @@ class distilled extends Table
                     $this->recipeMap['tequila'],
                 );
                 break;
-            case '3':
+            case '3': // C
                 $this->recipeFlight = array(
                     $this->recipeMap['aquavit'],
                     $this->recipeMap['soju'],
@@ -362,7 +439,7 @@ class distilled extends Table
                     $this->recipeMap['brandy'],
                 );
                 break;
-            case '4':
+            case '4': // D
                 $this->recipeFlight = array(
                     $this->recipeMap['aquavit'],
                     $this->recipeMap['lambanog'],
@@ -373,7 +450,7 @@ class distilled extends Table
                     $this->recipeMap['tequila'],
                 );
                 break;
-            case '5':
+            case '5': // E
                 $this->recipeFlight = array(
                     $this->recipeMap['cachaca'],
                     $this->recipeMap['gin'],
@@ -384,7 +461,7 @@ class distilled extends Table
                     $this->recipeMap['tequila'],
                 );
                 break;
-            case '6':
+            case '6': // F
                 $this->recipeFlight = array(
                     $this->recipeMap['cachaca'],
                     $this->recipeMap['soju'],
@@ -395,7 +472,7 @@ class distilled extends Table
                     $this->recipeMap['baijiu'],
                 );
                 break;
-            case '7':
+            case '7': // G
                 $this->recipeFlight = array(
                     $this->recipeMap['aquavit'],
                     $this->recipeMap['cachaca'],
@@ -406,7 +483,7 @@ class distilled extends Table
                     $this->recipeMap['whiskey'],
                 );
                 break;
-            case '8':
+            case '8': // H
                 $this->recipeFlight = array(
                     $this->recipeMap['shochu'],
                     $this->recipeMap['grappa'],
@@ -438,8 +515,8 @@ class distilled extends Table
     }
 
 
-	function __construct( )
-	{
+    function __construct( )
+    {
         // Your global variables labels:
         //  Here, you can assign labels to global variables you are using for this game.
         //  You can use any number of global variables with IDs between 10 and 99.
@@ -455,11 +532,28 @@ class distilled extends Table
             "powercard" => 14,
             "reactIdx" => 15,
             "distillersSelected" => 16,
+            "resumeStateId" => 17,
+            "inRoundEnd" => 18,
+            "points_per_round_1" => 19,
+            "money_per_round_1" => 20,
+            "points_per_round_2" => 21,
+            "money_per_round_2" => 22,
+            "points_per_round_3" => 23,
+            "money_per_round_3" => 24,
+            "points_per_round_4" => 25,
+            "money_per_round_4" => 26,
+            "points_per_round_5" => 27,
+            "money_per_round_5" => 28,
+            "points_per_round_6" => 29,
+            "money_per_round_6" => 30,
+            "points_per_round_7" => 31,
+            "money_per_round_7" => 32,
+            "points_per_round_8" => 33,
             "flight" => 100,
             "pairings" => 101,
             "setup" => 102,
+            "difficulty" => 103,
         ) );
-        
 
         // Add Alcohol
         // TODO give this a real card number backed by something
@@ -661,6 +755,81 @@ Purchase it or return it to the bottom of the deck.`
             new Card(158, clienttranslate("West Champion"), 0, 0, 0, CardType::GOAL),
             new Card(159, clienttranslate("Woody"), 0, 0, 0, CardType::GOAL),
         );
+
+        $this->solo_goal_cards_a = array(
+            new SoloGoal(101, SoloGoalType::COLLECT, 1, 0, "A", 0, 0, 70),
+            new SoloGoal(102, SoloGoalType::COLLECT, 2, 0, "A", 0, 0, 75),
+            new SoloGoal(103, SoloGoalType::COLLECT, 3, 0, "A", 0, 0, 75),
+            new SoloGoal(104, SoloGoalType::COLLECT, 4, 0, "A", 0, 0, 65),
+            new SoloGoal(105, SoloGoalType::COLLECT, 5, 0, "A", 0, 0, 70),
+            new SoloGoal(106, SoloGoalType::COLLECT, 6, 0, "A", 0, 0, 70),
+            new SoloGoal(107, SoloGoalType::COLLECT, 7, 0, "A", 0, 0, 75),
+            new SoloGoal(108, SoloGoalType::COLLECT, 8, 0, "A", 0, 0, 70),
+            new SoloGoal(109, SoloGoalType::COLLECT, 9, 0, "A", 0, 0, 65),
+            new SoloGoal(110, SoloGoalType::COLLECT, 10, 0, "A", 0, 0, 70),
+            new SoloGoal(111, SoloGoalType::COLLECT, 11, 0, "A", 0, 0, 65),
+        );
+        foreach ($this->solo_goal_cards_a as $c) {
+            $this->AllSoloCards[$c->uid] = $c;
+        }
+        $this->solo_goal_cards_b = array(
+            new SoloGoal(201, SoloGoalType::COLLECT, 33, 13, "B", 0, 0, 14, [[3,4],[2,4],[1,3,4]]),
+            new SoloGoal(202, SoloGoalType::SELL, 34, 14, "B", 0, 0, 11, [[3,4],[2,4],[2,4]]),
+            new SoloGoal(203, SoloGoalType::SELL, 35, 15, "B", 0, 0, 15, [[1,4],[1,2,4],[2,4]]),
+            new SoloGoal(204, SoloGoalType::COLLECT, 36, 16, "B", 0, 0, 14, [[3,4],[1,2,4],[3,4]]),
+            new SoloGoal(205, SoloGoalType::COLLECT, 37, 17, "B", 0, 0, 11, [[2,4],[1,2,4],[3,4]]),
+            new SoloGoal(206, SoloGoalType::SELL, 38, 18, "B", 0, 0, 13, [[2,4],[1,3,4],[2,4]]),
+            new SoloGoal(207, SoloGoalType::COLLECT, 39, 19, "B", 0, 0, 12, [[2,4],[2,3,4],[1,4]]),
+            new SoloGoal(208, SoloGoalType::SELL, 40, 20, "B", 0, 0, 12, [[2,4],[3,4],[2,3,4]]),
+            new SoloGoal(209, SoloGoalType::COLLECT, 41, 21, "B", 0, 0, 15, [[2,4],[1,4],[1,3,4]]),
+            new SoloGoal(210, SoloGoalType::COLLECT, 42, 22, "B", 0, 0, 13, [[1,4],[1,4],[1,2,4]]),
+            new SoloGoal(211, SoloGoalType::SELL, 43, 23, "B", 0, 0, 10, [[3,4],[3,4],[1,2,4]]),
+            new SoloGoal(212, SoloGoalType::SELL, 44, 24, "B", 0, 0, 14, [[3,4],[2,3,4],[1,4]]),
+            new SoloGoal(213, SoloGoalType::SELL, 45, 25, "B", 0, 0, 13, [[1,4],[3,4],[2,3,4]]),
+            new SoloGoal(214, SoloGoalType::SELL, 46, 26, "B", 0, 0, 11, [[3,4],[1,4],[1,4]]),
+            new SoloGoal(215, SoloGoalType::SELL, 47, 27, "B", 0, 0, 12, [[1,4],[3,4],[1,4]]),
+            new SoloGoal(216, SoloGoalType::EARN, 48, 28, "B", 0, 0, 13, [[1,4],[2,4],[3,4]]),
+            new SoloGoal(217, SoloGoalType::COLLECT, 49, 29, "B", 0, 0, 12, [[1,4],[3,4],[2,4]]),
+            new SoloGoal(218, SoloGoalType::SELL, 50, 30, "B", 0, 0, 10, [[2,4],[1,4],[3,4]]),
+        );
+        foreach ($this->solo_goal_cards_b as $c) {
+            $this->AllSoloCards[$c->uid] = $c;
+        }
+        $this->solo_goal_cards_c = array(
+            new SoloGoal(301, SoloGoalType::COLLECT, 54, 53, "C", 2, 0),
+            new SoloGoal(302, SoloGoalType::SELL, 55, 53, "C", 2, 0),
+            new SoloGoal(303, SoloGoalType::SELL, 56, 53, "C", 0, 2),
+            new SoloGoal(304, SoloGoalType::SELL, 57, 53, "C", 2, 0),
+            new SoloGoal(305, SoloGoalType::COLLECT, 58, 53, "C", 1, 1),
+            new SoloGoal(306, SoloGoalType::SELL, 59, 53, "C", 1, 1),
+            new SoloGoal(307, SoloGoalType::EARN, 60, 53, "C", 1, 0),
+            new SoloGoal(308, SoloGoalType::SELL, 61, 53, "C", 0, 2),
+            new SoloGoal(309, SoloGoalType::EARN, 62, 53, "C", 0, 2),
+            new SoloGoal(310, SoloGoalType::DISTILL, 63, 53, "C", 0, 3),
+            new SoloGoal(311, SoloGoalType::COLLECT, 64, 53, "C", 1, 1),
+            new SoloGoal(312, SoloGoalType::DISTILL, 65, 53, "C", 0, 3),
+            new SoloGoal(313, SoloGoalType::SELL, 66, 53, "C", 2, 0),
+            new SoloGoal(314, SoloGoalType::SELL, 67, 53, "C", 2, 0),
+            new SoloGoal(315, SoloGoalType::SELL, 68, 53, "C", 0, 2),
+            new SoloGoal(316, SoloGoalType::SELL, 69, 53, "C", 1, 0),
+            new SoloGoal(317, SoloGoalType::COLLECT, 70, 53, "C", 2, 0),
+            new SoloGoal(318, SoloGoalType::SELL, 71, 53, "C", 1, 1),
+        );
+        foreach ($this->solo_goal_cards_c as $c) {
+            $this->AllSoloCards[$c->uid] = $c;
+        }
+
+        $this->solo_goal_cards_special = array(
+            new SoloGoal(401, SoloGoalType::SWAP, 78, 79, "S", 0, 0, 5),
+        );
+        foreach ($this->solo_goal_cards_special as $c) {
+            $this->AllSoloCards[$c->uid] = $c;
+        }
+
+        $this->solo_goal_deck_a = new SoloDeck("A", $this->solo_goal_cards_a, $this);
+        $this->solo_goal_deck_b = new SoloDeck("B", $this->solo_goal_cards_b, $this);
+        $this->solo_goal_deck_c = new SoloDeck("C", $this->solo_goal_cards_c, $this);
+        $this->solo_goal_deck_special = new SoloDeck("S", $this->solo_goal_cards_special, $this);
 
         $this->signature_ing_cards = array(
             new Card(1,  clienttranslate('Sangiovese Grapes'), 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
@@ -1005,13 +1174,13 @@ Purchase it or return it to the bottom of the deck.`
             clienttranslate("1 free item"),
             clienttranslate("1 free distillery upgrade"),
         );
-	}
-	
+    }
+    
     protected function getGameName( )
     {
-		// Used for translations and stuff. Please do not modify.
+        // Used for translations and stuff. Please do not modify.
         return "distilled";
-    }	
+    }   
 
     /*
         setupNewGame:
@@ -1063,8 +1232,10 @@ Purchase it or return it to the bottom of the deck.`
         self::initStat( 'player', 'silver_labels', 0 );  // Init a player statistics (for all players)
         self::initStat( 'player', 'gold_labels', 0 );  // Init a player statistics (for all players)
         self::initStat( 'player', 'basic_labels', 0 );  // Init a player statistics (for all players)
-        self::initStat( 'player', 'goals_achieved', 0 );  // Init a player statistics (for all players)
-        self::initStat( 'player', 'spirit_awards_achieved', 0 );  // Init a player statistics (for all players)
+        if (count($players) > 1) {
+            self::initStat( 'player', 'goals_achieved', 0 );  // Init a player statistics (for all players)
+            self::initStat( 'player', 'spirit_awards_achieved', 0 );  // Init a player statistics (for all players)
+        }
         self::initStat( 'player', 'signature_spirit', 0 );  // Init a player statistics (for all players)
         self::initStat( 'player', 'points_ingame', 0);
         self::initStat( 'player', 'points_bottles', 0);
@@ -1074,11 +1245,34 @@ Purchase it or return it to the bottom of the deck.`
         self::initStat( 'player', 'points_dus', 0);
         self::initStat( 'player', 'points_total', 0);
 
+        if (count($players) == 1) {
+            self::initStat( 'player', 'points_solo', 0);
+            self::initStat( 'player', 'solo_goals', 0);
+            self::initStat( 'player', 'solo_swap_used', 0);            
+
+            self::setGameStateInitialValue( 'points_per_round_1', 0);
+            self::setGameStateInitialValue( 'money_per_round_1', 0);
+            self::setGameStateInitialValue( 'points_per_round_2', 0);
+            self::setGameStateInitialValue( 'money_per_round_2', 0);
+            self::setGameStateInitialValue( 'points_per_round_3', 0);
+            self::setGameStateInitialValue( 'money_per_round_3', 0);
+            self::setGameStateInitialValue( 'points_per_round_4', 0);
+            self::setGameStateInitialValue( 'money_per_round_4', 0);
+            self::setGameStateInitialValue( 'points_per_round_5', 0);
+            self::setGameStateInitialValue( 'money_per_round_5', 0);
+            self::setGameStateInitialValue( 'points_per_round_6', 0);
+            self::setGameStateInitialValue( 'money_per_round_6', 0);
+            self::setGameStateInitialValue( 'points_per_round_7', 0);
+            self::setGameStateInitialValue( 'money_per_round_7', 0);
+            self::setGameStateInitialValue( 'points_per_round_8', 0);
+        }
+
         // TODO: setup the initial game situation here
         self::setGameStateInitialValue( 'turn', 1 );
         self::setGameStateInitialValue( 'exitDistill', false);
         self::setGameStateInitialValue( 'reactIdx', null);
         self::setGameStateInitialValue( 'distillersSelected', false);
+        self::setGameStateInitialValue( 'resumeStateId', 0);
         //self::setGameStateInitialValue( 'playerPassedSell', array());
 
         $this->globals->set("DISTILLERS_SELECTED", []);
@@ -1091,7 +1285,7 @@ Purchase it or return it to the bottom of the deck.`
 
         if ($firstTaste)
             $this->setupFirstTaste();
-
+        
         $this->dealToIndex($this->distilleryDeck, 1);
         $this->dealToIndex($this->distilleryDeck, 2);
         $this->dealToIndex($this->distilleryDeck, 3);
@@ -1108,7 +1302,6 @@ Purchase it or return it to the bottom of the deck.`
         $this->dealToIndex($this->itemsDeck, 4);
         
         $this->flavorDeck->init();
-
 
         if ($firstTaste) {
             $flight = 1;
@@ -1205,58 +1398,89 @@ Purchase it or return it to the bottom of the deck.`
         $this->distillerShuffle = array_values($distillers);
         shuffle($this->distillerShuffle);
 
-        //$this->originalAwards = $this->spirit_awards;
-        // Set up spirit awards
-        shuffle($this->spirit_awards);
-        $saList = array();
+        // Solo mode
+        if (count($players) == 1) {
+            switch ($flight) {
+                case 7:
+                    $this->solo_goal_deck_a->remove(111);
+                    $this->solo_goal_deck_b->remove(214);
+                    $this->solo_goal_deck_b->remove(217);
+                    break;
+            }
 
-        // deal n+1 spirit awards
-        for ($i = 0; count($saList) < count($players) + 1; $i++) {
-            // If using G which does not have gold recipes, do not use Olympic Spirit or Gold Digger
-            $sa = array_pop($this->spirit_awards);
-            if ($flight == 7 && ($sa->uid == 8 || $sa->uid == 21)) 
-                continue;
-    
-            // On flight D or H with two players, do not  use quantity over quality
-            if (($flight == 4 || $flight == 5 || $flight == 8) && count($players) == 2 && $sa->uid == 22)
-                continue;
+            $this->solo_goal_deck_a->init();
+            $this->solo_goal_deck_b->init();
+            $this->solo_goal_deck_c->init();
+            $this->solo_goal_deck_special->init();
 
-            // On flight D with two players, do not use up with the sun or  North and South
-            if ($flight == 4 && count($players) == 2 && ($sa->uid == 20 || $sa->uid == 9))
-                continue;
+            $this->solo_dealRow("C", 1, 2, 1, 1);
+            if ($this->getGameStateValue('difficulty') > 1) {
+                $this->solo_dealRow("B", 2, 3, 0, 0);
+            } else {
+                $this->solo_dealRow("C", 2, 3, 0, 0);
+            }
+            $this->solo_dealRow("B", 3, 4, 1, 0);
+            if ($this->getGameStateValue('difficulty') > 0) {
+                $this->solo_dealRow("B", 4, 3, 0, 0);
+            } else {
+                $this->solo_dealRow("C", 4, 3, 0, 0);
+            }
+            $this->solo_dealRow("A", 5, 2, 1, 0);
 
-            // On flight E with 2 players, sun never sets and up with the sun are impossible
-            if ($flight == 5 && count($players) == 2 && ($sa->uid == 17 || $sa->uid == 20)) 
-                continue;
+            self::setGameStateValue("inRoundEnd", 0);
+        } else {
+            //$this->originalAwards = $this->spirit_awards;
+            // Set up spirit awards
+            shuffle($this->spirit_awards);
+            $saList = array();
 
-            // On flight F with 2 players, sun never sets and north and south are impossible
-            if ($flight == 6 && count($players) == 2 && ($sa->uid == 9 || $sa->uid == 17)) 
-                continue;
+            // deal n+1 spirit awards
+            for ($i = 0; count($saList) < count($players) + 1; $i++) {
+                // If using G which does not have gold recipes, do not use Olympic Spirit or Gold Digger
+                $sa = array_pop($this->spirit_awards);
+                if ($flight == 7 && ($sa->uid == 8 || $sa->uid == 21)) 
+                    continue;
+        
+                // On flight D or H with two players, do not  use quantity over quality
+                if (($flight == 4 || $flight == 5 || $flight == 8) && count($players) == 2 && $sa->uid == 22)
+                    continue;
 
-            $saList[] = sprintf("(%d, 'market')", $sa->uid);
+                // On flight D with two players, do not use up with the sun or  North and South
+                if ($flight == 4 && count($players) == 2 && ($sa->uid == 20 || $sa->uid == 9))
+                    continue;
+
+                // On flight E with 2 players, sun never sets and up with the sun are impossible
+                if ($flight == 5 && count($players) == 2 && ($sa->uid == 17 || $sa->uid == 20)) 
+                    continue;
+
+                // On flight F with 2 players, sun never sets and north and south are impossible
+                if ($flight == 6 && count($players) == 2 && ($sa->uid == 9 || $sa->uid == 17)) 
+                    continue;
+
+                $saList[] = sprintf("(%d, 'market')", $sa->uid);
+            }
+            $sql = sprintf("INSERT INTO spirit_award (uid, location) VALUES %s",
+                implode(',', $saList));
+            self::dbQuery($sql);
+
+            if ($firstTaste) {
+                $this->firstTasteDistillers = [
+                    $this->distillers[2],
+                    $this->distillers[14],
+                    $this->distillers[16],
+                    $this->distillers[18],
+                    $this->distillers[30],
+                ];
+
+                $this->firstTasteGoals = [
+                    [165, 167, 151],
+                    [158, 148, 162],
+                    [152, 163, 160],
+                    [159, 161, 150],
+                    [153, 166, 156],
+                ];
+            }
         }
-        $sql = sprintf("INSERT INTO spirit_award (uid, location) VALUES %s",
-            implode(',', $saList));
-        self::dbQuery($sql);
-
-        if ($firstTaste) {
-            $this->firstTasteDistillers = [
-                $this->distillers[2],
-                $this->distillers[14],
-                $this->distillers[16],
-                $this->distillers[18],
-                $this->distillers[30],
-            ];
-
-            $this->firstTasteGoals = [
-                [165, 167, 151],
-                [158, 148, 162],
-                [152, 163, 160],
-                [159, 161, 150],
-                [153, 166, 156],
-            ];
-        }
-
 
         $firstPlayer = true;
         foreach( $players as $player_id => $player ) {
@@ -1264,7 +1488,6 @@ Purchase it or return it to the bottom of the deck.`
                 self::dbQuery("UPDATE player SET first_player = 1 WHERE player_id=$player_id");
                 $firstPlayer = false;
             }
-
             // Distillers
             if ($firstTaste) {
                 $this->setupFirstTasteDistillers($player_id);
@@ -1420,21 +1643,50 @@ Purchase it or return it to the bottom of the deck.`
         $result['signatureLabels'] = $distillerLabels;
         $result['distillerLabelInfo'] = $distillerLabelInfo;
 
-        $sql = "SELECT uid, location FROM spirit_award";
-        $spiritAwards = self::getCollectionFromDb($sql);
-        $saList = array();
-        foreach($spiritAwards as $sa_uid => $sa) {
-            $tmp = $this->spirit_awards[$sa['uid']];
-            $tmp->location = $sa['location'];
-            $saList[] = $tmp;
-        }
-        $result['spiritAwards'] = $saList;
+        if ($this->getPlayersNumber() > 1) {
+            $sql = "SELECT uid, location FROM spirit_award";
+            $spiritAwards = self::getCollectionFromDb($sql);
+            $saList = array();
+            foreach($spiritAwards as $sa_uid => $sa) {
+                $tmp = $this->spirit_awards[$sa['uid']];
+                $tmp->location = $sa['location'];
+                $saList[] = $tmp;
+            }
+            $result['spiritAwards'] = $saList;
 
-        // Get awarded spirit awards
-        $saAwarded = self::dbQuery("SELECT * from market_purchase WHERE action='sa'");
-        foreach ($saAwarded as $info) {
-            $result['saAwarded'][] = array('uid' => $info['uid'], 'player_id' => $info['player_id']);
-
+            // Get awarded spirit awards
+            $saAwarded = self::dbQuery("SELECT * from market_purchase WHERE action='sa'");
+            foreach ($saAwarded as $info) {
+                $result['saAwarded'][] = array('uid' => $info['uid'], 'player_id' => $info['player_id']);
+            }
+        } else { // Solo mode
+            // Get Solo Goals
+            $sgCards = self::getCollectionFromDb("SELECT * FROM solo_goal WHERE row IS NOT NULL ORDER BY row ASC, pos ASC");
+            $sgList = array();
+            foreach($sgCards as $uid => $card) {
+                $sg = new stdClass();
+                $ref = $this->AllSoloCards[$card["uid"]];
+                $sg->row = $card["row"];
+                $sg->pos = $card["pos"];
+                $sg->revealed = $card["revealed"] == "1";
+                $sg->unlocked = $card["unlocked"] == "1";
+                $sg->completed = $card["completed"] == "1";
+                $sg->achieved = $card["achieved"] == "1";
+                $sg->imgB = $ref->imgB;
+                if ($sg->revealed) {
+                    $sg->uid = $card["uid"];
+                    $sg->imgF = $ref->imgF;
+                    $sg->awardSP = $ref->awardSP;
+                    $sg->awardMoney = $ref->awardMoney;
+                    $sg->goalPoints = $ref->goalPoints;
+                }        
+                $sgList[] = $sg;
+            }
+            $result['solo_goal_text'] = $this->solo_goal_text;
+            $result['soloGoals'] = $sgList;
+            $result['soloSwapUsed'] = $this->getSoloGoalSwapState();
+            $result['soloActiveRow'] = $this->getSoloGoalActiveRow();
+            $result['totalGoalScore'] = $this->getSoloGoalTotalScore();
         }
 
         // TODO i think flavor cards can be revealed too
@@ -1469,8 +1721,10 @@ Purchase it or return it to the bottom of the deck.`
         // Only do this if distillers have been selected
         $result['whatCanIMake'] = $this->getWCIM();
         $result['firstTaste'] = self::getGameStateValue("setup") == 2;
-        $result['distillersSelectedArray'] = $this->globals->get("DISTILLERS_SELECTED"); 
-
+        $result['distillersSelectedArray'] = $this->globals->get("DISTILLERS_SELECTED");
+        /*if ($this->getStateName() != "chooseDistiller")
+            $result['state'] = $this->gamestate->state();
+        */
         return $result;
     }
 
@@ -1507,7 +1761,6 @@ Purchase it or return it to the bottom of the deck.`
     /*
         In this space, you can put any utility methods useful for your game logic
     */
-
     function setupFirstTaste() {
         // Glassblower 19
         // Tour guide 23
@@ -1771,7 +2024,6 @@ Purchase it or return it to the bottom of the deck.`
         );
     }
     public function canPlayerBuy($playerId) {
-
         // This is a protection for zombie mode
         if ($this->isPlayerZombie($playerId)) 
             return false;
@@ -1941,11 +2193,13 @@ Purchase it or return it to the bottom of the deck.`
         return $region;
     }
     public function getBottleRegionForPlayer($playerId, $bottleUid) {
-        $region = $this->AllCards[$bottleUid]->subtype;
-        if ($region == Region::HOME) {
-            return $this->getPlayerDistiller($playerId)->region;
+        if ($bottleUid) {
+            $region = $this->AllCards[$bottleUid]->subtype;
+            if ($region == Region::HOME) {
+                return $this->getPlayerDistiller($playerId)->region;
+            }
+            return $region;
         }
-        return $region;
     }
     public function playerHasLabelRegionMatch($playerId, $drinkInfo) {
         $label = $drinkInfo['label'];
@@ -2362,7 +2616,7 @@ Purchase it or return it to the bottom of the deck.`
                         $playerCount[$pid] = 0;
                     }
                     $r = $this->getRecipeByName($info['label'], $pid);
-                    if ($r['cube'] == 'silver') {
+                    if ($r['cube'] == CUBENAME::SILVER) {
                         $playerCount[$pid]++;
                     }
                 }
@@ -2401,7 +2655,7 @@ Purchase it or return it to the bottom of the deck.`
                         $playerCount[$pid] = 0;
                     }
                     $r = $this->getRecipeByName($info['label'], $pid);
-                    if ($r['cube'] == 'gold') {
+                    if ($r['cube'] == CUBENAME::GOLD) {
                         $playerCount[$pid]++;
                     }
                 }
@@ -2421,7 +2675,7 @@ Purchase it or return it to the bottom of the deck.`
                         $playerCount[$pid] = 0;
                     }
                     $r = $this->getRecipeByName($info['label'], $pid);
-                    if ($r['cube'] == 'bronze') {
+                    if ($r['cube'] == CUBENAME::BRONZE) {
                         $playerCount[$pid]++;
                     }
                 }
@@ -2507,8 +2761,7 @@ Purchase it or return it to the bottom of the deck.`
        return $state['name'];
     }
     public function getStateId() {
-       $state = $this->gamestate->state();
-       return $state['name'];
+       return $this->gamestate->state_id();
     }
     function array_replace_value($ar, $value, $replacement)
     {
@@ -2698,6 +2951,7 @@ Purchase it or return it to the bottom of the deck.`
             $slot = $this->getRecipeSlotFromName("Whiskey");
             $this->buyRecipe_internal($playerId, $slot, array(), $this->distillers[22]->name);
         }
+
     }
     function dealDistillers($player_id) {
         $distiller = null;
@@ -2723,19 +2977,22 @@ Purchase it or return it to the bottom of the deck.`
             $newC = $this->AllCards[$this->newBottomlessCard($i, $player_id, true)];
         }
         // Goals
-        $flight = self::getGameStateValue("flight");
-        for ($i = 0; $i < 3; $i++) {
-            $c = array_pop($this->goals_cards);
+        $playerCount = $this->getPlayersNumber();
+        if ($playerCount > 1) { // No player goals in solo mode
+            $flight = self::getGameStateValue("flight");
+            for ($i = 0; $i < 3; $i++) {
+                $c = array_pop($this->goals_cards);
 
-            // Do not use From The Earth on Flight G
-            if ($flight == 7 && $c->card_id == 146)  {
-                $i--;
-                continue; 
+                // Do not use From The Earth on Flight G
+                if ($flight == 7 && $c->card_id == 146)  {
+                    $i--;
+                    continue; 
+                }
+
+                $sql = sprintf("INSERT INTO distillery_goal (uid, card_id, player_id) 
+                                VALUES ('%s', %d, %d)", $c->uid, $c->card_id, $player_id);
+                self::DbQuery($sql);
             }
-
-            $sql = sprintf("INSERT INTO distillery_goal (uid, card_id, player_id) 
-                            VALUES ('%s', %d, %d)", $c->uid, $c->card_id, $player_id);
-            self::DbQuery($sql);
         }
     }
     function dealStartingCardsFirstTaste($player_id) {
@@ -2818,13 +3075,18 @@ Purchase it or return it to the bottom of the deck.`
             ));
         }
     }
-    function playerGains($playerId, $amount, $trigger_name, $trigger_uid=null) {
+    function playerGains($playerId, $amount, $trigger_name=null, $trigger_uid=null) {
         $sql = sprintf("UPDATE player SET money=money+%d WHERE player_id='%s'",
                         $amount, $playerId);
         self::DbQuery($sql);
 
-        if ($amount > 0)
+        if ($amount > 0) {
+            $turn = self::getGameStateValue("turn", 0);
             $this->incStat($amount, "money_gained", $playerId);
+            if ($turn >= 1 && $this->getPlayersNumber() == 1) {
+                $this->incGameStateValue(sprintf("money_per_round_%s", $turn), $amount);
+            }
+        }
 
         if ($trigger_name) {
             $normalAmount = abs($amount);
@@ -2861,6 +3123,11 @@ Purchase it or return it to the bottom of the deck.`
         self::DbQuery($sql);
 
         $this->incStat($amount, "points_total", $playerId);
+        $turn = self::getGameStateValue("turn", 0);
+        if ($turn >= 1 && $this->getPlayersNumber() == 1) {
+            $this->incGameStateValue(sprintf("points_per_round_%s", $turn), $amount);
+        }
+
         if ($trigger_name) {
             $normalAmount = abs($amount);
             if ($amount >= 0) {
@@ -2883,14 +3150,18 @@ Purchase it or return it to the bottom of the deck.`
             }
         }
     }
-    function playerPointsEndgame($playerId, $amount, $row, $trigger_name, $card=null) {
+    function playerPointsEndgame($playerId, $amount, $row, $trigger_name=null, $card=null) {
         $sql = sprintf("UPDATE player SET player_score=player_score+%d WHERE player_id='%s'",
                         $amount, $playerId);
         self::DbQuery($sql);
 
-
         $this->incStat($amount, sprintf("points_%s", $row), $playerId);
-        $this->incStat($amount, "points_total", $playerId);
+        if ($row != "solo") {
+            $this->incStat($amount, "points_total", $playerId);
+            if ($this->getPlayersNumber() == 1) {
+                $this->incGameStateValue("points_per_round_8", $amount);
+            }
+        }
         if ($trigger_name) {
             self::notifyAllPlayers( 'playerPointsEndgame', clienttranslate('${player_name} gains ${sp} <span class="icon-sp-em"></span> from ${card_name}'), array(
                 'i18n' => ['card_name'],
@@ -2957,6 +3228,7 @@ Purchase it or return it to the bottom of the deck.`
         ));
         self::dbQuery("UPDATE distiller SET discarded=1 WHERE player_id=${player_id} AND card_id != ${distillerId}");
 
+
         $distillersSelected = $this->globals->get("DISTILLERS_SELECTED");
         if (!$distillersSelected) // This is because not all games will have done this
             $distillersSelected = [];
@@ -3019,6 +3291,12 @@ Purchase it or return it to the bottom of the deck.`
         $market = $this->getMarketFromId($marketId);
         $deck = $this->getDeckFromId($marketId);
         $nextPhase = "buyCard";
+        // TBD: Does this logic need to be filtered by the current state?
+        // if (($this->getPlayersNumber() == 1 && ($this->getStateName() != 'playerBuyTurnReveal') && in_array($marketId, array('du', 'item'))) {
+        if ($this->getPlayersNumber() == 1 && in_array($marketId, array('du', 'item'))) {
+            // Solo mode and buying a DU or Item (no solo goals are based on having ingredients of any type in your pantry)
+            $nextPhase = "soloGoalCheck";
+        }
         $usedPowers = array();
         $turn = self::getGameStateValue("turn", 0);
 
@@ -3230,11 +3508,11 @@ Purchase it or return it to the bottom of the deck.`
 
     function getCostOfRecipeSlot( $recipeSlot ) {
         $r = $this->getRecipeFromSlot($recipeSlot);
-        if ($r["cube"] == "bronze") {
+        if ($r["cube"] == CUBENAME::BRONZE) {
             return 2;
-        } else if ($r["cube"] == "silver") {
+        } else if ($r["cube"] == CUBENAME::SILVER) {
             return 4;
-        } else if ($r["cube"] == "gold") {
+        } else if ($r["cube"] == CUBENAME::GOLD) {
             return 6;
         }
     }
@@ -3441,8 +3719,10 @@ Purchase it or return it to the bottom of the deck.`
         else 
             self::notifyAllPlayers("endReveal", clienttranslate("No revealed cards to return to deck"), array());
 
-        if ($nextState)
-            $this->gamestate->nextState();
+        if ($nextState) {
+            $next = ($this->getPlayersNumber() == 1) ? "soloGoalCheck" : "nextPlayer";
+            $this->gamestate->nextState($next);
+        }
     }
     function stDistillMaster() {
         $this->gamestate->setAllPlayersMultiactive();
@@ -5051,7 +5331,8 @@ Purchase it or return it to the bottom of the deck.`
                 ));
                 if ($optForSp)  {
                     $this->stPlaceLabelForSp();
-                    $this->gamestate->nextState("placeLabelForSP");
+                    $next = ($this->getPlayersNumber() == 1) ? "soloGoalCheck" : "placeLabelForSP";
+                    $this->gamestate->nextState($next);
                     return;
                 } else  {
                     switch ($labelSlot) {
@@ -5082,7 +5363,8 @@ Purchase it or return it to the bottom of the deck.`
                             break;
 
                     }
-                    $this->gamestate->nextState(sprintf('label%d', $labelSlot));
+                    $next = ($this->getPlayersNumber() == 1) ? "soloGoalCheck" : sprintf('label%d', $labelSlot);
+                    $this->gamestate->nextState($next);
                     self::giveExtraTime(self::getActivePlayerId());
                 }
             } 
@@ -5100,7 +5382,8 @@ Purchase it or return it to the bottom of the deck.`
                 'hasLabel' => false,
                 'location' => $info["location"],
             ));
-            $this->gamestate->nextState("sellDrinkNoLabel");
+            $next = ($this->getPlayersNumber() == 1) ? "soloGoalCheck" : "sellDrinkNoLabel";
+            $this->gamestate->nextState($next);
         } 
     }
 
@@ -5158,7 +5441,7 @@ Purchase it or return it to the bottom of the deck.`
                 $sql = sprintf("UPDATE label SET count=count-1 WHERE location='market' AND label='%s'", $recipeName);
                 self::dbQuery($sql);
 
-                if ($recipe["cube"] != "bronze" && $recipe["cube"] != "silver" && $recipe["cube"] != "gold") {
+                if ($recipe["cube"] != CUBENAME::BRONZE && $recipe["cube"] != CUBENAME::SILVER && $recipe["cube"] != CUBENAME::GOLD) {
                     $stat = "basic_labels";
                 } else {
                     $stat = sprintf("%s_labels", $recipe["cube"]);
@@ -5194,7 +5477,8 @@ Purchase it or return it to the bottom of the deck.`
             "spirits" => $this->getSpirits(),
         ));
 
-        $this->gamestate->nextState("");
+        $next = ($this->getPlayersNumber() == 1) ? "soloGoalCheck" : "nextPlayer";
+        $this->gamestate->nextState($next);
     }
 
     function getRecipeNameFromSlot($recipeSlot, $playerId=null) {
@@ -5639,9 +5923,9 @@ Purchase it or return it to the bottom of the deck.`
                      "playerCards" => $cardList, 
                      //'whatCanIMake' => $this->getWCIM(),
                      // Debug only
-                    //"slot" => $slot,
-                    //"recipe" => $recipe,
-                    //"recipes" => $this->getRecipes(),
+                    // "slot" => $slot,
+                    // "recipe" => $recipe,
+                    // "recipes" => $this->getRecipes(),
                 );
     }
 
@@ -5673,6 +5957,7 @@ Purchase it or return it to the bottom of the deck.`
 
     function argSelectRecipe() {
 
+        //self::notifyAllPlayers("dbgdbg", "arg select recipe", array());
         $sql = sprintf('SELECT id, cards FROM drink WHERE player_id="%d" AND `recipe_slot` IS NULL',
             self::getActivePlayerId());
         $entry = self::getObjectFromDb($sql);
@@ -5699,6 +5984,15 @@ Purchase it or return it to the bottom of the deck.`
         }
         return $playerLabels;
     }
+
+    // Solo mode
+    function argsSoloGoalConfirm() {
+        $goals = $this->getCollectionFromDb("SELECT uid, type, row, pos FROM solo_goal WHERE achieved = 0 AND completed = 1 AND unlocked = 1");
+        return array(
+            'goals' => $goals
+        );
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions
 ////////////
@@ -5862,7 +6156,7 @@ Purchase it or return it to the bottom of the deck.`
                         }
                         break;
                     case 119: // Intern Researcher
-                        $score = self::getUniqueValueFromDb("SELECT COUNT(id) FROM recipe WHERE player_id=$player_id AND (color='silver' OR color='gold')");
+                        $score = self::getUniqueValueFromDb(sprintf("SELECT COUNT(id) FROM recipe WHERE player_id=$player_id AND (color='%s' OR color='%s')", CUBENAME::SILVER, CUBENAME::GOLD));
                         break;
                     case 120: // Warehouse Manager
                         $labels = self::getCollectionFromDb("SELECT * FROM label WHERE player_id=$player_id AND count != 0");
@@ -6438,6 +6732,31 @@ Purchase it or return it to the bottom of the deck.`
             $this->playerPointsEndgame($player_id, $score, "money", clienttranslate("converting <span class='icon-coin-em'></span> to <span class='icon-sp-em'></span>"));
         }
 
+        // Solo mode endgame - > >0 == win, else loss
+        if (count($playerList) == 1) {
+            // add negative points and if the total is still >0, they win
+            $goalRows = self::getUniqueValueFromDb("SELECT COUNT(DISTINCT row) FROM solo_goal WHERE achieved = 1");
+            if ($goalRows >= 5) { // Achieved one goal per tier
+                $targetScore = $this->getSoloGoalTotalScore();
+                self::notifyAllPlayers( 'playerPointsEndgame', clienttranslate('${player_name} completed one solo goal per row and has a solo target of ${target} <span class="icon-sp-em"></span>'), array(
+                    'target' => $targetScore,
+                    'sp' => -$targetScore,
+                    'player_name' => $this->getPlayerName($player_id),
+                    'player_id' => $player_id,
+                    'row' => 'target'
+                ));
+            } else { // Did not complete all the tiers - auto loss (negate all their points - rude!)
+                $targetScore = $this->getStat("points_total", $player_id);
+                self::notifyAllPlayers( 'playerPointsEndgame', clienttranslate('${player_name} failed to complete one solo goal per row and can not win'), array(
+                    'sp' => -$targetScore,
+                    'player_name' => $this->getPlayerName($player_id),
+                    'player_id' => $player_id,
+                    'row' => 'target'
+                ));
+            }
+            $this->playerPointsEndgame($player_id, -$targetScore, "solo");
+        }
+
         // set up tie breaking
         self::dbQuery("UPDATE player SET player_score_aux=money");
         if ($debug) {
@@ -6777,66 +7096,121 @@ Purchase it or return it to the bottom of the deck.`
         self::dbQuery("UPDATE bottomless_card SET location='player' WHERE location='tradeIn'");
         //$playerId = $this->setActiveFirstPlayer();
         //self::notifyAllPlayers("dbgdbg", "first player is now active", array('pid'=>$playerId));
-        $this->gamestate->nextState();
+        $this->gamestate->nextState("nextPlayer");
     }
 
     function stMarketEnd() {
         // Discard cards from the market
+        $playerCount = $this->getPlayersNumber();
 
-        // Do it twice if you have 2 or fewer players
-        $players = $this->loadPlayersBasicInfos();
-        $iterations = 1;
-        if (count($players) < 3) {
-            $iterations = 2;
-        }
-        
         $newCards = array();
         $newCardNames = array();
         $removedCards = array();
-        for ($i = 0; $i < $iterations; $i++) {
-            $sql = "
-                    SELECT uid, 'du' as market FROM distillery_upgrade
-                    WHERE location='market' and location_idx=4
-                    UNION ALL
-                    SELECT uid, 'ing' as market FROM premium_ingredient
-                    WHERE location='market' and location_idx=4
-                    UNION ALL
-                    SELECT uid, 'item' as market FROM premium_item
-                    WHERE location='market' and location_idx=4
-                    ";
-            $results = self::getCollectionFromDb($sql);
-            foreach ($results as $uid => $entry) {
-                $tmp = $this->AllCards[$uid];
-                $tmp->market = $entry["market"];
-                $removedCards[] = $tmp;
-            }
+        $marketCard = null;
 
-            $sql = sprintf("UPDATE distillery_upgrade SET location='truck'
-                            WHERE location_idx=4");
+        if ($playerCount > 1) {
+            // Do it twice if you have 2 or fewer players
+            $iterations = 1;
+            if ($playerCount < 3) {
+                $iterations = 2;
+            }
+            
+            for ($i = 0; $i < $iterations; $i++) {
+                $sql = "
+                        SELECT uid, 'du' as market FROM distillery_upgrade
+                        WHERE location='market' and location_idx=4
+                        UNION ALL
+                        SELECT uid, 'ing' as market FROM premium_ingredient
+                        WHERE location='market' and location_idx=4
+                        UNION ALL
+                        SELECT uid, 'item' as market FROM premium_item
+                        WHERE location='market' and location_idx=4
+                        ";
+                $results = self::getCollectionFromDb($sql);
+                foreach ($results as $uid => $entry) {
+                    $tmp = $this->AllCards[$uid];
+                    $tmp->market = $entry["market"];
+                    $removedCards[] = $tmp;
+                }
+
+                $sql = sprintf("UPDATE distillery_upgrade SET location='truck'
+                                WHERE location_idx=4");
+                self::dbQuery($sql);
+                $deck = $this->distilleryDeck;
+                $this->shiftMarketRight($deck, 4);
+                $dealt = $this->dealToIndex($deck, 1);
+                $newCards[] = $dealt;
+                $newCardNames[] = $this->AllCards[$dealt]->name;
+
+                $sql = sprintf("UPDATE premium_ingredient SET location='truck'
+                                WHERE location_idx=4");
+                self::dbQuery($sql);
+                $deck = $this->ingredientsDeck;
+                $this->shiftMarketRight($deck, 4);
+                $dealt = $this->dealToIndex($deck, 1);
+                $newCards[] = $dealt;
+                $newCardNames[] = $this->AllCards[$dealt]->name;
+                
+                $sql = sprintf("UPDATE premium_item SET location='truck'
+                                WHERE location_idx=4");
+                self::dbQuery($sql);
+                $deck = $this->itemsDeck;
+                $this->shiftMarketRight($deck, 4);
+                $dealt = $this->dealToIndex($deck, 1);
+                $newCards[] = $dealt;
+                $newCardNames[] = $this->AllCards[$dealt]->name;
+            }
+        } else { // solo mode
+            $marketCardUID = self::getUniqueValueFromDb("SELECT uid FROM solo_goal WHERE tier='B' AND row IS NULL AND used = false ORDER BY id LIMIT 1");
+            $marketCard = $this->AllSoloCards[$marketCardUID];
+            $sql = sprintf("SELECT uid, 'du' as market FROM distillery_upgrade WHERE location='market' and location_idx in (%s)
+                            UNION ALL
+                            SELECT uid, 'ing' as market FROM premium_ingredient WHERE location='market' and location_idx in (%s)
+                            UNION ALL
+                            SELECT uid, 'item' as market FROM premium_item WHERE location='market' and location_idx in (%s)",
+                        implode(',', $marketCard->market[0]),
+                        implode(',', $marketCard->market[1]),
+                        implode(',', $marketCard->market[2])
+                );
+                $results = self::getCollectionFromDb($sql);
+                foreach ($results as $uid => $entry) {
+                    $tmp = $this->AllCards[$uid];
+                    $tmp->market = $entry["market"];
+                    $removedCards[] = $tmp;
+                }
+
+            $sql = sprintf("UPDATE distillery_upgrade SET location='truck' WHERE location='market' AND location_idx in (%s)", implode(',', $marketCard->market[0]));
             self::dbQuery($sql);
             $deck = $this->distilleryDeck;
-            $this->shiftMarketRight($deck, 4);
-            $dealt = $this->dealToIndex($deck, 1);
-            $newCards[] = $dealt;
-            $newCardNames[] = $this->AllCards[$dealt]->name;
+            for ($i = 0; $i < count($marketCard->market[0]); $i++) {
+                $this->shiftMarketRight($deck, $marketCard->market[0][$i]);
+                $dealt = $this->dealToIndex($deck, 1);
+                $newCards[] = $dealt;
+                $newCardNames[] = $this->AllCards[$dealt]->name;
+            }
 
-            $sql = sprintf("UPDATE premium_ingredient SET location='truck'
-                            WHERE location_idx=4");
+            $sql = sprintf("UPDATE premium_ingredient SET location='truck' WHERE location='market' AND location_idx in (%s)", implode(',', $marketCard->market[1]));
             self::dbQuery($sql);
             $deck = $this->ingredientsDeck;
-            $this->shiftMarketRight($deck, 4);
-            $dealt = $this->dealToIndex($deck, 1);
-            $newCards[] = $dealt;
-            $newCardNames[] = $this->AllCards[$dealt]->name;
-            
-            $sql = sprintf("UPDATE premium_item SET location='truck'
-                            WHERE location_idx=4");
+            for ($i = 0; $i < count($marketCard->market[1]); $i++) {
+                $this->shiftMarketRight($deck, $marketCard->market[1][$i]);
+                $dealt = $this->dealToIndex($deck, 1);
+                $newCards[] = $dealt;
+                $newCardNames[] = $this->AllCards[$dealt]->name;
+            }
+
+            $sql = sprintf("UPDATE premium_item SET location='truck' WHERE location='market' AND location_idx in (%s)", implode(',', $marketCard->market[2]));
             self::dbQuery($sql);
             $deck = $this->itemsDeck;
-            $this->shiftMarketRight($deck, 4);
-            $dealt = $this->dealToIndex($deck, 1);
-            $newCards[] = $dealt;
-            $newCardNames[] = $this->AllCards[$dealt]->name;
+            for ($i = 0; $i < count($marketCard->market[2]); $i++) {
+                $this->shiftMarketRight($deck, $marketCard->market[2][$i]);
+                $dealt = $this->dealToIndex($deck, 1);
+                $newCards[] = $dealt;
+                $newCardNames[] = $this->AllCards[$dealt]->name;
+            }
+
+            $sql = sprintf("UPDATE solo_goal SET used = 1 WHERE uid = %d", $marketCard->uid);
+            self::dbQuery($sql);
         }
 
         $newCardTokens = [];
@@ -6860,6 +7234,15 @@ Purchase it or return it to the bottom of the deck.`
         $deckCounts['item'] = self::getUniqueValueFromDb("SELECT COUNT(*) FROM premium_item WHERE location='deck'");
         $deckCounts['ing'] = self::getUniqueValueFromDb("SELECT COUNT(*) FROM premium_ingredient WHERE location='deck'");
         $deckCounts['du'] = self::getUniqueValueFromDb("SELECT COUNT(*) FROM distillery_upgrade WHERE location='deck'");
+        if ($marketCard) {
+            $X_OFF = floor($marketCard->imgB % 10) * 122;
+            $Y_OFF = floor($marketCard->imgB / 10) * 190;
+            self::notifyAllPlayers(
+                "soloMarketDiscard", 
+                sprintf("%s <div class=\"card soloGoalCard\" style=\"background-position-x: -%dpx; background-position-y: -%dpx\"> </div>", clienttranslate('Market discard applied:'), $X_OFF, $Y_OFF), 
+                array()
+            );
+        }
         self::notifyAllPlayers("updateMarkets", 
             clienttranslate('Markets update at the end of the market phase, ${new_cards} added'), 
             array(
@@ -6868,9 +7251,9 @@ Purchase it or return it to the bottom of the deck.`
                     'args' => $newCardArgs,
                 ),
                 'new_markets' => $newMarkets,
-                'removed_slot' => (count($players) < 2) ? 3 : 4,
+                'removed_slot' => $playerCount == 1 ? $marketCard->market : ($playerCount < 2 ? [[3,4],[3,4],[3,4]] : [[4],[4],[4]]),
                 'removed_cards' => $removedCards,
-                'deck_counts' => $deckCounts,
+                'deck_counts' => $deckCounts
             ));
         
         $nextPlayer = $this->setActiveFirstPlayer();
@@ -6879,10 +7262,22 @@ Purchase it or return it to the bottom of the deck.`
     }
     function stRoundEnd() {
         $gs = self::getGameStateValue("turn");
+        self::notifyAllPlayers("roundEnd", 
+            clienttranslate('Ending round ${turn}'),
+            array(
+                'turn' => $gs
+            ));
         self::setGameStateValue("turn", $gs + 1);
 
         // TODO fix up next active player, move first player
-        if ($gs == 3) {
+        if ($this->getPlayersNumber() == 1) {
+            self::setGameStateValue("inRoundEnd", 1);
+            if ($gs == 7) {
+                $this->gamestate->nextState("endGame");
+            } else {
+                $this->gamestate->nextState("soloGoalCheck");
+            }
+        } else if ($gs == 3) {
             $this->gamestate->setAllPlayersMultiactive();
             $this->gamestate->nextState("discardGoals");
             $players = $this->loadPlayersBasicInfos();
@@ -7042,6 +7437,7 @@ Purchase it or return it to the bottom of the deck.`
                         JOIN distiller as d on d.player_id=pi.player_id
                         WHERE discarded=0 and location='signature' AND pi.player_id=%d",
                         self::getActivePlayerId());
+
         $sigUid = self::getUniqueValueFromDb($sql);
         $sigCard = $this->AllCards[$sigUid];
 
@@ -7247,6 +7643,7 @@ Purchase it or return it to the bottom of the deck.`
         $this->gamestate->nextState('nextPlayerDistill');
     }
     function stNextPlayerSellHack() {
+        self::activeNextPlayer();
         $pid = self::activeNextPlayer();
         while ($this->isPlayerZombie($pid)) {
             $pid = self::activeNextPlayer();
@@ -7309,12 +7706,11 @@ Purchase it or return it to the bottom of the deck.`
 
     function zombieTurn( $state, $active_player )
     {
-    	$statename = $state['name'];
+        $statename = $state['name'];
         $turn = self::getGameStateValue("turn");
-    	
+        
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
-                    //self::notifyAllPlayers("dbgdbg", '3 zombie ${state}', array('state' => $this->getStateName()));
                 case 'playerBuyTurnRevealSelect':
                     // TODO not handling zombies properly here
                     $sql = sprintf("INSERT INTO market_purchase (player_id, market_pass, turn) 
@@ -7350,7 +7746,7 @@ Purchase it or return it to the bottom of the deck.`
                 case 'roundStartAction':
                 case 'roundStartActionSelect':
                     $this->gamestate->nextState( "zombiePass" );
-                	break;
+                    break;
             }
 
             return;
@@ -7363,6 +7759,7 @@ Purchase it or return it to the bottom of the deck.`
                     $available = self::getUniqueValueFromDb("SELECT card_id FROM distiller WHERE player_id=$active_player LIMIT 1");
                     //self::notifyAllPlayers("dbgdbg", "choosing distiller", array('available' => $available, 'active_player'=>$active_player));
                     $this->selectDistillerAction($available, $active_player);
+
                     break;
                 case 'distill':
                     $this->skipDistill($active_player);
@@ -7373,6 +7770,8 @@ Purchase it or return it to the bottom of the deck.`
                 case 'discardGoals':
                     $goalUid = self::getUniqueValueFromDb("SELECT uid FROM distillery_goal WHERE player_id=$active_player LIMIT 1");
                     $this->discardGoal($goalUid, $active_player);
+                    return;
+                    //$this->gamestate->nextState("zombiePass");
                     break;
             }
             $this->gamestate->setPlayerNonMultiactive( $active_player, '' );
@@ -7948,9 +8347,15 @@ Purchase it or return it to the bottom of the deck.`
 
         $recipes = $this->getRecipes();
         foreach($recipes as $r) {
-            $ct = $playerCount;
-            if ($r['name'] == "Vodka" || $r['name'] == "Moonshine")
-                $ct *= 2;
+            if ($playerCount == 1) { // Solo mode
+                $ct = 5;
+                if ($r['name'] == "Vodka" || $r['name'] == "Moonshine")
+                    $ct = 7;
+            } else {
+                $ct = $playerCount;
+                if ($r['name'] == "Vodka" || $r['name'] == "Moonshine")
+                    $ct *= 2;
+            }
             $items[] = sprintf("('%s', 'market', %d)", $r["name"], $ct);
         }
 
@@ -7986,18 +8391,18 @@ Purchase it or return it to the bottom of the deck.`
      * 
      */
     public function LoadDebug()
-	{
-		// These are the id's from the BGAtable I need to debug.
-		// you can get them by running this query : SELECT JSON_ARRAYAGG(`player_id`) FROM `player`
-		$ids = [
+    {
+        // These are the id's from the BGAtable I need to debug.
+        // you can get them by running this query : SELECT JSON_ARRAYAGG(`player_id`) FROM `player`
+        $ids = [
             84056525,
             7350337,
-		];
+        ];
                 // You can also get the ids automatically with $ids = array_map(fn($dbPlayer) => intval($dbPlayer['player_id']), array_values($this->getCollectionFromDb('select player_id from player order by player_no')));
 
-		// Id of the first player in BGA Studio
-		$sid = 2383524;
-		
+        // Id of the first player in BGA Studio
+        $sid = 2383524;
+        
         $tables = ['bottomless_card', 
             'premium_ingredient',
             'distillery_upgrade',
@@ -8012,11 +8417,11 @@ Purchase it or return it to the bottom of the deck.`
             'premium_item',
             'recipe',
             'spirit_award'];
-		foreach ($ids as $id) {
-			// basic tables
-			self::DbQuery("UPDATE player SET player_id=$sid WHERE player_id = $id" );
-			self::DbQuery("UPDATE global SET global_value=$sid WHERE global_value = $id" );
-			self::DbQuery("UPDATE stats SET stats_player_id=$sid WHERE stats_player_id = $id" );
+        foreach ($ids as $id) {
+            // basic tables
+            self::DbQuery("UPDATE player SET player_id=$sid WHERE player_id = $id" );
+            self::DbQuery("UPDATE global SET global_value=$sid WHERE global_value = $id" );
+            self::DbQuery("UPDATE stats SET stats_player_id=$sid WHERE stats_player_id = $id" );
 
             foreach ($tables as $table) {
 
@@ -8024,10 +8429,10 @@ Purchase it or return it to the bottom of the deck.`
                 // tables specific to your schema that use player_ids
                 self::DbQuery("UPDATE $table SET player_id=$sid WHERE player_id = $id" );
             }
-			
-			++$sid;
-		}
-	}
+            
+            ++$sid;
+        }
+    }
     public function loadBugReportHelp() {
         $this->loadBugReportSQL(125469, [2383524, 2383525]);
     }
@@ -8067,26 +8472,959 @@ Purchase it or return it to the bottom of the deck.`
       $this->reloadPlayersBasicInfos();
     }
 
-function callZombie($numCycles = 1) { // Runs zombieTurn() on all active players
-    // Note: isMultiactiveState() doesn't work during this! It crashes without yielding an error.
-    self::notifyAllPlayers('dbgdbg', '<u>zombietest1 ${cycles} !</u>', ['cycles'=>$numCycles]);
-    for ($cycle = 0; $cycle < $numCycles; $cycle++) {
-        self::notifyAllPlayers('dbgdbg', '<u>zombietestLoop</u>', []);
-      $state = $this->gamestate->state();
-      $activePlayers = $this->gamestate->getActivePlayerList(); // this works in both active and multiactive states
-        self::notifyAllPlayers('dbgdbg', '<u>zombietest players ${count}</u>', 
-        ['count'=>count($activePlayers), 'players' => $activePlayers]);
+    function callZombie($numCycles = 1) { // Runs zombieTurn() on all active players
+        // Note: isMultiactiveState() doesn't work during this! It crashes without yielding an error.
+        self::notifyAllPlayers('dbgdbg', '<u>zombietest1 ${cycles} !</u>', ['cycles'=>$numCycles]);
+        for ($cycle = 0; $cycle < $numCycles; $cycle++) {
+            self::notifyAllPlayers('dbgdbg', '<u>zombietestLoop</u>', []);
+          $state = $this->gamestate->state();
+          $activePlayers = $this->gamestate->getActivePlayerList(); // this works in both active and multiactive states
+            self::notifyAllPlayers('dbgdbg', '<u>zombietest players ${count}</u>', 
+            ['count'=>count($activePlayers), 'players' => $activePlayers]);
 
-      // You can remove the notification if you find it too noisy
-      self::notifyAllPlayers('notifyZombie', '<u>ZombieTest cycle ${cycle} for ${statename}</u>', [
-        'cycle'     => $cycle+1,
-        'statename' => $state['name']
-      ]);
+          // You can remove the notification if you find it too noisy
+          self::notifyAllPlayers('notifyZombie', '<u>ZombieTest cycle ${cycle} for ${statename}</u>', [
+            'cycle'     => $cycle+1,
+            'statename' => $state['name']
+          ]);
 
-      // Make each active player take a zombie turn
-      foreach ($activePlayers as $key => $playerId) {
-        self::zombieTurn($state, (int)$playerId);
+          // Make each active player take a zombie turn
+          foreach ($activePlayers as $key => $playerId) {
+            self::zombieTurn($state, (int)$playerId);
+          }
+        }
       }
+
+    // SOLO MODE FUNCTIONS - START
+
+    function soloGoalsFilterDrinksByGoalType($drinks, $removeGoalType) {
+        if ($removeGoalType == SoloGoalType::COLLECT || $removeGoalType == SoloGoalType::EARN) { // Collection and Earn goals look at everything
+            return $drinks;
+        }
+        $out = array();
+        foreach ($drinks as $drink) { // array_filter is a thing, but... meh
+            if ($drink["goal_type"] != $removeGoalType) {
+                $out[] = $drink;
+            }
+        }
+        return $out;
     }
-  }
+
+    function stSoloGoalCheck_internal() {
+        $player_id = self::getActivePlayerId();
+        $turn = self::getGameStateValue("turn", 0);
+
+        $sgList = self::getCollectionFromDb("SELECT uid FROM solo_goal WHERE unlocked = 1 AND achieved = 0");
+        $drinksAll = self::getCollectionFromDb("SELECT d.*, sdu.goal_uid, sdu.goal_type FROM drink d LEFT OUTER JOIN solo_drinks_used sdu ON (d.id = sdu.drink_id) WHERE d.player_id=$player_id");
+        $cards = self::getCollectionFromDb("SELECT uid FROM premium_item WHERE (location='player' OR location='display') AND player_id=$player_id
+            UNION ALL
+            SELECT uid FROM distillery_upgrade WHERE location='player' AND player_id=$player_id");
+        $bottles = array(); // includes all bottles - not just those used in recipes
+        $du_equip = array();
+        $du_spec = array();
+        foreach ($cards as $c) {
+            $card = $this->AllCards[$c["uid"]];
+            if ($card->type == CardType::BOTTLE) {
+                $bottles[] = $card;
+            } else if ($card->type == CardType::DU) {
+                if ($card->subtype == DU::EQUIPMENT) {
+                    $du_equip[] = $card;
+                } else if ($card->subtype == DU::SPECIALIST) {
+                    $du_spec[] = $card;
+                }
+            }
+        }
+
+        $completed = array();
+        foreach ($sgList as $sg) {
+            $sgObj = $this->AllSoloCards[$sg["uid"]];
+            $sgObj->drinks = array();
+            $drinks = $this->soloGoalsFilterDrinksByGoalType($drinksAll, $sgObj->type);
+            
+            // self::notifyAllPlayers("soloGoalCheck", clienttranslate('Checking Solo Goals: ${uid} - Drinks: ${drinks}, Bottles: ${bottles}, Equip: ${du_equip}, Spec: ${du_spec}, Turn: ${turn}, Round End: ${re}'),array(
+            //         'uid' => $sg["uid"],
+            //         'drinks' => count($drinks),
+            //         'bottles' => count($bottles),
+            //         'du_equip' => count($du_equip),
+            //         'du_spec' => count($du_spec),
+            //         'turn' => $turn,
+            //         're' => self::getGameStateValue("inRoundEnd")
+            //     ));
+            
+            switch ($sgObj->uid) {
+            case 204: // X = 3, TYPE = E
+            case 209: // X = 3, TYPE = S
+                // Collect X DU of TYPE
+                $target = 100;
+                $type = DU::EQUIPMENT;
+                if ($sgObj->uid == 204 || $sgObj->uid == 209) {
+                    $target = 3;
+                    if ($sgObj->uid == 209) {
+                        $type = DU::SPECIALIST;
+                    }
+                }
+                if ($type == DU::EQUIPMENT) {
+                    if (count($du_equip) >= $target) {
+                        $completed[] = $sgObj;
+                    }
+                } else if ($type == DU::SPECIALIST) {
+                    if (count($du_spec) >= $target) {
+                        $completed[] = $sgObj;
+                    }
+                }
+                break;
+            case 301: // X = 1, Y = 2
+            case 101: // X = 2, Y = 3
+            case 102: // X = 5, Y = 1 (must be home region)
+            case 104: // X = 5, Y = 1 (must be non-home region)
+                // Collect X labels from Y diff regions
+                $regionCount = 100;
+                $target = 100;
+                if ($sgObj->uid == 301) {
+                    $target = 1;
+                    $regionCount = 2;
+                } else if ($sgObj->uid == 101) {
+                    $target = 2;
+                    $regionCount = 3;
+                } else if ($sgObj->uid == 102 || $sgObj->uid == 104) {
+                    $target = 5;
+                    $regionCount = 0; // not used
+                }
+                $regions = array();
+                $homeRegion = $this->getPlayerDistiller($player_id)->region;
+                $homeCount = 0;
+                $nonHomeCount = 0;
+                foreach ($drinks as $drink) {
+                    $recipe = $this->getRecipeFromSlot($drink["recipe_slot"], $player_id);
+                    $adjustedRegion = $this->getRecipeRegionForPlayer($player_id, $recipe);
+                    if (!array_key_exists($adjustedRegion, $regions)) {
+                        $regions[$adjustedRegion] = 1;
+                    } else {
+                        $regions[$adjustedRegion]++;
+                    }
+                    if ($adjustedRegion == $homeRegion) {
+                        $homeCount++;
+                    } else {
+                        $nonHomeCount++;
+                    }
+                }
+                if ($sgObj->uid == 102) {
+                    if ($homeCount >= $target) {
+                        $completed[] = $sgObj;
+                    }
+                } else if ($sgObj->uid == 104) {
+                    if ($nonHomeCount >= $target) {
+                        $completed[] = $sgObj;
+                    }
+                } else {
+                    $regionMatch = 0;
+                    foreach ($regions as $r) {
+                        if ($r >= $target) {
+                            $regionMatch++;
+                        }
+                    }
+                    if ($regionMatch >= $regionCount) {
+                        $completed[] = $sgObj;
+                    }
+                }
+                break;
+            case 302: // X = 8, TYPE = $
+            case 304: // X = 6, TYPE = $ (+bronze/silver from home region)
+            case 202: // X = 15, TYPE = $
+            case 308: // X = 8, TYPE = SP
+            case 208: // X = 20, TYPE = SP
+            case 213: // X = 16, TYPE = SP (+whiskey)
+            case 214: // X = 22, TYPE = SP (+gold)
+            case 215: // X = 18, TYPE = SP (+silver)
+                // Sell spirit >= ($X or X SP)
+                $target = 100;
+                $cubes = [];
+                if ($sgObj->uid == 302 || $sgObj->uid == 304 || $sgObj->uid == 202) {
+                    $type = "sale_value";
+                    switch ($sgObj->uid) {
+                    case 302:
+                        $target = 8;
+                        break;
+                    case 304:
+                        $target = 6;
+                        break;
+                    case 202:
+                        $target = 15;
+                        break;
+                    }
+                } else if ($sgObj->uid == 308 || $sgObj->uid == 208 || $sgObj->uid == 213 || $sgObj->uid == 214 || $sgObj->uid == 215) {
+                    $type = "sale_sp";
+                    switch ($sgObj->uid) {
+                    case 308:
+                        $target = 8;
+                        break;
+                    case 208:
+                        $target = 20;
+                        break;
+                    case 213:
+                        $target = 16;
+                        break;
+                    case 214:
+                        $cubes = [CUBENAME::GOLD];
+                        $target = 22;
+                        break;
+                    case 215:
+                        $cubes = [CUBENAME::SILVER];
+                        $target = 18;
+                        break;
+                    }
+                }
+                foreach ($drinks as $drink) {
+                    if ($drink[$type] >= $target && $drink["sold_turn"] == $turn) {
+                        if ($sgObj->uid == 304) {
+                            $recipe = $this->getRecipeFromSlot($drink["recipe_slot"], $player_id);
+                            $adjustedRegion = $this->getRecipeRegionForPlayer($player_id, $recipe);
+                            if ($adjustedRegion == $this->getPlayerDistiller($player_id)->region && in_array($recipe["cube"], [CUBENAME::BRONZE, CUBENAME::SILVER])) {
+                                $sgObj->drinks[] = $drink["id"];
+                                $completed[] = $sgObj;
+                                break;
+                            }
+                        } else if ($sgObj->uid == 213) {
+                            $slot = $this->getRecipeSlotFromName("Whiskey");
+                            if ($drink["recipe_slot"] == $slot) {
+                                $sgObj->drinks[] = $drink["id"];
+                                $completed[] = $sgObj;
+                                break;
+                            }
+                        } else if ($sgObj->uid == 214 || $sgObj->uid == 215) {
+                            $recipe = $this->getRecipeFromSlot($drink["recipe_slot"], $player_id);
+                            if (in_array($recipe["cube"], $cubes)) {
+                                $sgObj->drinks[] = $drink["id"];
+                                $completed[] = $sgObj;
+                                break;
+                            }
+                        } else {
+                            $sgObj->drinks[] = $drink["id"];
+                            $completed[] = $sgObj;
+                            break;
+                        }
+                    }
+                }
+                break;
+            case 207:
+                // Collect 3 bottles used on matching spirit region
+                $bottleCount = 0;
+                foreach ($drinks as $drink) {
+                    $recipe = $this->getRecipeFromSlot($drink["recipe_slot"], $player_id);
+                    $adjustedRegion = $this->getRecipeRegionForPlayer($player_id, $recipe);
+                    $bottleRegion = $this->getBottleRegionForPlayer($player_id, $drink["bottle_uid"]);
+                    if ($adjustedRegion == $bottleRegion) {
+                        $bottleCount++;
+                    }
+                }
+                if ($bottleCount >= 3) {
+                    $completed[] = $sgObj;
+                }
+                break;
+            case 210:
+                // Collect 5+ bottles (including storeroom)
+                if (count($bottles) >= 5) {
+                    $completed[] = $sgObj;
+                }
+                break;
+            case 303: // X = 3 (+bronze/silver)
+            case 212: // X = 5 (+aged)
+                // Sell spirit worth XSP more than recipe
+                $target = 100;
+                if ($sgObj->uid == 303) {
+                    $target = 3;
+                } else if ($sgObj->uid == 212) {
+                    $target = 5;
+                }
+                foreach ($drinks as $drink) {
+                    $recipe = $this->getRecipeFromSlot($drink["recipe_slot"], $player_id);
+                    if ($drink["sale_sp"] >= ($target + $recipe["sp"]) && $drink["sold_turn"] == $turn) {
+                        if ($sgObj->uid == 303) {
+                            if (in_array($recipe["cube"], [CUBENAME::BRONZE, CUBENAME::SILVER])) {
+                                $sgObj->drinks[] = $drink["id"];
+                                $completed[] = $sgObj;
+                                break;
+                            }
+                        } else if ($sgObj->uid == 212) {
+                            if ($recipe["aged"]) {
+                                $sgObj->drinks[] = $drink["id"];
+                                $completed[] = $sgObj;
+                                break;
+                            }
+                        } else {
+                            $sgObj->drinks[] = $drink["id"];
+                            $completed[] = $sgObj;
+                            break;
+                        }
+                    }
+                }
+                break;
+            case 201: // X = 3
+                // Collect X same labels
+                $target = 100;
+                if ($sgObj->uid == 201) {
+                    $target = 3;
+                }
+                $recipes = array();
+                foreach ($drinks as $drink) {
+                    if (!array_key_exists($drink["recipe_slot"], $recipes)) {
+                        $recipes[$drink["recipe_slot"]] = 1;
+                    } else {
+                        $recipes[$drink["recipe_slot"]]++;
+                    }
+                }
+                $complete = false;
+                foreach ($recipes as $r) {
+                    if ($r >= $target) {
+                        $complete = true;
+                        break;
+                    }
+                }
+                if ($complete) {
+                    $completed[] = $sgObj;
+                }
+                break;
+            case 305: // X = 2
+            case 105: // X = 6
+                // Collect X diff labels (proxy here is recipe_slot since moonshine/vodka use temp label_ids)
+                $target = 100;
+                if ($sgObj->uid == 305) {
+                    $target = 2;
+                } else if ($sgObj->uid == 105) {
+                    $target = 6;
+                }
+                $distinctLabels = array();
+                foreach ($drinks as $drink) {
+                    $distinctLabels[$drink["recipe_slot"]] = true;
+                }
+                if (count($distinctLabels) >= $target) {
+                    $completed[] = $sgObj;
+                }
+                break;
+            case 306: // X = 3, TYPE = sugars
+            case 313: // X = 3, TYPE = alchohol
+            case 314: // X = 2, TYPE = water
+            case 206: // X = 6, TYPE = alchohol
+            case 211: // X = 4, TYPE = flavor
+            case 218: // X = 5, TYPE = sugars
+                // Sell spirit containing >= X of TYPE cards
+                $target = 100;
+                $type = "NA";
+                if ($sgObj->uid == 306) {
+                    $target = 3;
+                    $type = CardType::SUGAR;
+                } else if ($sgObj->uid == 313) {
+                    $target = 3;
+                    $type = CardType::ALCOHOL;
+                } else if ($sgObj->uid == 314) {
+                    $target = 2;
+                    $type = CardType::WATER;
+                } else if ($sgObj->uid == 206) {
+                    $target = 6;
+                    $type = CardType::ALCOHOL;
+                } else if ($sgObj->uid == 211) {
+                    $target = 4;
+                    $type = CardType::FLAVOR;
+                } else if ($sgObj->uid == 218) {
+                    $target = 5;
+                    $type = CardType::SUGAR;
+                }
+                foreach ($drinks as $drink) {
+                    if ($drink["sold_turn"] == $turn) {
+                        $cardsFound = 0;
+                        $cardList = explode(',', $drink["cards"]);
+                        foreach ($cardList as $card) {
+                            $c = $this->AllCards[$card];
+                            if ($c->type == $type)
+                                $cardsFound++;
+                        }
+                        if ($cardsFound >= $target) {
+                            $sgObj->drinks[] = $drink["id"];
+                            $completed[] = $sgObj;
+                            break;
+                        }
+                    }
+                }
+                break;
+            case 307: // X = 8, TYPE = $
+            case 309: // X = 8, TYPE = SP
+            case 216: // X = 25, TYPE = SP
+                // Earn X TYPE or more in a round
+                $target = 10000;
+                $type = "money";
+                if ($sgObj->uid == 307) {
+                    $target = 8;
+                } else if ($sgObj->uid == 309) {
+                    $target = 8;
+                    $type = "points";
+                } else if ($sgObj->uid == 216) {
+                    $target = 25;
+                    $type = "points";
+                }
+                // We check the stat for the PRIOR turn since by the time this evaluates, the turn has already been incremented
+                if (self::getGameStateValue("inRoundEnd") == 1 && $this->getGameStateValue(sprintf("%s_per_round_%d", $type, ($turn - 1)), $player_id) >= $target) {
+                    $completed[] = $sgObj;
+                }
+                break;
+            case 203: // X = 2
+                // Sell X in one round
+                $target = 100;
+                if ($sgObj->uid == 203) {
+                    $target = 2;
+                }
+                $sold = 0;
+                foreach ($drinksAll as $drink) { // Using $drinksAll here since the first drink in a turn will have been filtered out, but is still valid
+                    if ($drink["sold_turn"] == $turn) {
+                        $sgObj->drinks[] = $drink["id"];
+                        $sold++;
+                    }
+                }
+                if ($sold >= $target) {
+                    $completed[] = $sgObj;
+                }
+                break;
+            case 310: // Distill: X = 1, AGED
+            case 106: // Collect: X = 4, AGED
+            case 107: // Collect: X = 6, NON-AGED
+                // Distill/Collect X aged/non-aged
+                $target = 100;
+                $aged = true;
+                $type = 0; // 0 = Distill, 1 = Collect
+                if ($sgObj->uid == 310) {
+                    $target = 1;
+                } else if ($sgObj->uid == 106) {
+                    $type = 1;
+                    $target = 4;
+                } else if ($sgObj->uid == 107) {
+                    $type = 1;
+                    $target = 6;
+                    $aged = false;
+                }
+                $found = 0;
+                foreach ($drinks as $drink) {
+                    $recipe = $this->getRecipeFromSlot($drink['recipe_slot'], $drink['player_id']);
+                    if ($aged) {
+                        if ($recipe['aged'] && (($type == 0 && $drink["first_turn"] == $turn) || $type == 1)) {
+                            if ($type == 0) {
+                                $sgObj->drinks[] = $drink["id"];
+                            }
+                            $found++;
+                        }
+                    } else {
+                        if (!$recipe['aged'] && (($type == 0 && $drink["first_turn"] == $turn) || $type == 1)) {
+                            if ($type == 0) {
+                                $sgObj->drinks[] = $drink["id"];
+                            }
+                            $found++;
+                        }
+                    }
+                }
+                if ($found >= $target) {
+                    $completed[] = $sgObj;
+                }
+                break;
+            case 217:
+                // Collect labels form all 3 barrel types
+                $barrelType = array();
+                foreach ($drinks as $drink) {
+                    $recipe = $this->getRecipeFromSlot($drink['recipe_slot'], $drink['player_id']);
+                    $barrelType[$recipe["barrel"]] = true;
+                }
+                if (count($barrelType) >= 3) {
+                    $completed[] = $sgObj;
+                }
+                break;
+            case 311: // Collect: X = 1, TYPE = Silver
+            case 316: // Sell: X = 1, TYPE = Bronze
+            case 317: // Collect: X = 2, TYPE = Bronze
+            case 111: // Collect: X = 3, TYPE = Gold
+            case 110: // Collect: X = 4, TYPE = Silver, Gold
+                // Sell/Collect X labels (drinks) of cube TYPE
+                $type = 0; // 1 = Collect, 2 = Sell
+                $target = 100;
+                $cubeTypes = [CUBENAME::BRONZE, CUBENAME::SILVER, CUBENAME::GOLD];
+                if ($sgObj->uid == 311) {
+                    $type = SoloGoalType::COLLECT;
+                    $target = 1;
+                    $cubeTypes = [CUBENAME::SILVER];
+                } else if ($sgObj->uid == 316) {
+                    $type = SoloGoalType::SELL;
+                    $target = 1;
+                    $cubeTypes = [CUBENAME::BRONZE];
+                } else if ($sgObj->uid == 317) {
+                    $type = SoloGoalType::COLLECT;
+                    $target = 2;
+                    $cubeTypes = [CUBENAME::BRONZE];
+                } else if ($sgObj->uid == 111) {
+                    $type = SoloGoalType::COLLECT;
+                    $target = 3;
+                    $cubeTypes = [CUBENAME::GOLD];
+                } else if ($sgObj->uid == 110) {
+                    $type = SoloGoalType::COLLECT;
+                    $target = 4;
+                    $cubeTypes = [CUBENAME::SILVER, CUBENAME::GOLD];
+                }
+                $labelsFound = 0;
+                foreach ($drinks as $drink) {
+                    $recipe = $this->getRecipeFromSlot($drink["recipe_slot"], $player_id);
+                    if ($type == SoloGoalType::COLLECT || ($type == SoloGoalType::SELL && $drink["sold_turn"] == $turn)) {
+                        if (in_array($recipe["cube"], $cubeTypes)) {
+                            if ($type == SoloGoalType::SELL) {
+                                $sgObj->drinks[] = $drink["id"];
+                            }
+                            $labelsFound++;
+                        }
+                    }
+                }
+                if ($labelsFound >= $target) {
+                    $completed[] = $sgObj;
+                }
+                break;
+            case 312:
+                // Distill signature
+                foreach ($drinks as $drink) {
+                    if ($drink["recipe_slot"] == 7) {
+                        $sgObj->drinks[] = $drink["id"];
+                        $completed[] = $sgObj;
+                        break;
+                    }
+                }
+                break;
+            case 315:
+                // Sell a spirit w/o basic sugar
+                foreach ($drinks as $drink) {
+                    if ($drink["sold_turn"] == $turn) {
+                        $cardsFound = 0;
+                        $cardList = explode(',', $drink["cards"]);
+                        foreach ($cardList as $card) {
+                            $c = $this->AllCards[$card];
+                            if ($c->type == CardType::SUGAR && $c->sp == 0) { // TODO: Using SP==0 to mean "basic sugar", but is that safe?
+                                $cardsFound++;
+                                break;
+                            }
+                        }
+                        if ($cardsFound == 0) {
+                            $sgObj->drinks[] = $drink["id"];
+                            $completed[] = $sgObj;
+                            break;
+                        }
+                    }
+                }
+                break;
+            case 318:
+                // Sell a spirit w/ 2+ sugars of same type
+                foreach ($drinks as $drink) {
+                    if ($drink["sold_turn"] == $turn) {
+                        $sugarTypes = array();
+                        $cardList = explode(',', $drink["cards"]);
+                        foreach ($cardList as $card) {
+                            $c = $this->AllCards[$card];
+                            if ($c->subtype) {
+                                if (!array_key_exists($c->subtype, $sugarTypes)) {
+                                    $sugarTypes[$c->subtype] = 1;
+                                } else {
+                                    $sugarTypes[$c->subtype]++;
+                                }
+                            }
+                        }
+                        $complete = false;
+                        foreach ($sugarTypes as $t) {
+                            if ($t >= 2) {
+                                $complete = true;
+                                break;
+                            }
+                        }
+                        if ($complete) {
+                            $sgObj->drinks[] = $drink["id"];
+                            $completed[] = $sgObj;
+                            break;
+                        }
+                    }
+                }
+                break;
+            case 103: // X = 5, TYPE = Grain
+            case 108: // X = 5, TYPE = Plant
+            case 109: // X = 5, TYPE = Fruit
+            case 205: // X = 1, TYPE = EA
+                // Collect X non-Vodka w/ TYPE
+                $target = 100;
+                $type = "NA";
+                if ($sgObj->uid == 103 || $sgObj->uid == 108 || $sgObj->uid == 109) {
+                    $target = 5;
+                    if ($sgObj->uid == 103) {
+                        $type = Sugar::GRAIN;
+                    } else if ($sgObj->uid == 108) {
+                        $type = Sugar::PLANT;
+                    } else if ($sgObj->uid == 109) {
+                        $type = Sugar::FRUIT;
+                    }
+                } else if ($sgObj->uid == 205) {
+                    $target = 1;
+                    $type = "EA";
+                }
+                $sugarTypes = array(
+                    Sugar::GRAIN => 0,
+                    Sugar::PLANT => 0,
+                    Sugar::FRUIT => 0
+                );
+                foreach ($drinks as $drink) {
+                    $recipe = $this->getRecipeFromSlot($drink["recipe_slot"], $drink["player_id"]);
+                    if ($recipe["name"] != "Vodka") {
+                        foreach ($recipe["allowed"] as $sugar) {
+                            $sugarTypes[$sugar]++;
+                        }
+                    }
+                }
+                // self::notifyAllPlayers("soloGoalCheck", clienttranslate('Checking Solo Goals: ${uid} Target: ${target}, Type: ${type} - Grain: ${grain}, Plant: ${plant}, Fruit: ${fruit}'), array(
+                //     'uid' => $sg["uid"],
+                //     'target' => $target,
+                //     'type' => $type,
+                //     'grain' => $sugarTypes[Sugar::GRAIN],
+                //     'plant' => $sugarTypes[Sugar::PLANT],
+                //     'fruit' => $sugarTypes[Sugar::FRUIT]
+                // ));
+                if ($type == "EA") {
+                    if ($sugarTypes[Sugar::GRAIN] >= $target && $sugarTypes[Sugar::PLANT] >= $target && $sugarTypes[Sugar::FRUIT] >= $target) {
+                        $completed[] = $sgObj;
+                    }
+                } else if ($sugarTypes[$type] >= $target) {
+                    $completed[] = $sgObj;
+                }
+                break;
+            }
+        }
+
+        if (count($completed) > 0) {
+            $labels = array();
+            foreach($completed as $c) {
+                $labels[] = $this->getSoloGoalLabelFromID($c->uid);
+            }
+            self::notifyAllPlayers("soloGoalCheckDebug", clienttranslate('${player_name} has qualified for the solo goal${plural} ${labels}'), array(
+                "player_name" => $this->getPlayerName($player_id),
+                "plural" => (count($labels) > 1) ? "s" : "",
+                "labels" => implode(' and ', $labels)
+            ));
+        } else {
+            self::setGameStateValue("inRoundEnd", 0);
+        }
+        return $completed;
+    }
+
+    function stSoloGoalCheck() {
+        if ($this->getSoloGoalActiveRow() < 5) { // Once the top is reached (aka: an "A" goal is done), don't check for more goals to complete
+            $completed = $this->stSoloGoalCheck_internal();
+        } else {
+            $completed = array();
+        }
+        $turn = self::getGameStateValue("turn");
+        if (count($completed) > 0) {
+            foreach ($completed as $completedGoal) {
+                $sql = sprintf("UPDATE solo_goal SET completed = 1, drink_ids = '%s' WHERE uid = %d", implode(",", $completedGoal->drinks), $completedGoal->uid);
+                self::dbQuery($sql);
+            }
+
+            if ($this->getStateName() != 'soloGoalCheckLoop') { // If not in the loop, capture how to get back to the current game state
+                $state = $this->gamestate->state();
+                if (array_key_exists("nothingAchieved", $state["transitions"])) {
+                    self::setGameStateValue("resumeStateId", $state["transitions"]["nothingAchieved"]);
+                }
+            }
+            $this->gamestate->nextState("soloGoalConfirm"); // Player needs to confirm/deny the goal
+        } else {
+
+            $this->soloGoalMarkDrinksInvalid();
+            
+            if ($this->getStateName() == 'soloGoalCheckLoop') { // If in the loop but nothing new was completed, return to the resume state
+                $jumpState = self::getGameStateValue("resumeStateId");
+                if ($jumpState == 0) { // This is likely an error, but try to recover anyways...
+                     $jumpState = this.getStateId();
+                }
+                self::setGameStateValue("resumeStateId", 0);
+                if ($turn == 8) { // turn == 8 means we should be jumping to game end
+                    $jumpState = 98;
+                }
+                $this->gamestate->jumpToState($jumpState);
+            } else {
+                $this->gamestate->nextState("nothingAchieved"); // If nothing was completed and not in the loop, continue forward in the state
+            }
+        }
+    }
+
+    function solo_dealRow($tier, $row, $count, $revealed, $unlocked) {
+        $sgList = self::getCollectionFromDb("SELECT uid FROM solo_goal WHERE row IS NULL AND tier='$tier' ORDER BY id ASC LIMIT $count");
+        $pos = 0;
+        foreach ($sgList as $key => $r) {
+            $sql = sprintf("UPDATE solo_goal SET row=%d, pos=%d, revealed=%d, unlocked=%d WHERE uid=%d", $row, $pos, $revealed, $unlocked, $r["uid"]);
+            self::DbQuery($sql);
+            $pos++;
+        }
+    }
+
+    function getSoloGoalByLocation( $row, $pos ) {
+        $card_id = self::getUniqueValueFromDb(sprintf("SELECT uid FROM solo_goal WHERE row = %d AND pos = %d", $row, $pos));
+        if ($card_id) {
+            return $this->AllSoloCards[$card_id];
+        }
+        return false;
+    }
+
+    function getSoloGoalLabelFromID( $card_id ) {
+        $card = $this->AllSoloCards[$card_id];
+        return sprintf('%s%d', $card->tier, ($card_id % 100));
+    }
+
+    function getSoloGoalTotalScore() {
+        $sgList = self::getCollectionFromDb("SELECT uid FROM solo_goal WHERE achieved = 1");
+        $total = 0;
+        foreach ($sgList as $sg) {
+            $sgObj = $this->AllSoloCards[$sg["uid"]];
+            $total += $sgObj->goalPoints;
+        }
+        return $total;
+    }
+
+    function getSoloGoalActiveRow() {
+        $row = self::getUniqueValueFromDb("SELECT row FROM solo_goal WHERE achieved = 1 ORDER BY row DESC LIMIT 1");
+        if ($row) {
+            return $row;
+        }
+        return 1;
+    }
+
+    function soloGoalMarkDrinksInvalid() {
+        // This prevents the first drink sold in a turn from being valid for goals after a second drink is sold
+        $player_id = self::getActivePlayerId();
+
+        $drinksDistilled = self::getCollectionFromDb(sprintf("SELECT d.id FROM drink d LEFT OUTER JOIN solo_drinks_used sdu ON (d.id = sdu.drink_id AND sdu.goal_type = %d) WHERE sdu.drink_id IS NULL AND d.location = 'washback' AND d.player_id=%d", SoloGoalType::DISTILL, $player_id));
+        foreach ($drinksDistilled as $drink) {
+            self::dbQuery(sprintf("INSERT INTO solo_drinks_used SET drink_id = %d, goal_type = %d", $drink["id"], SoloGoalType::DISTILL));
+        }
+        $drinksSold = self::getCollectionFromDb(sprintf("SELECT d.id FROM drink d LEFT OUTER JOIN solo_drinks_used sdu ON (d.id = sdu.drink_id AND sdu.goal_type = %d) WHERE sdu.drink_id IS NULL AND d.location = 'sold' AND d.player_id=%d", SoloGoalType::SELL, $player_id));
+        foreach ($drinksSold as $drink) {
+            self::dbQuery(sprintf("INSERT INTO solo_drinks_used SET drink_id = %d, goal_type = %d", $drink["id"], SoloGoalType::SELL));
+        }
+    }
+
+    function soloGoalsFindUnlockedForAchieved( $row, $pos, $includeNeighbors ) {
+        $newGoals = array();
+
+        if ($includeNeighbors) {
+            $leftNeighbor = $this->getSoloGoalByLocation($row, $pos-1);
+            if ($leftNeighbor) {
+                $leftNeighbor->loc = sprintf('%d_%d', $row, $pos-1);
+                $leftNeighbor->revealed = 1;
+                $leftNeighbor->unlocked = 1;
+                $newGoals[] = $leftNeighbor;
+            }
+
+            $rightNeighbor = $this->getSoloGoalByLocation($row, $pos+1);
+            if ($rightNeighbor) {
+                $rightNeighbor->loc = sprintf('%d_%d', $row, $pos+1);
+                $rightNeighbor->revealed = 1;
+                $rightNeighbor->unlocked = 1;
+                $newGoals[] = $rightNeighbor;
+            }
+        }
+        
+        $newRow = $row + 1;
+        if ($newRow < 4) {
+            $g = $this->getSoloGoalByLocation($newRow, $pos);
+            $g->loc = sprintf('%d_%d', $newRow, $pos);
+            $g->revealed = 1;
+            $g->unlocked = 1;
+            $newGoals[] = $g;
+            $g = $this->getSoloGoalByLocation($newRow, $pos + 1);
+            $g->loc = sprintf('%d_%d', $newRow, $pos + 1);
+            $g->revealed = 1;
+            $g->unlocked = 1;
+            $newGoals[] = $g;
+        } else if ($newRow <= 5) {
+            if ($pos > 0) {
+                $g = $this->getSoloGoalByLocation($newRow, $pos - 1);
+                $g->loc = sprintf('%d_%d', $newRow, $pos - 1);
+                $g->revealed = 1;
+                $g->unlocked = 1;
+                $newGoals[] = $g;
+            }
+            if ($row + $pos < 6) {
+                $g = $this->getSoloGoalByLocation($newRow, $pos);
+                $g->loc = sprintf('%d_%d', $newRow, $pos);
+                $g->revealed = 1;
+                $g->unlocked = 1;
+                $newGoals[] = $g;
+            }
+        }
+        if (count($newGoals) > 0) {
+            self::dbQuery(sprintf('UPDATE solo_goal SET revealed = 1, unlocked = 1 WHERE uid IN (%s)', implode(",", array_column($newGoals, "uid"))));
+        }
+        return $newGoals;
+    }
+
+    function completeSoloGoal( $card_id ) {
+        // Note: specifically NOT running checkAction since this can be called from any state
+        $player_id = self::getActivePlayerId();
+        $turn = self::getGameStateValue("turn");
+
+        $completedGoal = self::getObjectFromDb(sprintf("SELECT * FROM solo_goal WHERE uid = %d AND completed = 1", $card_id)); // Get location of goal and confirm it's able to be completed
+        if ($completedGoal) {
+            $goal = $this->AllSoloCards[$card_id];
+
+            self::dbQuery(sprintf("UPDATE solo_goal SET achieved = 1, turn_achieved = %d WHERE uid = %d", $turn, $card_id));
+            foreach (explode(",", $completedGoal["drink_ids"]) as $drink_id) {
+                self::dbQuery(sprintf("INSERT INTO solo_drinks_used SET goal_uid = %d, drink_id = %d, goal_type = %d", $card_id, $drink_id, $goal->type));
+            }
+            $this->incStat(1, "solo_goals", $player_id);
+            if ($goal->awardSP > 0) {
+                $this->playerPoints($player_id, $goal->awardSP);
+            }
+            if ($goal->awardMoney > 0) {
+                $this->playerGains($player_id, $goal->awardMoney);
+            }
+
+            // Reset all goals
+            self::dbQuery("UPDATE solo_goal SET completed = 0, unlocked = 0 WHERE row IS NOT NULL");
+
+            // See if there are any other goals achieved in this row; we'll need to keep those unlocked as well
+            $otherAchieved = self::getCollectionFromDb(sprintf("SELECT * FROM solo_goal WHERE achieved = 1 AND (row = %d OR row = %d) AND uid != %d", $completedGoal["row"], $completedGoal["row"]-1, $card_id));
+            $existingGoals = array();
+            foreach($otherAchieved as $oa) {
+                $existingGoals = array_merge($existingGoals, $this->soloGoalsFindUnlockedForAchieved($oa["row"], $oa["pos"], ($oa["row"] == $completedGoal["row"])));
+            }
+
+            // Unlock new cards
+            $newGoals = $this->soloGoalsFindUnlockedForAchieved($completedGoal["row"], $completedGoal["pos"], true);
+
+            if ($goal->awardSP || $goal->awardMoney) {
+                self::notifyAllPlayers("soloGoalComplete", clienttranslate('${player_name} completed a solo goal in row ${goalRow} worth ${money} <span class="icon-coin-em"></span> and ${sp} <span class="icon-sp-em"></span>.'), array(
+                    "player_id" => $player_id,
+                    "player_name" => $this->getPlayerName($player_id),
+                    "goalRow" => $completedGoal["row"],
+                    "money" => $goal->awardMoney,
+                    "sp" => $goal->awardSP,
+                    "achievedGoal" => sprintf('%d_%d', $completedGoal["row"], $completedGoal["pos"]),
+                    "unlockedGoals" => array_merge($newGoals, $existingGoals),
+                    "activeRow" => $completedGoal["row"],
+                ));
+            } else {
+                self::notifyAllPlayers("soloGoalComplete", clienttranslate('${player_name} completed a solo goal in row ${goalRow} that has a target score of ${goalScore} (total target score is ${totalGoalScore}).'), array(
+                    "player_id" => $player_id,
+                    "player_name" => $this->getPlayerName($player_id),
+                    "goalRow" => $completedGoal["row"],
+                    "goalScore" => $goal->goalPoints,
+                    "totalGoalScore" => $this->getSoloGoalTotalScore(),
+                    "achievedGoal" => sprintf('%d_%d', $completedGoal["row"], $completedGoal["pos"]),
+                    "unlockedGoals" => array_merge($newGoals, $existingGoals),
+                    "activeRow" => $completedGoal["row"],
+                ));
+            }
+        } else {
+            throw new BgaSystemException('Solo goal ${card_id} is not able to be achieved.');
+        }
+
+        $this->gamestate->nextState('soloGoalLoop'); // Since we just unlocked more goals, it's possible some of those can also be completed - loop time
+    }
+
+    function skipSoloGoal() {
+        self::checkAction("skipSoloGoal");
+
+        // "Collect" type goals do not have to be completed right away, but the other types do. Update all those other types to not be "completed"
+
+        $completedGoals = self::getCollectionFromDb(sprintf("SELECT uid FROM solo_goal WHERE completed = 1 AND type != %d", SoloGoalType::COLLECT));
+        foreach ($completedGoals as $goal) {
+            $this->AllSoloCards[$goal["uid"]]->completed = false;
+        }
+        $sql = sprintf("UPDATE solo_goal SET completed = 0, drink_ids = NULL WHERE completed = 1 AND type != %d", SoloGoalType::COLLECT);
+        self::dbQuery($sql);
+
+        $this->soloGoalMarkDrinksInvalid();
+
+        self::notifyAllPlayers("soloGoalSkipped", clienttranslate('${player_name} skipped completing a solo goal.'), array(
+            "player_name" => $this->getPlayerName(self::getActivePlayerId())
+        ));
+
+        $jumpState = self::getGameStateValue("resumeStateId");
+        self::setGameStateValue("resumeStateId", 0);
+        $this->gamestate->jumpToState($jumpState);
+    }
+
+    function getSoloGoalSwapState() {
+        $achieved = self::getUniqueValueFromDb("SELECT achieved FROM solo_goal WHERE uid = 401");
+        if ($achieved == "1") {
+            return true;
+        }
+        return false;
+    }
+
+    function soloGoalSwapUse($row, $pos) {
+        $player_id = self::getActivePlayerId();
+        
+        $posList = explode("_", $pos); // Won't let me use a comma in the sending of this value :-\
+        $pos = implode(",", $posList);
+
+        // Begin by fixing all the cards above the target cards - do this first as it makes referencing the tree easier
+
+        // Reset the unlock state of all goals in the row above the target row
+        if ($row < 5) { //top row; don't need
+            self::dbQuery(sprintf("UPDATE solo_goal SET unlocked = 0 WHERE row = %d", ($row + 1)));
+        }
+
+        $priorAchievedPosList = self::getCollectionFromDb(sprintf("SELECT pos FROM solo_goal WHERE row = %d AND achieved = 1", ($row - 1)));
+        $swappedGoals = self::getCollectionFromDb(sprintf("SELECT * FROM solo_goal WHERE row = %d AND pos IN (%s)", $row, $pos));
+        $swappedLabels = array();
+        $unlockedGoals = array(); // This will contain any goals that need to be unlocked
+        $lockGoals = array(); // Any goals that need to be locked
+        foreach ($swappedGoals as $goal) {
+            $swappedLabels[] = $this->getSoloGoalLabelFromID($goal["uid"]);
+            $newPos = ($posList[0] == $goal["pos"] ? $posList[1] : $posList[0]); // Whichever one this equals, it's moving to the other
+            $this->AllSoloCards[$goal["uid"]]->pos = $newPos;
+            self::dbQuery(sprintf("UPDATE solo_goal SET pos = %d WHERE uid = %d", $newPos, $goal["uid"]));
+            
+            if ($goal["achieved"]) { // This goal was achieved, so unlock new cards based on the new position
+                if ($row < 5) { // top row; don't need
+                    $unlockedGoals = array_merge($unlockedGoals, $this->soloGoalsFindUnlockedForAchieved($row, $newPos, ($row == $this->getSoloGoalActiveRow())));
+                }
+            } else if ($row > 1) { // Don't need to worry about anything else if swapping row 1 card
+                // row <= 3 prior pos are x-1 and x, row > 3 prior pos are x and x+1
+                if (($row <= 3 && (array_key_exists(($newPos - 1), $priorAchievedPosList) || array_key_exists($newPos, $priorAchievedPosList))) ||
+                    ($row > 3 && (array_key_exists($newPos, $priorAchievedPosList) || array_key_exists(($newPos - 1), $priorAchievedPosList)))) {
+                    // A prior goal is achieved; reveal and unlock this goal if it is not already
+                    if (!$goal["revealed"] || !$goal["unlocked"]) {
+                        self::dbQuery(sprintf('UPDATE solo_goal SET revealed = 1, unlocked = 1 WHERE uid = %s', $goal["uid"]));
+                        $g = $this->AllSoloCards[$goal["uid"]];
+                        $g->loc = sprintf('%d_%d', $row, $newPos);
+                        $unlockedGoals[] = $g;
+                    }
+                } else {
+                    // A prior goal is NOT achieved; leave the revealed as it is, but lock this goal and remove any completed flag (it will be "recompleted" if it unlocks)
+                    self::dbQuery(sprintf('UPDATE solo_goal SET unlocked = 0, completed = 0 WHERE uid = %s', $goal["uid"]));
+                    $lockGoals[] = sprintf('%d_%d', $row, $newPos);
+                }
+            }
+        }
+
+        self::dbQuery("UPDATE solo_goal SET achieved = 1 WHERE uid = 401");
+        $this->setStat(true, "solo_swap_used", $player_id);
+
+        self::notifyAllPlayers("soloGoalsSwapped", clienttranslate('${player_name} swapped two solo goals - ${swap1} and ${swap2}.'), array(
+            "player_name" => $this->getPlayerName($player_id),
+            "swap1" => $swappedLabels[0],
+            "swap2" => $swappedLabels[1],
+            "row" => $row,
+            "pos" => $pos,
+            "unlockedGoals" => $unlockedGoals,
+            "lockGoals" => $lockGoals,
+            "totalGoalScore" => $this->getSoloGoalTotalScore(),
+        ));
+
+        // If any new goals were unlocked, it's possible that they could be claimed
+        if (count($unlockedGoals) > 0) {
+            $jumpState = self::getGameStateValue("resumeStateId");
+            if ($jumpState == 0) { // We aren't in the middle of a solo goal state already, so capture where we are so we can get back
+                self::setGameStateValue("resumeStateId", $this->getStateId());
+            }
+            $this->gamestate->jumpToState(78); // soloGoalCheckLoop
+        }
+    }
+
+    // SOLO MODE FUNCTIONS - END
 }

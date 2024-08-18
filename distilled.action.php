@@ -25,20 +25,20 @@
   class action_distilled extends APP_GameAction
   { 
     // Constructor: please do not modify
-   	public function __default()
-  	{
-  	    if( self::isArg( 'notifwindow') )
-  	    {
+    public function __default()
+    {
+        if( self::isArg( 'notifwindow') )
+        {
             $this->view = "common_notifwindow";
-  	        $this->viewArgs['table'] = self::getArg( "table", AT_posint, true );
-  	    }
-  	    else
-  	    {
+            $this->viewArgs['table'] = self::getArg( "table", AT_posint, true );
+        }
+        else
+        {
             $this->view = "distilled_distilled";
             self::trace( "Complete reinitialization of board game" );
       }
-  	} 
-  	
+    } 
+    
     public function buyCard() {
       self::setAjaxMode();
       $cardName = self::getArg("cardName", AT_alphanum, true );
@@ -249,10 +249,29 @@
       $this->game->useDistillPower($trigger);
       self::ajaxResponse();
     }
+
+    public function completeSoloGoal() {
+      self::setAjaxMode();
+      $card_id = self::getArg("card_id", AT_int, true );
+      $this->game->completeSoloGoal($card_id);
+      self::ajaxResponse();
+    }
+    public function skipSoloGoal() {
+      self::setAjaxMode();
+      $this->game->skipSoloGoal();
+      self::ajaxResponse();
+    }
+    public function soloGoalSwapUse() {
+      self::setAjaxMode();
+      $row = self::getArg("row", AT_int, true );
+      $pos = self::getArg("pos", AT_alphanum, true );
+      $this->game->soloGoalSwapUse($row, $pos);
+      self::ajaxResponse();
+    }
     /*
     
     Example:
-  	
+    
     public function myAction()
     {
         self::setAjaxMode();     

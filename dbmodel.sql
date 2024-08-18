@@ -160,6 +160,31 @@ CREATE TABLE IF NOT EXISTS `spirit_award` (
     `sp_gained` int(10)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
+CREATE TABLE IF NOT EXISTS `solo_goal` (
+    `id` int(2) unsigned NOT NULL AUTO_INCREMENT,
+    `uid` int(3) NOT NULL,
+    `type` int(1) NOT NULL,
+    `tier` varchar(1),
+    `row` int(1),
+    `pos` int(1),
+    `revealed` boolean default 0,
+    `unlocked` boolean default 0,
+    `completed` boolean default 0,
+    `drink_ids` varchar(50),
+    `achieved` boolean default 0,
+    `turn_achieved` int(1),
+    `used` boolean default 0,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
+
+CREATE TABLE IF NOT EXISTS `solo_drinks_used` (
+    `id` int(2) unsigned NOT NULL AUTO_INCREMENT,
+    `goal_uid` int(3),
+    `goal_type` int(1) NOT NULL,
+    `drink_id` int(2) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
+
 CREATE TABLE IF NOT EXISTS `distiller` (
     `uid` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `card_id` int(10) NOT NULL,

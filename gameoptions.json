@@ -29,6 +29,27 @@
             "1": { "name": "Normal" },
             "2": { "name": "First Taste (Tutorial)" }
         },
-        "default": 1
+        "default": 1,
+        "displaycondition": [
+            {
+                "type": "minplayers",
+                "value": [ 2 ]
+            }
+        ]
+    },
+    "103": {
+        "name": "Difficulty",
+        "values": {
+            "0": { "name": "Standard"},
+            "1": { "name": "Hard"},
+            "2": { "name": "Go home, you're drunk!"}
+        },
+        "default": 0,
+        "displaycondition": [
+            {
+                "type": "maxplayers",
+                "value": [ 1 ]
+            }
+        ]
     }
 }

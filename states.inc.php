@@ -80,13 +80,13 @@ $machinestates = array(
     // Note: ID=2 => your first state
     // Market Phases
     4 => array(
-    		"name" => "roundStartOnce",
+            "name" => "roundStartOnce",
             "type" => "game",
             "action" => "stRoundStartOnce",
             "transitions" => array('' => 5),
     ),
     5 => array(
-    		"name" => "roundStart",
+            "name" => "roundStart",
             "type" => "game",
             "action" => "stRoundStart",
             "updateGameProgression" => true,        
@@ -105,7 +105,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must take a card at round start'),
         "args" => "argRoundStartAction",
         "possibleactions" => array("buyCard", "roundStartPass"),
-        "transitions" => array(/*'' => 4, */'buyCard' => 5, 'pass' => 6, 'zombiePass'=>6),
+        "transitions" => array(/*'' => 4, */'buyCard' => 5, 'pass' => 6, 'zombiePass'=>6, "soloGoalCheck" => 69),
     ),
     9 => array(
         "name" => "roundStartActionSelect",
@@ -128,13 +128,13 @@ $machinestates = array(
     ),
     10 => array(
         // Add args to highlight things the player can do
-    		"name" => "playerBuyTurn",
+            "name" => "playerBuyTurn",
             "args" => "argPlayerBuyTurn",
-    		"description" => clienttranslate('${actplayer} must buy a card, buy a recipe, or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} must buy a card, buy a recipe, or pass'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( "buyCard", "buyRecipe", "pass"),
-    		"transitions" => array( "buyCard" => 11, "buyWater" => 14, /*"buyDuCard" => 12, */ "buyRecipe"=>11, "pass" => 12, "zombiePass" => 12),
+            "description" => clienttranslate('${actplayer} must buy a card, buy a recipe, or pass'),
+            "descriptionmyturn" => clienttranslate('${you} must buy a card, buy a recipe, or pass'),
+            "type" => "activeplayer",
+            "possibleactions" => array( "buyCard", "buyRecipe", "pass"),
+            "transitions" => array( "buyCard" => 11, "buyWater" => 14, /*"buyDuCard" => 12, */ "buyRecipe"=>11, "pass" => 12, "zombiePass" => 12, "soloGoalCheck" => 70)
     ),
     12 => array(
         "name" => "marketPass",
@@ -143,27 +143,27 @@ $machinestates = array(
         "transitions" => array('' => 11),
     ),
     14 => array(
-    		"name" => "playerBuyTurnRevealSelect",
-    		"description" => clienttranslate('${actplayer} may choose a market deck to reveal a card from or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} may choose a market deck to reveal a card from or pass'), 
-    		"type" => "activeplayer",
+            "name" => "playerBuyTurnRevealSelect",
+            "description" => clienttranslate('${actplayer} may choose a market deck to reveal a card from or pass'),
+            "descriptionmyturn" => clienttranslate('${you} may choose a market deck to reveal a card from or pass'), 
+            "type" => "activeplayer",
             "possibleactions" => array( "reveal" /*, "pass"*/),
-    		"transitions" => array( "reveal" => 15, "pass" => 11)
+            "transitions" => array( "reveal" => 15, "pass" => 11)
     ),
     15 => array(
-    		"name" => "playerBuyTurnReveal",
-    		"description" => clienttranslate('${actplayer} may buy the revealed card or pass.'),
-    		"descriptionmyturn" => clienttranslate('${you} may buy the revealed card or pass.'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( "buyCard", "pass"),
+            "name" => "playerBuyTurnReveal",
+            "description" => clienttranslate('${actplayer} may buy the revealed card or pass.'),
+            "descriptionmyturn" => clienttranslate('${you} may buy the revealed card or pass.'),
+            "type" => "activeplayer",
+            "possibleactions" => array( "buyCard", "pass"),
             "args" => "argPlayerBuyTurnReveal",
-    		"transitions" => array( "buyCard" => 16, "pass" => 16, "zombiePass" => 16)
+            "transitions" => array( "buyCard" => 16, "pass" => 16, "zombiePass" => 16, "soloGoalCheck" => 70)
     ),
     16 => array(
         "name" => "playerBuyTurnRevealCleanup",
         "type" => "game",
         "action" => "stPlayerBuyTurnRevealCleanup",
-        "transitions" => array('' => 11),
+        "transitions" => array('nextPlayer' => 11, "soloGoalCheck" => 70),
     ),
     11 => array(
         "name" => "nextPlayer",
@@ -219,7 +219,7 @@ $machinestates = array(
         "name" => "distillFinalize",
         "type" => "game",
         "action" => 'stDistillFinalize',
-        "transitions" => array('' => 22),
+        "transitions" => array('nextPlayer' => 22),
         "updateGameProgression" => true,        
     ),
 
@@ -231,7 +231,7 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} must select a recipe'),
         "args" => "argSelectRecipe",
         "possibleactions" => array("selectRecipe"),
-        "transitions" => array('' => 18),
+        "transitions" => array('nextPlayer' => 18, "soloGoalCheck" => 71),
     ),
 
     29 => array (
@@ -267,7 +267,7 @@ $machinestates = array(
             "placeLabelForSP" => 29,
             'zombiePass' => 96,
             'wait' => 96,
-        ),
+            "soloGoalCheck" => 73),
     ),
 
     48 => array(
@@ -318,7 +318,7 @@ $machinestates = array(
         "name" => "stRoundEnd",
         "type" => "game",
         "action" => "stRoundEnd",
-        "transitions" => array("nextRound" => 4, "discardGoals"=> 61, "endGame" => 98),
+        "transitions" => array("nextRound" => 4, "discardGoals"=> 61, "endGame" => 98, "soloGoalCheck" => 74),
     ),
 
         
@@ -331,6 +331,60 @@ $machinestates = array(
         "transitions" => array("" => 4),
     ),
 
+    // Solo mode
+    69 => array(
+        "name" => "soloGoalCheckRoundStart",
+        "type" => "game",
+        "action" => "stSoloGoalCheck",
+        "transitions" => array("nothingAchieved" => 5, "soloGoalConfirm" => 79),
+    ),
+    70 => array(
+        "name" => "soloGoalCheckBuy",
+        "type" => "game",
+        "action" => "stSoloGoalCheck",
+        "transitions" => array("nothingAchieved" => 11, "soloGoalConfirm" => 79),
+    ),
+    71 => array(
+        "name" => "soloGoalCheckBuyRecipe",
+        "type" => "game",
+        "action" => "stSoloGoalCheck",
+        "transitions" => array("nothingAchieved" => 18, "soloGoalConfirm" => 79),
+    ),
+    72 => array(
+        "name" => "soloGoalCheckDistill",
+        "type" => "game",
+        "action" => "stSoloGoalCheck",
+        "transitions" => array("nothingAchieved" => 22, "soloGoalConfirm" => 79),
+    ),
+    73 => array(
+        "name" => "soloGoalCheckSell",
+        "type" => "game",
+        "action" => "stSoloGoalCheck",
+        "transitions" => array("nothingAchieved" => 29, "soloGoalConfirm" => 79),
+    ),
+    74 => array(
+        "name" => "soloGoalCheckRoundEnd",
+        "type" => "game",
+        "action" => "stSoloGoalCheck",
+        "transitions" => array("nothingAchieved" => 4, "soloGoalConfirm" => 79),
+    ),
+    
+    78 => array(
+        "name" => "soloGoalCheckLoop",
+        "type" => "game",
+        "action" => "stSoloGoalCheck",
+        "transitions" => array("soloGoalConfirm" => 79),
+    ),
+    79 => array(
+        "name" => "soloGoalConfirm",
+        "descriptionmyturn" => clienttranslate('${you} may complete a solo goal.'),
+        "description" => clienttranslate('${actplayer} may complete a solo goal.'),
+        "type" => "activeplayer",
+        "args" => "argsSoloGoalConfirm",
+        "possibleactions" => array("completeSoloGoal", "skipSoloGoal"),
+        "transitions" => array("soloGoalLoop" => 78)
+    ),
+
     98 => array(
         "name" => "endGameScoring",
         "type" => "game",
@@ -338,7 +392,6 @@ $machinestates = array(
         "transitions" => array('' => 99)
 
     ),
-
     96 => array(
         'name' => 'nextPlayerWait',
         'type' => 'game',

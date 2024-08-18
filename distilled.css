@@ -1,15 +1,15 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * distilledsugar implementation : © JB Feldman <wigginender520@gmail.com>
+ * distilled implementation : © JB Feldman <wigginender520@gmail.com>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * distilledsugar.css
+ * distilled.css
  *
- * distilledsugar stylesheet
+ * distilled stylesheet
  *
  */
 
@@ -17,8 +17,8 @@
     This is the CSS stylesheet of your game User Interface.
     
     Styles defined on this file will be applied to the HTML elements you define in your
-    HTML template (distilledsugar_distilledsugar.tpl), and to HTML elements you create dynamically
-    (in distilledsugar.js).
+    HTML template (distilled_distilled.tpl), and to HTML elements you create dynamically
+    (in distilled.js).
     
     Usually, you are using CSS to:
     
@@ -350,8 +350,8 @@ body > .card {
 
 .mainShared {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 .labelDisplay {
@@ -463,6 +463,33 @@ body > .card {
 .flexOne {
     flex: 1;
     margin: 10px;
+}
+
+.mainTabsContainer {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: row;
+    padding-left: 40px;
+}
+
+.mainTab {
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    background: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    margin: 5px;
+    margin-bottom: 0;
+    font-weight: bold;
+    color: black;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.mainTab.selectedTab {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
 }
 
 .playerContainer {
@@ -600,7 +627,6 @@ body > .card {
     height: 190px;*/
     opacity: unset;
 }
-
 
 .dlabel {
     background: url('img/labels.jpg');
@@ -2190,6 +2216,7 @@ checkmark.style.position = "absolute";
     text-shadow:1px 1px 1px lightgray; 
 }
 
+.soloGoalAchieved::after,
 .card.selected::after {
     content: '✓';
     font-size: 100px;
@@ -2203,6 +2230,14 @@ checkmark.style.position = "absolute";
     line-height: 190px;
     text-shadow: 4px 4px 4px black; 
     animation: fadeIn 0.4s;
+}
+.soloGoalsRow_pb > .soloGoalAchieved::after {
+    content: '✓';
+    font-size: 25px;
+    height: 40px;
+    width: 30.5px;
+    line-height: 40px;
+    text-shadow: 1px 1px 1px black;
 }
 
 .goalsCard.selected::after {
@@ -2219,6 +2254,171 @@ checkmark.style.position = "absolute";
     text-shadow: 4px 4px 4px black; 
 }
 
+
+.turnHighlightSolo {
+    position: absolute;
+    width: 10%;
+    left: 36.5%;
+    top: 23%;
+    font-size: 4vw;
+    color: red;
+    font-weight: bold;
+    display: block;
+    text-align: center;
+    line-height: 100px;
+    text-shadow: 4px 4px 4px black;
+}
+.mobile_version .turnHighlightSolo {
+    border-width: 5px;
+}
+.soloGoals,
+.soloGoals_pb {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    padding: 10px;
+    justify-content: center;
+    max-width: 1000px;
+}
+.soloGoals_pb {
+    background: url('img/grain.jpg');
+    background-size: 400px 325px;
+    border-radius: 10px;
+    background-color: #6a4116;
+}
+.soloGoalsRow,
+.soloGoalsRow_pb {
+    width: 100%;
+}
+.soloGoalCard {
+    background: url('img/solo/soloGoals.webp');
+    background-repeat: no-repeat;
+    background-size: 1220px 1520px;
+    border-radius: 10px;
+    opacity: 0.5;
+    width: 122px; 
+    height: 190px;
+    position: relative;
+}
+.soloGoalsRow_pb .soloGoalCard {
+    width: 30.5px; 
+    height: 47.5px;
+    background-size: 305px 380px;
+    border-radius: 2px;
+}
+
+#logs .soloGoalCard {
+    opacity: unset !important;
+}
+.soloGoalUnlocked {
+    opacity: unset;
+}
+.soloGoalActive,
+.soloGoalActiveCollect {
+    box-shadow: 0 0 5px 3px #00ff00;
+    cursor: pointer;
+}
+.soloGoalAchieved {
+}
+#left-side .soloGoalDisabled {
+    cursor: not-allowed;
+}
+#soloGoals5 {
+    margin-top: -200px;
+}
+#soloGoalsSwap {
+    margin-left: auto;
+    height: 200px;
+}
+#soloGoalsTarget {
+    margin-left: 1vw;
+    margin-right: auto;
+    height: 180px;
+    margin-top: 20px;
+    text-align: center;
+}
+#soloGoalsTargetLabel {
+}
+#soloGoalsTargetValue,
+.soloGoalsTargetValue {
+    font-size: 2vw;
+    color: red;
+}
+#solo_goal_target {
+    color: red;
+}
+#soloGoal-card-swap {
+    transform: rotate(-65deg);
+    margin-right: 3vw;
+    opacity: 1;
+}
+.soloSwapUsed {
+    background-position-x: -1098px !important;
+    background-position-y: -1330px !important;
+    cursor: not-allowed;
+}
+.soloSwapAvailable {
+    background-position-x: -976px !important;
+    background-position-y: -1330px !important;
+    cursor: pointer;
+}
+.soloGoalSwapActive::before {
+    content: '↔';
+    font-size: 100px;
+    color: orange;
+    font-weight: bold;
+    display: block;
+    height: 190px;
+    width: 122px;
+    position: absolute;
+    text-align: center;
+    line-height: 190px;
+    text-shadow: 4px 4px 4px black; 
+    animation: fadeIn 0.4s;
+    z-index: 1;
+}
+.turnTrack.soloModeTurn {
+    width: 37vw;
+    height: 7vw;
+    background: url("img/solo/turntrack_horizontal.webp");
+    background-size: 100% 100%;
+    margin: 10px;
+    aspect-ratio: 165 / 33;
+    position: relative;
+    border-radius: 1vw;
+}
+.mobile_version .turnTrack.soloModeTurn {
+    width: 309px;
+}
+.soloModeTurn > .turnHighlight {
+    top: 22%;
+}
+.soloModeTurn > .turnHighlight1 {
+    left: 1.5%;
+}
+.soloModeTurn > .turnHighlight2 {
+    left: 15%;
+}
+.soloModeTurn > .turnHighlight3 {
+    left: 28.5%;
+}
+.soloModeTurn > .turnHighlight4 {
+    left: 42%;
+}
+.soloModeTurn > .turnHighlight5 {
+    left: 57%;
+}
+.soloModeTurn > .turnHighlight6 {
+    left: 71.6%;
+}
+.soloModeTurn > .turnHighlight7 {
+    left: 86.2%;
+}
+.soloGoalTooltip.tooltipContainer {
+    grid-template-columns: 122px 100px;
+}
 
 .marketBuyable:hover {
     overflow: visible;

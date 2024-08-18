@@ -158,10 +158,10 @@ $this->goal_text = array(
   19 => clienttranslate("Have or be tied for the most spirit labels that require a wood barrel. <div class='icon-wood'></div>"),
 );
 
-
 $miscTranslate = array(
   clienttranslate("Pantry"),
   clienttranslate("Goals"),
+  clienttranslate("Solo Goals"),
   clienttranslate("Storeroom"),
   clienttranslate("Washback"),
   clienttranslate("Warehouse 1"),
@@ -246,3 +246,56 @@ $this->distiller_text = array(
   34 => clienttranslate("<span class='icon-start-em'></span> you may reveal 2 cards from a market deck and buy up to 1 of them. Return cards not bought to the bottom of the deck."),
 );
 
+$this->solo_goal_text = array(
+  101 => clienttranslate("Collect 2 spirit labels from 3 different regions."),
+  102 => clienttranslate("Collect 5 spirit labels from your Distiller's region."),
+  103 => clienttranslate("Collect 5 non-Vodka spirit labels that require Grain <div class='icon-grain'></div>."),
+  104 => clienttranslate("Collect 5 spirit labels from regions other than your Distiller's region."),
+  105 => clienttranslate("Collect 6 different spirit labels."),
+  106 => clienttranslate("Collect 4 <span class='icon-aged-em'></span> spirit labels."),
+  107 => clienttranslate("Collect 6 <span class='icon-unaged-em'></span> spirit labels."),
+  108 => clienttranslate("Collect 5 non-Vodka spirit labels that require Plant <div class='icon-plant'></div>."),
+  109 => clienttranslate("Collect 5 non-Vodka spirit labels that require Fruit <div class='icon-fruit'></div>."),
+  110 => clienttranslate("Collect 4 Silver and/or Gold tier spirit labels."),
+  111 => clienttranslate("Collect 3 Gold tier spirit labels."),
+
+  201 => clienttranslate("Collect 3 spirit labels of the same spirit type."),
+  202 => clienttranslate("Sell a spirit worth at least 15 <span class='icon-coin-em'></span>."),
+  203 => clienttranslate("Sell 2 spirits in a single round."),
+  204 => clienttranslate("Collect 3 Equipment Distillery Upgrades <span class='icon-du-em'></span>."),
+  205 => clienttranslate("Collect 3 Non-vodka spirit labels; 1 that requires Grain <div class='icon-grain'></div>, 1 that requires Plants <div class='icon-plant'></div>, and 1 that requires Fruit <div class='icon-fruit'></div>."),
+  206 => clienttranslate("Sell a spirit containing 6 <span class='icon-alcohol-em'></span> or more."),
+  207 => clienttranslate("Collect 3 bottles <div class='icon-bottle'></div> used for spirits of the matching region."),
+  208 => clienttranslate("Sell a spirit worth 20 <span class='icon-sp-em'></span> or more."),
+  209 => clienttranslate("Collect 3 Specialist Distillery Upgrades <span class='icon-du-em'></span>."),
+  210 => clienttranslate("Collect 5 or more premium bottles <div class='icon-bottle'></div> (includes any in storeroom)."),
+  211 => clienttranslate("Sell a spirit containing 4 <span class='icon-flavor-em'></span> or more."),
+  212 => clienttranslate("Sell an <span class='icon-aged-em'></span> worth at least 5 <span class='icon-sp-em'></span> more than the recipe's base <span class='icon-sp-em'></span>."),
+  213 => clienttranslate("Sell a Whiskey worth 16 <span class='icon-sp-em'></span> or more."),
+  214 => clienttranslate("Sell a gold tier spirit worth 22 <span class='icon-sp-em'></span> or more."),
+  215 => clienttranslate("Sell a silver tier spirit worth 18 <span class='icon-sp-em'></span> or more."),
+  216 => clienttranslate("Earn 25 <span class='icon-sp-em'></span> or more in a round."),
+  217 => clienttranslate("Collect spirit labels requiring all 3 barrel types <div class='icon-metal'></div> <div class='icon-wood'></div> <div class='icon-clay'></div>."),
+  218 => clienttranslate("Sell a spirit containing 5 sugars or more."),
+
+  301 => clienttranslate("Collect spirit labels from 2 different regions."),
+  302 => clienttranslate("Sell a spirit worth at least 8 <span class='icon-coin-em'></span>."),
+  303 => clienttranslate("Sell a Bronze/Silver tier spirit from your Distiller's Region <span class='icon-home-em'></span> worth at least 3 <span class='icon-sp-em'></span> more than the recipe <span class='icon-sp-em'></span>."),
+  304 => clienttranslate("Sell a Bronze/Silver tier spirit from your Distiller's Region <span class='icon-home-em'></span> worth at least 6 <span class='icon-coin-em'></span>."),
+  305 => clienttranslate("Collect 2 different spirit labels."),
+  306 => clienttranslate("Sell a spirit containing at least 3 sugars."),
+  307 => clienttranslate("Earn 8 <span class='icon-coin-em'></span> or more in a round."),
+  308 => clienttranslate("Sell a spirit worth at least 8 <span class='icon-sp-em'></span>."),
+  309 => clienttranslate("Earn 8 <span class='icon-sp-em'></span> or more in a round."),
+  310 => clienttranslate("Distill an <span class='icon-aged-em'></span> spirit."),
+  311 => clienttranslate("Collect a silver tier spirit label."),
+  312 => clienttranslate("Distill your signature spirit."),
+  313 => clienttranslate("Sell a spirit containing at least 3 <span class='icon-alcohol-em'></span>."),
+  314 => clienttranslate("Sell a spirit containing at least 2 <span class='icon-water-em'></span>."),
+  315 => clienttranslate("Sell a spirit containing no Basic Sugars."),
+  316 => clienttranslate("Sell a Bronze tier spirit."),
+  317 => clienttranslate("Collect 2 Bronze tier spirit labels."),
+  318 => clienttranslate("Sell a spirit containing at least 2 sugars of the same type."),
+
+  401 => clienttranslate("Swap any 2 solo goal cards within the same row.</br>May only be used once."),
+);
