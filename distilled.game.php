@@ -6745,6 +6745,10 @@ Purchase it or return it to the bottom of the deck.`
                     'player_id' => $player_id,
                     'row' => 'target'
                 ));
+                if ($targetScore == $this->getStat("points_total", $player_id)) {
+                    self::notifyAllPlayers( 'playerPointsTiebreaker', clienttranslate('Your score is tied with your golo goal! Decreasing your solo goal by 1 <span class="icon-sp-em"></span> to award your victory!');
+                    $this->playerPointsEndgame($player_id, 1, "solo");
+                }
             } else { // Did not complete all the tiers - auto loss (negate all their points - rude!)
                 $targetScore = $this->getStat("points_total", $player_id);
                 self::notifyAllPlayers( 'playerPointsEndgame', clienttranslate('${player_name} failed to complete one solo goal per row and can not win'), array(
