@@ -251,7 +251,7 @@ var jstpl_player_section = '\
                 </div>\
             </div>\
             <div style="text-align: center; display: flex; flex-direction: row; justify-content: space-around;">\
-                <div class="translateme"> Flavor Bonus: </div>\
+                <div class="translateme"> Aged Flavor Bonus: </div>\
                 <div> 1 <span class="icon-flavor-em"></span> = 1 <span class="icon-sp-em"></span> </div>\
                 <div> 2 <span class="icon-flavor-em"></span> = 3 <span class="icon-sp-em"></span> </div>\
                 <div> 3 <span class="icon-flavor-em"></span> = 6 <span class="icon-sp-em"></span> </div>\
@@ -338,6 +338,7 @@ var jstpl_player_floater = '\
             <div class="displaybase ${DIVBASE}_wrapper"> ${DISPLAYBASE} <br/> </div>\
             <div class="pantry_inner_wrapper"> \
                 <div id="${DIVBASE}_${PID}_deck"> </div>\
+                <div id="${DIVBASE}_${PID}_wcim"> </div>\
                 <div id="${DIVBASE}_${PID}_label" class="label"> </div>\
                 <div id="${DIVBASE}_${PID}" class="pantry2"> </div> \
             </div>\

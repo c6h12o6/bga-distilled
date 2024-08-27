@@ -4540,6 +4540,12 @@ Purchase it or return it to the bottom of the deck.`
 
         $bonus = 0;
 
+        $allRecipes = $this->getRecipes();
+        $allRecipes[] = $this->signature_recipes[
+            ($this->getPlayerDistiller($playerId))->id / 2
+        ];
+
+        $recipe = $allRecipes[$recipeSlot + 2];
         $powerCards = $this->getPowerCards();
         foreach ($powerCards as $pc) {
             if ($playerId != $pc['player_id']) 
@@ -4547,7 +4553,8 @@ Purchase it or return it to the bottom of the deck.`
 
             switch ($pc['card_id']) {
                 case 120: // warehouse manager
-                    $bonus += $maxFlavor;
+                    if ($recipe['aged'])
+                        $bonus += $maxFlavor;
                     break;
                 case 130: // celebrity promoter
                     $bonus += 2;
@@ -4555,11 +4562,6 @@ Purchase it or return it to the bottom of the deck.`
             }
         }
 
-        $allRecipes = $this->getRecipes();
-        $allRecipes[] = $this->signature_recipes[
-            ($this->getPlayerDistiller($playerId))->id / 2
-        ];
-        $recipe = $allRecipes[$recipeSlot + 2];
 
         $bottleData = $this->getBottleData($playerId, $recipe, $bottleUid);
         $barrelData = $this->getBarrelData($playerId, $recipe, $barrelUid, $cards);
@@ -5865,7 +5867,7 @@ Purchase it or return it to the bottom of the deck.`
                         $score = self::getUniqueValueFromDb("SELECT COUNT(id) FROM recipe WHERE player_id=$player_id AND (color='silver' OR color='gold')");
                         break;
                     case 120: // Warehouse Manager
-                        $labels = self::getCollectionFromDb("SELECT * FROM label WHERE player_id=$player_id AND count != 0");
+                        $labels = self::getCollectionFromDb("SELECT * FROM label WHERE player_id=$player_id AND count != 0 AND location!='flight'");
                         $aged = 0;
                         //self::notifyAllPlayers("dbgdbg", "labels", array('labels', $labels));
                         foreach ($labels as $iuid => $info) {

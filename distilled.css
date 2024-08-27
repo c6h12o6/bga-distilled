@@ -2301,6 +2301,19 @@ checkmark.style.position = "absolute";
     cursor: pointer;
 }
 
+.pantry_wcim {
+  width: 122px;
+  padding: 2px;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 1;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  align-items: center;
+  border-radius: 2px;
+}
+
 @keyframes blinker {
   50% {
     opacity: 0;

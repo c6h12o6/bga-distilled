@@ -877,7 +877,8 @@ function (dojo, declare, on, bgacards) {
                 console.log(X)
                 console.log(this.playerRevealStock)
                 this.activeCards[X.uid] = X;
-                this.playerRevealStock[this.player_id][X.market].addCard(X);
+                if (this.playerRevealStock[this.player_id])
+                    this.playerRevealStock[this.player_id][X.market].addCard(X);
                 this.showFloatingReveal();
             })
 
@@ -1895,7 +1896,7 @@ function (dojo, declare, on, bgacards) {
             this.replaceActionBar(_("Choose a card to buy"), 
                 () => {
                     console.log("cancel trucker");
-                    this.connectTrucksWithCb((X) => this.truckerCallback(X), null, true);
+                    this.connectTrucksWithCb((X) => this.truckerCallback(X), true);
                 })
             args.options.forEach(O => {
                 console.log(args, market)
@@ -3719,7 +3720,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                                                     lock: true,
                                                 }, () => {
                                                     console.log("cancel trucker 2");
-                                                    this.connectTrucksWithCb((X) => this.truckerCallback(X), null, true);
+                                                    this.connectTrucksWithCb((X) => this.truckerCallback(X), true);
                                                 }
                                             )
                                         }
