@@ -272,6 +272,8 @@ function (dojo, declare, on, bgacards) {
                     div.classList.add('labelSlot');
                     div.key = card.name;
 
+                    if (card.signature)
+                        this.addTooltipForSignature(div, card)
                     dojo.connect(div, 'onclick', this, () => this.flipLabel(card))
                 },
                 setupFrontDiv: (card, div) => {
@@ -427,12 +429,84 @@ function (dojo, declare, on, bgacards) {
             return formatHTML
         },
 
+        getTooltipForRecipe(r) {
+            var region = dojo.string.substitute(
+                "${region_str}: ${region_cap} <span class='icon-${region}-em'></span>", 
+                {
+                    region_str: _("Region"),
+                    region: _(r['region']).toLowerCase(),
+                    region_cap: this.capitalize(_(r['region']).toLowerCase())
+                }
+            )
+            var tier = dojo.string.substitute(
+                "${tier_str}: ${tier} <br/>", {
+                    tier_str: _("Tier"),
+                    tier: this.capitalize(_(r['cube']))
+                }
+            )
+            var aged = ''
+            var agedIcon = '';
+            if (r['aged']) {
+                agedIcon = `<span class='icon-aged-em'></span>`;
+                aged = _("Aged")
+            }
+            else {
+                agedIcon = `<span class='icon-unaged-em'></span>`;
+                aged = _("Unaged")
+            }
+
+            var barrel = dojo.string.substitute(
+                "${barrel_str}: ${barrel_cap} <span class='icon-${barrel} icon-em'></span>", 
+                {barrel_str: _("Barrel"), 
+                    barrel: _(r['barrel'].toLowerCase()),
+                    barrel_cap: this.capitalize(_(r['barrel'].toLowerCase()))
+                })
+
+            var types = r['allowed'].map(X => `<span class='icon-${X.toLowerCase()}-em'></span>`)
+            var requires = `${_("Requires at least")} ${r['sugars']}` + types.join(' / ')
+            var mustinclude = ""
+            if (r.signature) {
+                mustinclude = dojo.string.substitute(_("Must include ${include} <br/>"), {
+                    include: this.capitalize(_(r.include))
+                })
+                tier = ""
+            }
+            return `
+            <div style="font-size: 20px">
+                ${r['name']} ${r['sp']} <span class='icon-sp-em'></span> <br/>
+                <hr/>
+                ${region} <br/>
+                ${barrel} <br/>
+                ${tier}
+                ${mustinclude}
+                ${aged} ${agedIcon} <br/>
+                ${requires} <br/>
+            
+            </div>
+            `;
+        },
+        getTooltipForRecipeSlot(slot) {
+            var r = this.recipeFlight[slot];
+            return this.getTooltipForRecipe(r);
+        },
+        addTooltipForSignature(div, card) {
+            var formatHTML = this.getTooltipForRecipe(card);
+            this.addTooltipHtml(div.id, formatHTML, 1000);
+        },
+        addTooltipsForFlight() {
+            for (var ii = 0; ii < 7; ii++) {
+                var formatHTML = this.getTooltipForRecipeSlot(ii);
+                dojo.query(`.flightRecipe${ii}`).forEach(div => {
+                    this.addTooltipHtml(div.id, formatHTML, 1000)
+                    div.dataset.whee = "done"
+                })
+            }
+        },
         addTooltipForCard( card , div) {
             formatHTML = this.getTooltipForCard(card)
             this.addTooltipHtml(div.id, formatHTML, 1000)
         },
         addTooltipForDistiller(card, div) {
-            console.log(card)
             formatHTML = this.getTooltipForDistiller(card)
             this.addTooltipHtml(div.id, formatHTML, 1000)
         },
@@ -558,7 +632,6 @@ function (dojo, declare, on, bgacards) {
             if (gamedatas.distillersSelectedArray?.includes(''+this.player_id)) {
                 thisPlayerSelected = true;
             }
-            console.log("thisPlayerSelected", thisPlayerSelected);
 
             for( var player_id in gamedatas.players )
             {
@@ -685,7 +758,6 @@ function (dojo, declare, on, bgacards) {
                 }
 
                 if (this.isSpectator && player_id == this.player_list[0]) {
-                    console.log("making visible?")
                     dojo.removeClass('playerSection_' + player_id, "invisible")
                 }
 
@@ -694,7 +766,6 @@ function (dojo, declare, on, bgacards) {
 
                 // 1 indexed
                 flightIdx = parseInt(gamedatas.flightCard) - 1;
-                console.log("flightIdx is " + flightIdx);
                 let elem = document.getElementById("myPlayerFlight_" + player_id);
                 let xPos = (flightIdx % 4) * 33.3;
                 let yPos = Math.floor(flightIdx / 4) * 50;
@@ -733,8 +804,6 @@ function (dojo, declare, on, bgacards) {
                         dojo.query('.distillerChoice').removeClass('invisible')
                     }
                 }
-                console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                console.log("distillersSelectedArray", gamedatas.distillersSelectedArray)
                 if (gamedatas.distillers[player_id]?.length == 1 && (!gamedatas.firstTaste || thisPlayerSelected)) {
                     console.log("placing chosen distiller")
                     if (player_id == this.player_id) {
@@ -752,11 +821,8 @@ function (dojo, declare, on, bgacards) {
                         this.labelCardsManager,
                         document.getElementById('recipeSignatureSlot_' + player_id),
                     );
-                    console.log(player_id)
-                    console.log(gamedatas.signatureLabels)
                     if (player_id.toString() in gamedatas.signatureLabels && gamedatas.signatureLabels[player_id].length) {
                         var sigLabel = gamedatas.signatureLabels[player_id][0];
-                        console.log(sigLabel.location)
                         if (sigLabel.location == 'flight') {
                             this.playerSignatureLabelStock[player_id].addCard(
                                 gamedatas.signatureLabels[player_id][0]);
@@ -785,21 +851,16 @@ function (dojo, declare, on, bgacards) {
             btns = ['nowrapRadio', 'wrapRadio', 'scrollRadio']
             btns.forEach(id => {
                 elem = document.getElementById(id)
-                console.log(elem)
                 dojo.connect(elem, 'onclick', this, 'onWrapClick')
             })
 
             // Place the distiller choice bar
-            console.log("thisPlayerSelected", thisPlayerSelected)
             if ((gamedatas.firstTaste && !thisPlayerSelected) || (gamedatas.distillersSelected == 0 && gamedatas.distillers[this.player_id]?.length == 2)) {
                 if (gamedatas.firstTaste) {
                     document.getElementById("label2choice").remove();
                 }
-                console.log("placing distillers for choice")
                 
-                console.log("distillers length", gamedatas.distillers[this.player_id], gamedatas.distillers[this.player_id].length)
                 for (var ii = gamedatas.distillers[this.player_id].length; ii >= 1; ii--) {
-                    console.log("loopdy freaking doo", ii)
                     this.placeFlippyCard(this.player_id, `distiller${ii}`, 'distiller', 
                         gamedatas.distillers[this.player_id][ii-1].id);
 
@@ -874,15 +935,12 @@ function (dojo, declare, on, bgacards) {
             gamedatas.reveal.forEach(X => {
                 X.location_idx = 1;
                 X.location = 'reveal'
-                console.log(X)
-                console.log(this.playerRevealStock)
                 this.activeCards[X.uid] = X;
                 if (this.playerRevealStock[this.player_id])
                     this.playerRevealStock[this.player_id][X.market].addCard(X);
                 this.showFloatingReveal();
             })
 
-            console.log(function () { return this.activeCards}())
             this.labels = {}
             this.labelOrder = {}
             for (var i = 0; i < gamedatas.flight.length; i++) {
@@ -941,8 +999,8 @@ function (dojo, declare, on, bgacards) {
                 this.addRecipeCube(R.player_id, R.slot, R.color)
             })
             this.recipeFlight = gamedatas.recipeFlight;
+            this.addTooltipsForFlight()
 
-            console.log(gamedatas.spirits)
             this.spiritContents = []
             gamedatas.spirits?.forEach(S => {
                 this.addTinyLabel(S, S.player_id);

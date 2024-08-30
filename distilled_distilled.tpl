@@ -261,7 +261,16 @@ var jstpl_player_section = '\
         </div>\
         <div id="myPlayerRecipeCard_${PID}" class="playerRecipeCard"> \
             <div id="jumboCard_${PID}" class="recipeCardGrow" title="Zoom in / out"> +/- </div> \
-            <div id="myPlayerFlight_${PID}" class="playerFlight"> </div>\
+            <div id="myPlayerFlight_${PID}" class="playerFlight"> \
+                <div id="stuff_${PID}"></div>\
+                <div id="flightRecipe0_${PID}" class="flightRecipe0" data-recipe="0" style="height: 14.28%;width: 100%;top:     0%;position:absolute; "></div>\
+                <div id="flightRecipe1_${PID}" class="flightRecipe1" data-recipe="1" style="height: 14.28%;width: 100%;top: 14.28%;position:absolute; "></div>\
+                <div id="flightRecipe2_${PID}" class="flightRecipe2" data-recipe="2" style="height: 14.28%;width: 100%;top: 28.57%;position:absolute; "></div>\
+                <div id="flightRecipe3_${PID}" class="flightRecipe3" data-recipe="3" style="height: 14.28%;width: 100%;top: 42.85%;position:absolute; "></div>\
+                <div id="flightRecipe4_${PID}" class="flightRecipe4" data-recipe="4" style="height: 14.28%;width: 100%;top: 57.14%;position:absolute; "></div>\
+                <div id="flightRecipe5_${PID}" class="flightRecipe5" data-recipe="5" style="height: 14.28%;width: 100%;top: 71.42%;position:absolute; "></div>\
+                <div id="flightRecipe6_${PID}" class="flightRecipe6" data-recipe="6" style="height: 14.28%;width: 100%;top: 85.71%;position:absolute; "></div>\
+            </div>\
             <div id="recipeCubeSlot_0_${PID}" class="recipeCubeSlot" style="top: 35%; left: 6%;"> </div> \
             <div id="recipeCubeSlot_1_${PID}" class="recipeCubeSlot" style="top: 43%; left: 6%;"> </div> \
             <div id="recipeCubeSlot_2_${PID}" class="recipeCubeSlot" style="top: 50.5%; left: 6%;"> </div> \

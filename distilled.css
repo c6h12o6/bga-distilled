@@ -1342,6 +1342,11 @@ body > .card {
     --width: var(--icon-size-mobile);
 }
 
+.icon-em {
+    --width: 1em !important;
+    display: inline-block;
+}
+
 
 .icon-wood {
     background: url("img/icons.png");
@@ -1754,6 +1759,7 @@ body > .card {
     align-items: center;
     text-align: center;
     border-radius: 10px;
+    font-size: 16px;
 }
 .wcimTooltipContainer {
     display: flex;
