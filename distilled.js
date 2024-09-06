@@ -5880,16 +5880,37 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             // TODO replace removal with move to truck
             this.expandMarket();
 
-            notif.args.removed_cards.forEach (C => {
+            var duTruck = 0;
+            var itemTruck = 0;
+            var ingTruck = 0;
+
+            notif.args.truck_cards.forEach (C => {
                 console.log("Adding cards to truck")
                 console.log(C)
                 C.location = 'truck'
-                if (C.market == 'du') 
+                if (C.market == 'du')  {
                     this.addCardToTruck(C, 'du', this.decks.duTruck);
-                else if (C.market == 'item')
+                    duTruck ++;
+                }
+                else if (C.market == 'item') {
                     this.addCardToTruck(C, 'item', this.decks.itemTruck);
-                else if (C.market == "ing") 
+                    itemTruck++;
+                }
+                else if (C.market == "ing") {
                     this.addCardToTruck(C, 'ing', this.decks.ingTruck);
+                    ingTruck++;
+                }
+            });
+
+            this.decks.ingTruck.setCardNumber(ingTruck)
+            this.decks.itemTruck.setCardNumber(itemTruck)
+            this.decks.duTruck.setCardNumber(duTruck)
+
+            notif.args.removed_cards.forEach (C => {
+                console.log("remove cards that got shuffled")
+                console.log(C)
+                var stock = this.getStock(C.market);
+                stock.removeCard(C)
             });
             Object.keys(notif.args.new_markets).forEach(M => {
                 this.notif_updateMarket({
