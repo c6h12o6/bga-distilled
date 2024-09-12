@@ -2308,9 +2308,9 @@ checkmark.style.position = "absolute";
 }
 
 .pantry_wcim {
-  width: 122px;
-  padding: 2px;
+  gap: 10px;
   margin: 0;
+  margin-left: 10px;
   display: flex;
   flex-direction: row;
   flex-shrink: 1;
@@ -2318,6 +2318,22 @@ checkmark.style.position = "absolute";
   flex-wrap: wrap;
   align-items: center;
   border-radius: 2px;
+}
+
+.hide_wcim .wcim {
+    display: none;
+}
+
+#pantryWrap2 {
+    display: flex;
+    flex-direction: column;
+
+}
+
+#pantry_wcim {
+    color: white;
+    display: flex;
+    padding-bottom: 5px;
 }
 
 @keyframes blinker {

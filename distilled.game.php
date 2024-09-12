@@ -3617,6 +3617,11 @@ Purchase it or return it to the bottom of the deck.`
             'whatCanIMake' => $this->getWCIM(),
         );
     }
+    function argWcimArgs() {
+        return array(
+            'whatCanIMake' => $this->getWCIM()
+        );
+    }
     function argChooseDistiller() {
         $cards = self::dbQuery("SELECT * FROM distiller ORDER BY uid DESC");
 
@@ -5476,9 +5481,9 @@ Purchase it or return it to the bottom of the deck.`
         $ret = array();
         foreach ($players as $player_id => $info) {
             $cards = self::getCollectionFromDb("
-                SELECT uid FROM bottomless_card WHERE location='player' AND player_id=${player_id}
+                SELECT uid FROM bottomless_card WHERE (location='player' or location='tradeIn') AND player_id=${player_id}
                 UNION ALL
-                SELECT uid FROM premium_ingredient WHERE location='player' AND player_id=${player_id}
+                SELECT uid FROM premium_ingredient WHERE (location='player' or location='tradeIn') AND player_id=${player_id}
                 ");
 
             if ($debug) {
@@ -5506,7 +5511,7 @@ Purchase it or return it to the bottom of the deck.`
 
             $raw = array();
             foreach ($distillable as $d) {
-                if ($d['recipeSlot'] < 0)
+                if ($d['recipeSlot'] < -1)
                     continue;
                 $r = $this->getRecipeFromSlot($d['recipeSlot'], $player_id);
                 $raw[$r['label']] = $r;
@@ -5547,7 +5552,10 @@ Purchase it or return it to the bottom of the deck.`
                     break;
             }
         }
-        return array('players' => $players, 'trades' => $tradeCollection);
+        return array('players' => $players, 
+                     'trades' => $tradeCollection,
+                     'whatCanIMake' => $this->getWCIM(),
+                    );
     }
 
     function argDistillPowers() {

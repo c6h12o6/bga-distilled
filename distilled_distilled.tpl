@@ -159,7 +159,9 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
         </div>
     </div>
         
-        <div id='pantryWrap2'> </div>
+        <div id='pantryWrap2'> 
+            <div id="pantry_wcim" class="wcim"></div>
+        </div>
 </div>
 
 <div id="radioButtons" class="radioButtons whiteblock">
@@ -345,11 +347,12 @@ var jstpl_player_floater = '\
     <div>\
         <div id="${DIVBASE}_wrapper_${PID}" class="pantry floatingPantry">\
             <div class="displaybase ${DIVBASE}_wrapper"> ${DISPLAYBASE} <br/> </div>\
-            <div class="pantry_inner_wrapper"> \
-                <div id="${DIVBASE}_${PID}_deck"> </div>\
-                <div id="${DIVBASE}_${PID}_wcim"> </div>\
-                <div id="${DIVBASE}_${PID}_label" class="label"> </div>\
-                <div id="${DIVBASE}_${PID}" class="pantry2"> </div> \
+            <div style="display: flex; flex-direction: row;">\
+                <div class="pantry_inner_wrapper"> \
+                    <div id="${DIVBASE}_${PID}_deck"> </div>\
+                    <div id="${DIVBASE}_${PID}_label" class="label"> </div>\
+                    <div id="${DIVBASE}_${PID}" class="pantry2"> </div> \
+                </div>\
             </div>\
         </div>\
     </div>\
