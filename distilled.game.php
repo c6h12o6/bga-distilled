@@ -775,7 +775,7 @@ Purchase it or return it to the bottom of the deck.`
         $this->solo_goal_cards_b = array(
             new SoloGoal(201, SoloGoalType::COLLECT, 33, 13, "B", 0, 0, 14, [[3,4],[2,4],[1,3,4]]),
             new SoloGoal(202, SoloGoalType::SELL, 34, 14, "B", 0, 0, 11, [[3,4],[2,4],[2,4]]),
-            new SoloGoal(203, SoloGoalType::SELL, 35, 15, "B", 0, 0, 15, [[1,4],[1,2,4],[2,4]]),
+            new SoloGoal(203, SoloGoalType::EARN, 35, 15, "B", 0, 0, 15, [[1,4],[1,2,4],[2,4]]),
             new SoloGoal(204, SoloGoalType::COLLECT, 36, 16, "B", 0, 0, 14, [[3,4],[1,2,4],[3,4]]),
             new SoloGoal(205, SoloGoalType::COLLECT, 37, 17, "B", 0, 0, 11, [[2,4],[1,2,4],[3,4]]),
             new SoloGoal(206, SoloGoalType::SELL, 38, 18, "B", 0, 0, 13, [[2,4],[1,3,4],[2,4]]),
@@ -8871,19 +8871,19 @@ Purchase it or return it to the bottom of the deck.`
                 }
                 break;
             case 203: // X = 2
-                // Sell X in one round
+                // Sell X in one round (evaluated as an "Earn" goal)
                 $target = 100;
                 if ($sgObj->uid == 203) {
                     $target = 2;
                 }
                 $sold = 0;
-                foreach ($drinksAll as $drink) { // Using $drinksAll here since the first drink in a turn will have been filtered out, but is still valid
+                foreach ($drinks as $drink) {
                     if ($drink["sold_turn"] == $turn) {
                         $sgObj->drinks[] = $drink["id"];
                         $sold++;
                     }
                 }
-                if ($sold >= $target) {
+                if (self::getGameStateValue("inRoundEnd") == 1 && $sold >= $target) {
                     $completed[] = $sgObj;
                 }
                 break;
