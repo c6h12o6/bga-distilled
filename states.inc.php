@@ -238,6 +238,7 @@ $machinestates = array(
         "name" => "nextPlayerSellHack",
         "type" => "game",
         "action" => "stNextPlayerSellHack",
+        "args" => "argWcimArgs",
         "transitions" => array('' => 31)
     ),
     31 => array(

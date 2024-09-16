@@ -27,13 +27,19 @@
         "name": "Game Setup",
         "values": {
             "1": { "name": "Normal" },
-            "2": { "name": "First Taste (Tutorial)" }
+            "2": { "name": "First Taste (Tutorial)", "firstgameonly": true }
         },
         "default": 1,
         "displaycondition": [
             {
-                "type": "minplayers",
-                "value": [ 2 ]
+                "type": "otheroption",
+                "id": 201,
+                "value": 1
+            },
+            {
+              "type": "otheroption",
+              "id": 100,
+              "value": 1
             }
         ]
     },

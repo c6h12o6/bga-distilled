@@ -852,6 +852,9 @@ Purchase it or return it to the bottom of the deck.`
             new Card(18, clienttranslate('Ugni Blanc Grapes'), 0, 2, 4, CardType::SUGAR, Sugar::FRUIT ),
         );
 
+        // Additional cards
+        $this->premium_ingredient_cards[] = new Card(47, clienttranslate("Mountain Spring Water"), 3, 2, 1, CardType::WATER);
+
         // TODO need to get the values of the sig recipes
         $this->distillers = array(
             0 => new Distiller(0, "Ruthless Ajani", Region::AMERICAS, 0, 9, 4, 1, 0),
@@ -1954,49 +1957,51 @@ Purchase it or return it to the bottom of the deck.`
                 $cardIdToUid[$this->AllCards[$p]->card_id] = $p;
             }
 
-            if (in_array(109, $powerTypes) && ($c->type == CardType::BARREL || $c->type == CardType::BOTTLE)) {
-                $cost -= 1;
-                $usedPowers[] = [$cardIdToUid[109], 'du'];
-            }
-            if (in_array(114, $powerTypes) && ($c->type == CardType::SUGAR || $c->type == CardType::WATER || $c->type == CardType::YEAST)) {
-                $cost -= 2;
-                $usedPowers[] = [$cardIdToUid[114], 'du'];
-            }
-            if (in_array(115, $powerTypes) && ($c->type == CardType::BOTTLE))  {
-                $cost -= 2;
-                $usedPowers[] = [$cardIdToUid[115], 'du'];
-            }
-            if (in_array(122, $powerTypes) && ($c->type == CardType::BOTTLE)) {
-                $cost -= 1;
-                $usedPowers[] = [$cardIdToUid[122], 'du'];
-            }
-            if (in_array(128, $powerTypes) && ($c->type == CardType::DU)) {
-                $cost -= 2;
-                $usedPowers[] = [$cardIdToUid[128], 'du'];
-            }
-            if (in_array(131, $powerTypes) && ($c->type == CardType::BARREL)) {
-                $cost -= 2;
-                $usedPowers[] = [$cardIdToUid[131], 'du'];
-            }
-            if (in_array(0, $powerTypes) && ($c->type == CardType::BOTTLE)) { // Ajani 
-                $cost -= 1;
-                $usedPowers[] = [0, 'distiller'];
-            }
-            if (in_array(6, $powerTypes) && ($c->type == CardType::DU)) { // etienne
-                $cost -= 2;
-                $usedPowers[] = [6, 'distiller'];
-            }
-            if (in_array(12, $powerTypes)  && ($c->type == CardType::BARREL)) { // pilar
-                $cost -= 2;
-                $usedPowers[] = [12, 'distiller'];
-            }
-            if (in_array(14, $powerTypes)  && ($c->card_id >= 133 && $c->card_id <= 139)) { // Mother Mary
-                $cost -= 1;
-                $usedPowers[] = [14, 'distiller'];
-            }
-            if (in_array(18, $powerTypes)  && ($c->type == CardType::SUGAR || $c->type == CardType::WATER || $c->type == CardType::YEAST)) { // Jeong
-                $cost -= 2;
-                $usedPowers[] = [18, 'distiller'];
+            if ($cost != 0) {
+                if (in_array(109, $powerTypes) && ($c->type == CardType::BARREL || $c->type == CardType::BOTTLE)) {
+                    $cost -= 1;
+                    $usedPowers[] = [$cardIdToUid[109], 'du'];
+                }
+                if (in_array(114, $powerTypes) && ($c->type == CardType::SUGAR || $c->type == CardType::WATER || $c->type == CardType::YEAST)) {
+                    $cost -= 2;
+                    $usedPowers[] = [$cardIdToUid[114], 'du'];
+                }
+                if (in_array(115, $powerTypes) && ($c->type == CardType::BOTTLE))  {
+                    $cost -= 2;
+                    $usedPowers[] = [$cardIdToUid[115], 'du'];
+                }
+                if (in_array(122, $powerTypes) && ($c->type == CardType::BOTTLE)) {
+                    $cost -= 1;
+                    $usedPowers[] = [$cardIdToUid[122], 'du'];
+                }
+                if (in_array(128, $powerTypes) && ($c->type == CardType::DU)) {
+                    $cost -= 2;
+                    $usedPowers[] = [$cardIdToUid[128], 'du'];
+                }
+                if (in_array(131, $powerTypes) && ($c->type == CardType::BARREL)) {
+                    $cost -= 2;
+                    $usedPowers[] = [$cardIdToUid[131], 'du'];
+                }
+                if (in_array(0, $powerTypes) && ($c->type == CardType::BOTTLE)) { // Ajani 
+                    $cost -= 1;
+                    $usedPowers[] = [0, 'distiller'];
+                }
+                if (in_array(6, $powerTypes) && ($c->type == CardType::DU)) { // etienne
+                    $cost -= 2;
+                    $usedPowers[] = [6, 'distiller'];
+                }
+                if (in_array(12, $powerTypes)  && ($c->type == CardType::BARREL)) { // pilar
+                    $cost -= 2;
+                    $usedPowers[] = [12, 'distiller'];
+                }
+                if (in_array(14, $powerTypes)  && ($c->card_id >= 133 && $c->card_id <= 139)) { // Mother Mary
+                    $cost -= 1;
+                    $usedPowers[] = [14, 'distiller'];
+                }
+                if (in_array(18, $powerTypes)  && ($c->type == CardType::SUGAR || $c->type == CardType::WATER || $c->type == CardType::YEAST)) { // Jeong
+                    $cost -= 2;
+                    $usedPowers[] = [18, 'distiller'];
+                }
             }
 
             // These ones just need to be recorded, no affect on the purchase
@@ -3892,6 +3897,11 @@ Purchase it or return it to the bottom of the deck.`
             'whatCanIMake' => $this->getWCIM(),
         );
     }
+    function argWcimArgs() {
+        return array(
+            'whatCanIMake' => $this->getWCIM()
+        );
+    }
     function argChooseDistiller() {
         $cards = self::dbQuery("SELECT * FROM distiller ORDER BY uid DESC");
 
@@ -4820,6 +4830,12 @@ Purchase it or return it to the bottom of the deck.`
 
         $bonus = 0;
 
+        $allRecipes = $this->getRecipes();
+        $allRecipes[] = $this->signature_recipes[
+            ($this->getPlayerDistiller($playerId))->id / 2
+        ];
+
+        $recipe = $allRecipes[$recipeSlot + 2];
         $powerCards = $this->getPowerCards();
         foreach ($powerCards as $pc) {
             if ($playerId != $pc['player_id']) 
@@ -4827,7 +4843,8 @@ Purchase it or return it to the bottom of the deck.`
 
             switch ($pc['card_id']) {
                 case 120: // warehouse manager
-                    $bonus += $maxFlavor;
+                    if ($recipe['aged'])
+                        $bonus += $maxFlavor;
                     break;
                 case 130: // celebrity promoter
                     $bonus += 2;
@@ -4835,11 +4852,6 @@ Purchase it or return it to the bottom of the deck.`
             }
         }
 
-        $allRecipes = $this->getRecipes();
-        $allRecipes[] = $this->signature_recipes[
-            ($this->getPlayerDistiller($playerId))->id / 2
-        ];
-        $recipe = $allRecipes[$recipeSlot + 2];
 
         $bottleData = $this->getBottleData($playerId, $recipe, $bottleUid);
         $barrelData = $this->getBarrelData($playerId, $recipe, $barrelUid, $cards);
@@ -5278,7 +5290,7 @@ Purchase it or return it to the bottom of the deck.`
 
                     if ($bottleRegion == $recipeRegion) {
                         $this->playerGains($playerId, 2, $this->distillers[32]->name);
-                        $sp['total'] += 2;
+                        $value['total'] += 2;
                     }
                     break;
                 case 20: // anne mcadam (untested)
@@ -5753,9 +5765,9 @@ Purchase it or return it to the bottom of the deck.`
         $ret = array();
         foreach ($players as $player_id => $info) {
             $cards = self::getCollectionFromDb("
-                SELECT uid FROM bottomless_card WHERE location='player' AND player_id=${player_id}
+                SELECT uid FROM bottomless_card WHERE (location='player' or location='tradeIn') AND player_id=${player_id}
                 UNION ALL
-                SELECT uid FROM premium_ingredient WHERE location='player' AND player_id=${player_id}
+                SELECT uid FROM premium_ingredient WHERE (location='player' or location='tradeIn') AND player_id=${player_id}
                 ");
 
             if ($debug) {
@@ -5783,7 +5795,7 @@ Purchase it or return it to the bottom of the deck.`
 
             $raw = array();
             foreach ($distillable as $d) {
-                if ($d['recipeSlot'] < 0)
+                if ($d['recipeSlot'] < -1)
                     continue;
                 $r = $this->getRecipeFromSlot($d['recipeSlot'], $player_id);
                 $raw[$r['label']] = $r;
@@ -5824,7 +5836,10 @@ Purchase it or return it to the bottom of the deck.`
                     break;
             }
         }
-        return array('players' => $players, 'trades' => $tradeCollection);
+        return array('players' => $players, 
+                     'trades' => $tradeCollection,
+                     'whatCanIMake' => $this->getWCIM(),
+                    );
     }
 
     function argDistillPowers() {
@@ -6159,12 +6174,10 @@ Purchase it or return it to the bottom of the deck.`
                         $score = self::getUniqueValueFromDb(sprintf("SELECT COUNT(id) FROM recipe WHERE player_id=$player_id AND (color='%s' OR color='%s')", CUBENAME::SILVER, CUBENAME::GOLD));
                         break;
                     case 120: // Warehouse Manager
-                        $labels = self::getCollectionFromDb("SELECT * FROM label WHERE player_id=$player_id AND count != 0");
+                        $labels = self::getCollectionFromDb("SELECT * FROM label WHERE player_id=$player_id AND count != 0 AND location!='flight'");
                         $aged = 0;
-                        //self::notifyAllPlayers("dbgdbg", "labels", array('labels', $labels));
                         foreach ($labels as $iuid => $info) {
                             $r = $this->getRecipeByName($info['label'], $player_id);
-                            //self::notifyAllPlayers("dbgdbg", "r", array('r' => $r));
                             if ($r['aged']) {
                                 $aged++;
                             }
@@ -7238,6 +7251,7 @@ Purchase it or return it to the bottom of the deck.`
         $deckCounts['item'] = self::getUniqueValueFromDb("SELECT COUNT(*) FROM premium_item WHERE location='deck'");
         $deckCounts['ing'] = self::getUniqueValueFromDb("SELECT COUNT(*) FROM premium_ingredient WHERE location='deck'");
         $deckCounts['du'] = self::getUniqueValueFromDb("SELECT COUNT(*) FROM distillery_upgrade WHERE location='deck'");
+
         if ($marketCard) {
             $X_OFF = floor($marketCard->imgB % 10) * 122;
             $Y_OFF = floor($marketCard->imgB / 10) * 190;
@@ -7247,6 +7261,28 @@ Purchase it or return it to the bottom of the deck.`
                 array()
             );
         }
+
+        $truckCards = [];
+        $sql = "
+                SELECT uid, 'du' as market FROM distillery_upgrade
+                WHERE location='truck'
+                UNION ALL
+                SELECT uid, 'ing' as market FROM premium_ingredient
+                WHERE location='truck'
+                UNION ALL
+                SELECT uid, 'item' as market FROM premium_item
+                WHERE location='truck'
+                ";
+        $results = self::getCollectionFromDb($sql);
+        foreach ($results as $uid => $entry) {
+            $tmp = $this->AllCards[$uid];
+            $tmp->market = $entry["market"];
+            $truckCards[] = $tmp;
+            if (array_key_exists($uid, $removedCards)) {
+                unset($removedCards[$uid]);
+            }
+        }
+
         self::notifyAllPlayers("updateMarkets", 
             clienttranslate('Markets update at the end of the market phase, ${new_cards} added'), 
             array(
@@ -7256,6 +7292,7 @@ Purchase it or return it to the bottom of the deck.`
                 ),
                 'new_markets' => $newMarkets,
                 'removed_slot' => $playerCount == 1 ? $marketCard->market : ($playerCount < 2 ? [[3,4],[3,4],[3,4]] : [[4],[4],[4]]),
+                'truck_cards' => $truckCards,
                 'removed_cards' => $removedCards,
                 'deck_counts' => $deckCounts
             ));

@@ -272,6 +272,8 @@ function (dojo, declare, on, bgacards) {
                     div.classList.add('labelSlot');
                     div.key = card.name;
 
+                    if (card.signature)
+                        this.addTooltipForSignature(div, card)
                     dojo.connect(div, 'onclick', this, () => this.flipLabel(card))
                 },
                 setupFrontDiv: (card, div) => {
@@ -427,6 +429,79 @@ function (dojo, declare, on, bgacards) {
             return formatHTML
         },
 
+        getTooltipForRecipe(r) {
+            var region = dojo.string.substitute(
+                "${region_str}: ${region_cap} <span class='icon-${region}-em'></span>", 
+                {
+                    region_str: _("Region"),
+                    region: _(r['region']).toLowerCase(),
+                    region_cap: this.capitalize(_(r['region']).toLowerCase())
+                }
+            )
+            var tier = dojo.string.substitute(
+                "${tier_str}: ${tier} <br/>", {
+                    tier_str: _("Tier"),
+                    tier: this.capitalize(_(r['cube']))
+                }
+            )
+            var aged = ''
+            var agedIcon = '';
+            if (r['aged']) {
+                agedIcon = `<span class='icon-aged-em'></span>`;
+                aged = _("Aged")
+            }
+            else {
+                agedIcon = `<span class='icon-unaged-em'></span>`;
+                aged = _("Unaged")
+            }
+
+            var barrel = dojo.string.substitute(
+                "${barrel_str}: ${barrel_cap} <span class='icon-${barrel} icon-em'></span>", 
+                {barrel_str: _("Barrel"), 
+                    barrel: _(r['barrel'].toLowerCase()),
+                    barrel_cap: this.capitalize(_(r['barrel'].toLowerCase()))
+                })
+
+            var types = r['allowed'].map(X => `<span class='icon-${X.toLowerCase()}-em'></span>`)
+            var requires = `${_("Requires at least")} ${r['sugars']}` + types.join(' / ')
+            var mustinclude = ""
+            if (r.signature) {
+                mustinclude = dojo.string.substitute(_("Must include ${include} <br/>"), {
+                    include: this.capitalize(_(r.include))
+                })
+                tier = ""
+            }
+            return `
+            <div style="font-size: 20px">
+                ${r['name']} ${r['sp']} <span class='icon-sp-em'></span> <br/>
+                <hr/>
+                ${region} <br/>
+                ${barrel} <br/>
+                ${tier}
+                ${mustinclude}
+                ${aged} ${agedIcon} <br/>
+                ${requires} <br/>
+            
+            </div>
+            `;
+        },
+        getTooltipForRecipeSlot(slot) {
+            var r = this.recipeFlight[slot];
+            return this.getTooltipForRecipe(r);
+        },
+        addTooltipForSignature(div, card) {
+            var formatHTML = this.getTooltipForRecipe(card);
+            this.addTooltipHtml(div.id, formatHTML, 1000);
+        },
+        addTooltipsForFlight() {
+            for (var ii = 0; ii < 7; ii++) {
+                var formatHTML = this.getTooltipForRecipeSlot(ii);
+                dojo.query(`.flightRecipe${ii}`).forEach(div => {
+                    this.addTooltipHtml(div.id, formatHTML, 1000)
+                    div.dataset.whee = "done"
+                })
+            }
+        },
         addTooltipForCard( card , div) {
             formatHTML = this.getTooltipForCard(card)
             this.addTooltipHtml(div.id, formatHTML, 1000)
@@ -595,11 +670,13 @@ function (dojo, declare, on, bgacards) {
                 return;
             }
 
+            if (gamedatas.firstTaste && !gamedatas.recipeFlight) {
+                return;
+            }
             var thisPlayerSelected = false;
             if (gamedatas.distillersSelectedArray?.includes(''+this.player_id)) {
                 thisPlayerSelected = true;
             }
-            console.log("thisPlayerSelected", thisPlayerSelected);
 
             for( var player_id in gamedatas.players )
             {
@@ -733,7 +810,6 @@ function (dojo, declare, on, bgacards) {
                 }
 
                 if (this.isSpectator && player_id == this.player_list[0]) {
-                    console.log("making visible?")
                     dojo.removeClass('playerSection_' + player_id, "invisible")
                 }
 
@@ -783,8 +859,7 @@ function (dojo, declare, on, bgacards) {
                         dojo.query('.distillerChoice').removeClass('invisible')
                     }
                 }
-                // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                // console.log("distillersSelectedArray", gamedatas.distillersSelectedArray)
+
                 if (gamedatas.distillers[player_id]?.length == 1 && (!gamedatas.firstTaste || thisPlayerSelected)) {
                     // console.log("placing chosen distiller")
                     if (player_id == this.player_id) {
@@ -802,11 +877,9 @@ function (dojo, declare, on, bgacards) {
                         this.labelCardsManager,
                         document.getElementById('recipeSignatureSlot_' + player_id),
                     );
-                    // console.log(player_id)
-                    // console.log(gamedatas.signatureLabels)
+
                     if (player_id.toString() in gamedatas.signatureLabels && gamedatas.signatureLabels[player_id].length) {
                         var sigLabel = gamedatas.signatureLabels[player_id][0];
-                        console.log(sigLabel.location)
                         if (sigLabel.location == 'flight') {
                             this.playerSignatureLabelStock[player_id].addCard(
                                 gamedatas.signatureLabels[player_id][0]);
@@ -905,21 +978,16 @@ function (dojo, declare, on, bgacards) {
             btns = ['nowrapRadio', 'wrapRadio', 'scrollRadio']
             btns.forEach(id => {
                 elem = document.getElementById(id)
-                // console.log(elem)
                 dojo.connect(elem, 'onclick', this, 'onWrapClick')
             })
 
             // Place the distiller choice bar
-            // console.log("thisPlayerSelected", thisPlayerSelected)
             if ((gamedatas.firstTaste && !thisPlayerSelected) || (gamedatas.distillersSelected == 0 && gamedatas.distillers[this.player_id]?.length == 2)) {
                 if (gamedatas.firstTaste) {
                     document.getElementById("label2choice").remove();
                 }
-                // console.log("placing distillers for choice")
                 
-                // console.log("distillers length", gamedatas.distillers[this.player_id], gamedatas.distillers[this.player_id].length)
                 for (var ii = gamedatas.distillers[this.player_id].length; ii >= 1; ii--) {
-                    // console.log("loopdy freaking doo", ii)
                     this.placeFlippyCard(this.player_id, `distiller${ii}`, 'distiller', 
                         gamedatas.distillers[this.player_id][ii-1].id);
 
@@ -994,14 +1062,12 @@ function (dojo, declare, on, bgacards) {
             gamedatas.reveal.forEach(X => {
                 X.location_idx = 1;
                 X.location = 'reveal'
-                // console.log(X)
-                // console.log(this.playerRevealStock)
                 this.activeCards[X.uid] = X;
-                this.playerRevealStock[this.player_id][X.market].addCard(X);
+                if (this.playerRevealStock[this.player_id])
+                    this.playerRevealStock[this.player_id][X.market].addCard(X);
                 this.showFloatingReveal();
             })
 
-            // console.log(function () { return this.activeCards}())
             this.labels = {}
             this.labelOrder = {}
             for (var i = 0; i < gamedatas.flight.length; i++) {
@@ -1067,8 +1133,8 @@ function (dojo, declare, on, bgacards) {
                 this.addRecipeCube(R.player_id, R.slot, R.color)
             })
             this.recipeFlight = gamedatas.recipeFlight;
+            this.addTooltipsForFlight()
 
-            // console.log(gamedatas.spirits)
             this.spiritContents = []
             gamedatas.spirits?.forEach(S => {
                 this.addTinyLabel(S, S.player_id);
@@ -1418,13 +1484,16 @@ function (dojo, declare, on, bgacards) {
                                     typename: _(typename),
                                     cardName: _(cardName),
                                 });
-                            var btn = this.addActionButton('discount' + D.triggerCard.uid, s,
+                            console.log(D.triggerCard)
+                            console.log(D.triggerCard.uid)
+                            var btnName = 'discount' + D.triggerCard.uid + D.triggerCard.market
+                            var btn = this.addActionButton(btnName, s,
                                 (evt)=>{
-                                    var elem = document.getElementById('discount' + D.triggerCard.uid);
+                                    var elem = document.getElementById(btnName);
                                     this.togglePowerButton(elem);
                                 }
                             );
-                            var elem = document.getElementById('discount' + D.triggerCard.uid);
+                            var elem = document.getElementById(btnName);
                             elem.dataset["uid"] = (D.triggerCard.market == 'du') ? D.triggerCard.uid : 0; // 0 indicates a distiller ability
                             elem.classList.add('powerCard')
                             // console.log("user pref", this.getGameUserPreference(100), elem)
@@ -1492,7 +1561,6 @@ function (dojo, declare, on, bgacards) {
                             })
                         })
                         if (!args.mustSellAged) {
-                            // console.log(onlyAged)
                             if (onlyAged) {
                                 this.addActionButton("skipSaleButton", _("Skip Sale"), () => {
                                     // on round 7, prompt
@@ -1501,11 +1569,11 @@ function (dojo, declare, on, bgacards) {
                                             this, function(result) {})
                                     }
                                     if (this.turn == 7) {
-                                        var elem = document.getElementById("skipSaleButton")
-                                        dojo.addClass('skipSaleButton', "disabled-looking")
-
-                                        this.addTooltip("skipSaleButton", 
-                                            _("In round 7 you must sell all spirits"), '', 1000)
+                                        // console.log("make a confirmation dialog")
+                                        this.confirmationDialog(
+                                            _("In round 7, it is usually best to sell all spirits. Are you sure you want to end the sale phase?"), 
+                                            () => this.ajaxcall("/distilled/distilled/skipSale.html", {lock: true}),
+                                            () => {})
                                     }
                                 })
                             }
@@ -1669,13 +1737,16 @@ function (dojo, declare, on, bgacards) {
                                 type: _(typename),
                                 name: _(cardName),
                             });
-                            var btn = this.addActionButton('discount' + D.triggerCard.uid, s,
+                            console.log(D.triggerCard)
+                            console.log(D.triggerCard.uid)
+                            var btnName = 'discount' + D.triggerCard.uid + D.triggerCard.market;
+                            var btn = this.addActionButton(btnName, s,
                                 (evt)=>{
-                                    var elem = document.getElementById('discount' + D.triggerCard.uid);
+                                    var elem = document.getElementById(btnName)
                                     this.togglePowerButton(elem);
                                 }
                             );
-                            var elem = document.getElementById('discount' + D.triggerCard.uid);
+                            var elem = document.getElementById(btnName)
                             elem.dataset["uid"] = (D.triggerCard.market == 'du') ? D.triggerCard.uid : 0; // 0 indicates a distiller ability
                             elem.classList.add("powerButton")
                             elem.classList.add("powerCard")
@@ -2071,7 +2142,7 @@ function (dojo, declare, on, bgacards) {
             this.replaceActionBar(_("Choose a card to buy"), 
                 () => {
                     console.log("cancel trucker");
-                    this.connectTrucksWithCb((X) => this.truckerCallback(X), null, true);
+                    this.connectTrucksWithCb((X) => this.truckerCallback(X), true);
                 })
             args.options.forEach(O => {
                 console.log(args, market)
@@ -2482,10 +2553,8 @@ function (dojo, declare, on, bgacards) {
             truck.setCardNumber(truckCount + 1, null);
         },
         translatetpl() {
-            // console.log("Translating!!!!!")
             let divs = dojo.query('.translateme')
             divs.forEach(D => {
-                // console.log("translating ", D,  `"${D.innerText}"`)
                 var translation = _(D.innerText.trim()) 
                 translation = bga_format(translation, {
                     '*': (t) => {
@@ -2725,16 +2794,41 @@ function (dojo, declare, on, bgacards) {
             formatHTML += '</div></div>';
             return formatHTML
         },
+        getPantryWhatCanIMake(spiritList) {
+            let imageClass = "dlabel"
+            var formatHTML = `<div title="${_("This section will display the recipes you can distill based on the ingredients in your pantry, the recipes you've purchased, and the barrels in your store room. Will not show moonshine.")}"> ${_("Distillable Recipes")} </div> `+ '<div class="pantry_wcim">'
+                
+            if (spiritList.length == 0) {
+                formatHTML += `<div class="icon-redx"></div>`
+            }
+            spiritList.forEach(spirit => {
+                label = spirit.label
+                if (spirit.signature == true) {
+                    label += 18;
+                }
+
+                const xBack = (label %  6);
+                const yBack = Math.floor(label / 6);
+
+                formatHTML += `
+                    <div class="${imageClass}" 
+                        style="--width: 41px; --height: 30px; background-position-x: calc(-${xBack} * var(--width)); background-position-y: calc(-${yBack} * var(--height));"> 
+                    </div>
+                    `
+            })
+            formatHTML += '</div>';
+            return formatHTML
+        },
         updateWhatCanIMake(args) {
             // console.log("whatCanIMake")
             Object.keys(args).forEach(pid => {
-                // console.log(pid)
-                data = args[pid]
-
-                html = this.getTooltipForWhatCanIMake(data)
-                // console.log(html)
-                if (pid == this.player_id)
+                var data = args[pid]
+                var html = this.getTooltipForWhatCanIMake(data)
+                if (pid == this.player_id) {
                     this.addTooltipHtml(`whatCanIMake`, html, 1000)
+                    var elem = document.getElementById(`pantry_wcim`)
+                    elem.innerHTML = this.getPantryWhatCanIMake(data);
+                }
             })
         },
 
@@ -3261,7 +3355,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             } else {
                 // console.log(C, C.name, _(C.name))
                 var cb = null;
-                // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 if (this.stateName == 'roundStartAction' && this.stateArgs?.args?.powercard == 123) {
                     // trucker
                     console.log("Setting up cb")
@@ -3272,41 +3365,81 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                     {name: _(C.name), cost: cost}), cb)
             }
 
-            for (let ii = 3; ii > 0; ii--) {
+            [3, 2, 1].forEach(ii => {
                 var divname = 'du' + ii + "_" + this.player_id + '-front';
                 var elem = document.getElementById(divname);
-                existing = _("Empty")
+                var existing = _("Empty")
+                var confirm = false
                 if (elem) {
                     existing = this.activeCards[elem.dataset.uid].name
+                    confirm = true;
                 } 
 
                 var btn = this.addReplacementActionButton(`btn_slot`+ii, dojo.string.substitute(_("Slot ${ii} (${existing})"), {ii: ii, existing: _(existing)}), () => {
                     if (placeLabelArgs) { // Indicates place label stage
-                        // console.log("placeDuPrompt2", this.decks.duTruck.getCards())
                         if (args.discard) {
                             discard = this.activeCards[args.discard].name
                             args.duSlot = function () { return ii }();
-                            this.confirmButton(dojo.string.substitute(_("Discard ${discard} and collect ${name} on slot ${ii}"), {discard: _(discard), name: _(C.name), ii: ii}), 
-                                'sellDrink',
-                                this.getAjaxArgsFromArgs(args),
-                                'revertActionBarAndResetCards')
+                            if (confirm) {
+                                this.confirmationDialog(
+                                    dojo.string.substitute(
+                                        _("Discard ${discard} and collect ${name} on slot ${ii}? <br/><span style='color: red'>Are you sure you want to discard ${existing}?</span>"),
+                                        {discard: _(discard), existing: _(existing), name: _(C.name), ii: ii}),
+                                    () => {
+                                        this.ajaxcall( `/distilled/distilled/sellDrink.html`, this.getAjaxArgsFromArgs(args), this, function(result) {});
+                                        this.revertActionBar();
+                                    },
+                                    () => {}
+                                );
+                            } else {
+                                this.confirmButton(dojo.string.substitute(_("Discard ${discard} and collect ${name} on slot ${ii}"), {discard: _(discard), name: _(C.name), ii: ii}), 
+                                    'sellDrink',
+                                    this.getAjaxArgsFromArgs(args),
+                                    'revertActionBarAndResetCards')
+                            }
                         } else {
-                            // console.log("placeDuPrompt3", this.decks.duTruck.getCards())
                             args.duSlot = function () { return ii }();
-                            this.confirmButton(dojo.string.substitute(_("Collect ${name} on slot ${ii}"), {name: _(C.name), ii: ii}), 
-                                'sellDrink',
-                                this.getAjaxArgsFromArgs(args),
-                                'revertActionBarAndResetCards')
+                            if (confirm) {
+                                this.confirmationDialog(
+                                    dojo.string.substitute(
+                                        _("Place ${name} on slot ${ii}? <br/><span style='color: red'>Are you sure you want to discard ${existing}?</span>"),
+                                        {existing: _(existing), name: _(C.name), ii: ii}),
+                                    () => {
+                                        this.ajaxcall( `/distilled/distilled/sellDrink.html`, this.getAjaxArgsFromArgs(args), this, function(result) {});
+                                        this.revertActionBar();
+                                    },
+                                    () => {}
+                                );
+                            } else {
+                                this.confirmButton(dojo.string.substitute(_("Collect ${name} on slot ${ii}"), {name: _(C.name), ii: ii}), 
+                                    'sellDrink',
+                                    this.getAjaxArgsFromArgs(args),
+                                    'revertActionBarAndResetCards')
+                            }
                         }
                     } else {
                         args.duSlot = function () { return ii }(),
                         args.debugId = 4;
                         args.stateName = this.stateName;
-                        this.confirmButton(dojo.string.substitute(_('Place ${name} on slot ${ii}'), {name: _(C.name), ii: ii}), "buyCard", 
-                            args, cb)
+
+                        if (confirm) {
+                            this.confirmationDialog(
+                                dojo.string.substitute(
+                                    _("Place ${name} on slot ${ii}? <br/><span style='color: red'>Are you sure you want to discard ${existing}?</span>"),
+                                    {existing: _(existing), name: _(C.name), ii: ii}),
+                                () => {
+                                    this.ajaxcall( `/distilled/distilled/buyCard.html`, args, this, function(result) {});
+                                    this.revertActionBar();
+                                },
+                                () => {}
+                            );
+                        } else {
+                            this.confirmButton(dojo.string.substitute(_('Place ${name} on slot ${ii}'), {name: _(C.name), ii: ii}), "buyCard", 
+                                args, cb)
+                        }
                     }
                 })
-            }
+            })
         },
         beginTrade(prompt, tradeOut) {
             this.replaceActionBar(prompt);
@@ -3326,7 +3459,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 let swap = this.activeCards[tradeOut]
 
                 if (swap.cost >= this.activeCards[card_no].cost && card_no <= 102) {
-                    // console.log(this.activeCards[card_no].name)
                     cardName = this.activeCards[card_no].name;
                     cardIcon = this.activeCards[card_no].subtype.toLowerCase();
                     if (!cardIcon)
@@ -3375,8 +3507,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             button.id = id
             button.innerHTML = text;
 
-            // console.log("attach callback to button")
-            // console.log(button)
             dojo.connect(button, 'onclick', this, cb)
 
             this.actionBarReplacement.insertAdjacentElement("afterbegin", button)
@@ -3399,13 +3529,8 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             actionBar.classList.add("invisible")
 
             titleElement = document.getElementById("pagemaintitletext")
-            // console.log("should i set old title?")
-            // console.log(this.oldtitle)
             if (!this.oldtitle) {
                 this.oldtitle = titleElement.innerHTML
-                // console.log(titleElement)
-                // console.log(titleElement.innerHTML)
-                // console.log(this.oldtitle)
             }
             if (title)
                 titleElement.innerHTML = title;
@@ -3997,7 +4122,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                                                     lock: true,
                                                 }, () => {
                                                     console.log("cancel trucker 2");
-                                                    this.connectTrucksWithCb((X) => this.truckerCallback(X), null, true);
+                                                    this.connectTrucksWithCb((X) => this.truckerCallback(X), true);
                                                 }
                                             )
                                         }
@@ -4549,7 +4674,6 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
 
             // If it's expanded, allow yourself to see the reveal
             if (this.isExpanded()) {
-                // console.log("checking expanded")
                 if (this.playerRevealStock[this.player_id].ing.getCards().length || 
                     this.playerRevealStock[this.player_id].item.getCards().length || 
                     this.playerRevealStock[this.player_id].du.getCards().length) {
@@ -6247,16 +6371,37 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
             // TODO replace removal with move to truck
             this.expandMarket();
 
-            notif.args.removed_cards.forEach (C => {
-                // console.log("Adding cards to truck")
-                // console.log(C)
+            var duTruck = 0;
+            var itemTruck = 0;
+            var ingTruck = 0;
+
+            notif.args.truck_cards.forEach (C => {
+                console.log("Adding cards to truck")
+                console.log(C)
                 C.location = 'truck'
-                if (C.market == 'du') 
+                if (C.market == 'du')  {
                     this.addCardToTruck(C, 'du', this.decks.duTruck);
-                else if (C.market == 'item')
+                    duTruck ++;
+                }
+                else if (C.market == 'item') {
                     this.addCardToTruck(C, 'item', this.decks.itemTruck);
-                else if (C.market == "ing") 
+                    itemTruck++;
+                }
+                else if (C.market == "ing") {
                     this.addCardToTruck(C, 'ing', this.decks.ingTruck);
+                    ingTruck++;
+                }
+            });
+
+            this.decks.ingTruck.setCardNumber(ingTruck)
+            this.decks.itemTruck.setCardNumber(itemTruck)
+            this.decks.duTruck.setCardNumber(duTruck)
+
+            notif.args.removed_cards.forEach (C => {
+                console.log("remove cards that got shuffled")
+                console.log(C)
+                var stock = this.getStock(C.market);
+                stock.removeCard(C)
             });
 
             Object.keys(notif.args.new_markets).forEach((M, idx) => {
