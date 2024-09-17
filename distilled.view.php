@@ -43,7 +43,7 @@ class view_distilled_distilled extends game_view
 
         if (!$solo_mode) {
           // hide the solo goals section
-          $this->page->begin_block("distilled_distilled.tpl", "solo_goals");
+          $this->page->begin_block("distilled_distilled", "solo_goals");
           $this->page->insert_template("solo_goals", '', []);
         }
     }

@@ -1356,7 +1356,7 @@ function (dojo, declare, on, bgacards) {
                         }
 
                         if (hasCollect === false) {
-                            this.confirmButton(_("Confirm Skip Claim"), "skipSoloGoal", {lock: true}, null, _("<span style='color: red'> Solo goals must be claimed when triggered. </span> Are you sure you wish to skip?"))
+                            this.confirmButton(_("Confirm Skip Claim"), "skipSoloGoal", {lock: true}, null, _("<span style='color: red'>Distill and Sell goals must be claimed when triggered. </span> Are you sure you wish to skip?"))
                         } else {
                             this.ajaxcall( "/distilled/distilled/skipSoloGoal.html", {lock: true}, this, function(result) {});
                         }
@@ -6381,7 +6381,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 C.location = 'truck'
                 if (C.market == 'du')  {
                     this.addCardToTruck(C, 'du', this.decks.duTruck);
-                    duTruck ++;
+                    duTruck++;
                 }
                 else if (C.market == 'item') {
                     this.addCardToTruck(C, 'item', this.decks.itemTruck);

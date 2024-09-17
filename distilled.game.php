@@ -7684,7 +7684,6 @@ Purchase it or return it to the bottom of the deck.`
         $this->gamestate->nextState('nextPlayerDistill');
     }
     function stNextPlayerSellHack() {
-        self::activeNextPlayer();
         $pid = self::activeNextPlayer();
         while ($this->isPlayerZombie($pid)) {
             $pid = self::activeNextPlayer();
@@ -8768,7 +8767,7 @@ Purchase it or return it to the bottom of the deck.`
                     $completed[] = $sgObj;
                 }
                 break;
-            case 303: // X = 3 (+bronze/silver)
+            case 303: // X = 3 (+bronze/silver from home)
             case 212: // X = 5 (+aged)
                 // Sell spirit worth XSP more than recipe
                 $target = 100;
@@ -8781,7 +8780,9 @@ Purchase it or return it to the bottom of the deck.`
                     $recipe = $this->getRecipeFromSlot($drink["recipe_slot"], $player_id);
                     if ($drink["sale_sp"] >= ($target + $recipe["sp"]) && $drink["sold_turn"] == $turn) {
                         if ($sgObj->uid == 303) {
-                            if (in_array($recipe["cube"], [CUBENAME::BRONZE, CUBENAME::SILVER])) {
+                            $homeRegion = $this->getPlayerDistiller($player_id)->region;
+                            $adjustedRegion = $this->getRecipeRegionForPlayer($player_id, $recipe);
+                            if (in_array($recipe["cube"], [CUBENAME::BRONZE, CUBENAME::SILVER]) && $adjustedRegion == $homeRegion) {
                                 $sgObj->drinks[] = $drink["id"];
                                 $completed[] = $sgObj;
                                 break;
