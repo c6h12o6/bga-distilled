@@ -2911,7 +2911,7 @@ Purchase it or return it to the bottom of the deck.`
     }
     function selectDistiller($playerId, $distillerId) {
         $distiller = $this->distillers[$distillerId];
-        $this->playerGains($playerId, $distiller->startingMoney, $distiller->name);
+        $this->playerGains($playerId, $distiller->startingMoney, $distiller->name, null, false);
         for ($ii = 0; $ii < $distiller->startingYeast; $ii++)
             $this->buyCard_internal($playerId, $this->templateCards[139]->uid, 'bm');
         for ($ii = 0; $ii < $distiller->startingWater; $ii++)
@@ -3080,12 +3080,12 @@ Purchase it or return it to the bottom of the deck.`
             ));
         }
     }
-    function playerGains($playerId, $amount, $trigger_name=null, $trigger_uid=null) {
+    function playerGains($playerId, $amount, $trigger_name=null, $trigger_uid=null, $trackGain=true) {
         $sql = sprintf("UPDATE player SET money=money+%d WHERE player_id='%s'",
                         $amount, $playerId);
         self::DbQuery($sql);
 
-        if ($amount > 0) {
+        if ($amount > 0 && $trackGain == true) {
             $turn = self::getGameStateValue("turn", 0);
             $this->incStat($amount, "money_gained", $playerId);
             if ($turn >= 1 && $this->getPlayersNumber() == 1) {
@@ -6759,7 +6759,7 @@ Purchase it or return it to the bottom of the deck.`
                     'row' => 'target'
                 ));
                 if ($targetScore == $this->getStat("points_total", $player_id)) {
-                    self::notifyAllPlayers( 'playerPointsTiebreaker', clienttranslate('Your score is tied with your golo goal! Decreasing your solo goal by 1 <span class="icon-sp-em"></span> to award your victory!');
+                    self::notifyAllPlayers( 'playerPointsTiebreaker', clienttranslate('Your score is tied with your golo goal! Decreasing your solo goal by 1 <span class="icon-sp-em"></span> to award your victory!'));
                     $this->playerPointsEndgame($player_id, 1, "solo");
                 }
             } else { // Did not complete all the tiers - auto loss (negate all their points - rude!)
@@ -7147,7 +7147,7 @@ Purchase it or return it to the bottom of the deck.`
                 foreach ($results as $uid => $entry) {
                     $tmp = $this->AllCards[$uid];
                     $tmp->market = $entry["market"];
-                    $removedCards[] = $tmp;
+                    $removedCards[$uid] = $tmp;
                 }
 
                 $sql = sprintf("UPDATE distillery_upgrade SET location='truck'
@@ -7193,7 +7193,7 @@ Purchase it or return it to the bottom of the deck.`
                 foreach ($results as $uid => $entry) {
                     $tmp = $this->AllCards[$uid];
                     $tmp->market = $entry["market"];
-                    $removedCards[] = $tmp;
+                    $removedCards[$uid] = $tmp;
                 }
 
             $sql = sprintf("UPDATE distillery_upgrade SET location='truck' WHERE location='market' AND location_idx in (%s)", implode(',', $marketCard->market[0]));
@@ -7252,16 +7252,6 @@ Purchase it or return it to the bottom of the deck.`
         $deckCounts['ing'] = self::getUniqueValueFromDb("SELECT COUNT(*) FROM premium_ingredient WHERE location='deck'");
         $deckCounts['du'] = self::getUniqueValueFromDb("SELECT COUNT(*) FROM distillery_upgrade WHERE location='deck'");
 
-        if ($marketCard) {
-            $X_OFF = floor($marketCard->imgB % 10) * 122;
-            $Y_OFF = floor($marketCard->imgB / 10) * 190;
-            self::notifyAllPlayers(
-                "soloMarketDiscard", 
-                sprintf("%s <div class=\"card soloGoalCard\" style=\"background-position-x: -%dpx; background-position-y: -%dpx\"> </div>", clienttranslate('Market discard applied:'), $X_OFF, $Y_OFF), 
-                array()
-            );
-        }
-
         $truckCards = [];
         $sql = "
                 SELECT uid, 'du' as market FROM distillery_upgrade
@@ -7283,6 +7273,16 @@ Purchase it or return it to the bottom of the deck.`
             }
         }
 
+        if ($marketCard) {
+            $X_OFF = floor($marketCard->imgB % 10) * 122;
+            $Y_OFF = floor($marketCard->imgB / 10) * 190;
+            self::notifyAllPlayers(
+                "soloMarketDiscard", 
+                sprintf("%s <div class=\"card soloGoalCard\" style=\"background-position-x: -%dpx; background-position-y: -%dpx\"> </div>", clienttranslate('Market discard applied:'), $X_OFF, $Y_OFF), 
+                array()
+            );
+        }
+
         self::notifyAllPlayers("updateMarkets", 
             clienttranslate('Markets update at the end of the market phase, ${new_cards} added'), 
             array(
@@ -7293,7 +7293,7 @@ Purchase it or return it to the bottom of the deck.`
                 'new_markets' => $newMarkets,
                 'removed_slot' => $playerCount == 1 ? $marketCard->market : ($playerCount < 2 ? [[3,4],[3,4],[3,4]] : [[4],[4],[4]]),
                 'truck_cards' => $truckCards,
-                'removed_cards' => $removedCards,
+                'removed_cards' => array_values($removedCards),
                 'deck_counts' => $deckCounts
             ));
         
