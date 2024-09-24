@@ -6902,6 +6902,11 @@ Purchase it or return it to the bottom of the deck.`
 
     function stRoundStartOnce() {
         $turn = self::getGameStateValue("turn", 0);
+        
+        if ($this->getPlayersNumber() == 1) {
+            self::setGameStateValue("inRoundEnd", 0);
+        }
+        
         self::notifyAllPlayers("roundStart", 
             clienttranslate('Starting round ${turn}'), 
             array('turn' => $turn,
@@ -7314,7 +7319,7 @@ Purchase it or return it to the bottom of the deck.`
         if ($this->getPlayersNumber() == 1) {
             self::setGameStateValue("inRoundEnd", 1);
             if ($gs == 7) {
-                $this->gamestate->nextState("endGame");
+                $this->gamestate->nextState("soloGoalCheckEnd");
             } else {
                 $this->gamestate->nextState("soloGoalCheck");
             }
@@ -8537,13 +8542,20 @@ Purchase it or return it to the bottom of the deck.`
 
     // SOLO MODE FUNCTIONS - START
 
-    function soloGoalsFilterDrinksByGoalType($drinks, $removeGoalType) {
+    function soloGoalsFilterDrinksByGoalType($drinks, $drinksUsed, $removeGoalType) {
         if ($removeGoalType == SoloGoalType::COLLECT || $removeGoalType == SoloGoalType::EARN) { // Collection and Earn goals look at everything
             return $drinks;
         }
         $out = array();
-        foreach ($drinks as $drink) { // array_filter is a thing, but... meh
-            if ($drink["goal_type"] != $removeGoalType) {
+        foreach ($drinks as $drink) {
+            $drinkUsed = false;
+            foreach ($drinksUsed as $use) {
+                if ($use["drink_id"] == $drink["id"] && $use["goal_type"] == $removeGoalType) {
+                    $drinkUsed = true;
+                    break;
+                }
+            }
+            if ($drinkUsed == false) {
                 $out[] = $drink;
             }
         }
@@ -8553,9 +8565,13 @@ Purchase it or return it to the bottom of the deck.`
     function stSoloGoalCheck_internal() {
         $player_id = self::getActivePlayerId();
         $turn = self::getGameStateValue("turn", 0);
+        if ($turn > 7) {
+            $turn = 7;
+        }
 
         $sgList = self::getCollectionFromDb("SELECT uid FROM solo_goal WHERE unlocked = 1 AND achieved = 0");
-        $drinksAll = self::getCollectionFromDb("SELECT d.*, sdu.goal_uid, sdu.goal_type FROM drink d LEFT OUTER JOIN solo_drinks_used sdu ON (d.id = sdu.drink_id) WHERE d.player_id=$player_id");
+        $drinksAll = self::getCollectionFromDb("SELECT * FROM drink WHERE player_id=$player_id");
+        $drinksUsed = self::getCollectionFromDb("SELECT * FROM solo_drinks_used");
         $cards = self::getCollectionFromDb("SELECT uid FROM premium_item WHERE (location='player' OR location='display') AND player_id=$player_id
             UNION ALL
             SELECT uid FROM distillery_upgrade WHERE location='player' AND player_id=$player_id");
@@ -8579,11 +8595,18 @@ Purchase it or return it to the bottom of the deck.`
         foreach ($sgList as $sg) {
             $sgObj = $this->AllSoloCards[$sg["uid"]];
             $sgObj->drinks = array();
-            $drinks = $this->soloGoalsFilterDrinksByGoalType($drinksAll, $sgObj->type);
-            
-            // self::notifyAllPlayers("soloGoalCheck", clienttranslate('Checking Solo Goals: ${uid} - Drinks: ${drinks}, Bottles: ${bottles}, Equip: ${du_equip}, Spec: ${du_spec}, Turn: ${turn}, Round End: ${re}'),array(
+            $drinks = $this->soloGoalsFilterDrinksByGoalType($drinksAll, $drinksUsed, $sgObj->type);
+
+            // $sold = 0;
+            // foreach ($drinks as $drink) {
+            //     if ($drink["sold_turn"] == $turn) {
+            //         $sold++;
+            //     }
+            // }
+            // self::notifyAllPlayers("soloGoalCheck", clienttranslate('Checking Solo Goals: ${uid} - Drinks: ${drinks}, Sold: ${sold}, Bottles: ${bottles}, Equip: ${du_equip}, Spec: ${du_spec}, Turn: ${turn}, Round End: ${re}'),array(
             //         'uid' => $sg["uid"],
             //         'drinks' => count($drinks),
+            //         'sold' => $sold,
             //         'bottles' => count($bottles),
             //         'du_equip' => count($du_equip),
             //         'du_spec' => count($du_spec),
@@ -8904,7 +8927,11 @@ Purchase it or return it to the bottom of the deck.`
                     $type = "points";
                 }
                 // We check the stat for the PRIOR turn since by the time this evaluates, the turn has already been incremented
-                if (self::getGameStateValue("inRoundEnd") == 1 && $this->getGameStateValue(sprintf("%s_per_round_%d", $type, ($turn - 1)), $player_id) >= $target) {
+                $tempTurn = $turn;
+                if ($turn == 7) {
+                    $tempTurn = 8; // Handle the last round by faking a turn 8; it will reduce to 7 next
+                }
+                if (self::getGameStateValue("inRoundEnd") == 1 && $this->getGameStateValue(sprintf("%s_per_round_%d", $type, ($tempTurn - 1)), $player_id) >= $target) {
                     $completed[] = $sgObj;
                 }
                 break;
@@ -9146,8 +9173,6 @@ Purchase it or return it to the bottom of the deck.`
                 "plural" => (count($labels) > 1) ? "s" : "",
                 "labels" => implode(' and ', $labels)
             ));
-        } else {
-            self::setGameStateValue("inRoundEnd", 0);
         }
         return $completed;
     }
@@ -9173,7 +9198,6 @@ Purchase it or return it to the bottom of the deck.`
             }
             $this->gamestate->nextState("soloGoalConfirm"); // Player needs to confirm/deny the goal
         } else {
-
             $this->soloGoalMarkDrinksInvalid();
             
             if ($this->getStateName() == 'soloGoalCheckLoop') { // If in the loop but nothing new was completed, return to the resume state
