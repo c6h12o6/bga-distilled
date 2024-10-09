@@ -434,7 +434,7 @@ function (dojo, declare, on, bgacards) {
                 "${region_str}: ${region_cap} <span class='icon-${region}-em'></span>", 
                 {
                     region_str: _("Region"),
-                    region: _(r['region']).toLowerCase(),
+                    region: this.getProperSubtype(r['region']),
                     region_cap: this.capitalize(_(r['region']).toLowerCase())
                 }
             )
@@ -473,7 +473,7 @@ function (dojo, declare, on, bgacards) {
             }
             return `
             <div style="font-size: 20px">
-                ${r['name']} ${r['sp']} <span class='icon-sp-em'></span> <br/>
+                ${_(r['name'])} ${r['sp']} <span class='icon-sp-em'></span> <br/>
                 <hr/>
                 ${region} <br/>
                 ${barrel} <br/>
@@ -675,7 +675,6 @@ function (dojo, declare, on, bgacards) {
 
                 this['score_counter_' + player_id] = scoreCounter;
 
-
                 var regions = ['americas', 'europe', 'asia', 'home', 'bottle']
                 regions.forEach(R => {
                     var regionCounter = new ebg.counter();
@@ -684,7 +683,6 @@ function (dojo, declare, on, bgacards) {
                     regionCounter.setValue(0)
                     this[counterName] = regionCounter;
                 })
-                
 
                 // TODO: Setting up players boards if needed
                 let section = dojo.place(this.format_block('jstpl_player_section', {
@@ -892,6 +890,7 @@ function (dojo, declare, on, bgacards) {
 
 
             gamedatas.basic_market.forEach(X => {
+                console.log("JBF 123", X)
                 this.activeCards[X.uid] = X;
 
                 dojo.place(this.format_block('jstpl_card', {
@@ -900,6 +899,11 @@ function (dojo, declare, on, bgacards) {
                     X_OFF: (X.card_id % 14) * 122,
                     Y_OFF: Math.floor(X.card_id / 14) * 190
                 }), 'basicMarket2', 'last');
+                var bmElem = document.getElementById('bm-card-' + X.uid + '-front')
+                if (X.type == 'SUGAR' || X.type == 'WATER' || X.type == 'YEAST')
+                    bmElem.classList.add('ing-card')
+                else 
+                    bmElem.classList.add('item-card')
                 this.addTooltipForCard(X, document.getElementById('bm-card-' + X.uid + '-front'))
             })
 
@@ -1100,6 +1104,8 @@ function (dojo, declare, on, bgacards) {
             if (args.args?.whatCanIMake) {
                 this.updateWhatCanIMake(args.args.whatCanIMake)
             }
+
+            this.noZindex();
             
             switch( stateName )
             {
@@ -1124,6 +1130,9 @@ function (dojo, declare, on, bgacards) {
                     }
                     break;
                 case 'distill':
+                    if ( this.isCurrentPlayerActive() ) {
+                        this.showFloatingPantry();
+                    }
                 case 'distill_post_trade': 
                     this.distillStartArgs = Object.assign({}, args);
                     console.log(args)
@@ -1945,6 +1954,15 @@ function (dojo, declare, on, bgacards) {
         // <a href="#" class="action-button bgabutton bgabutton_blue" onclick="return false;" id="discount1" data-uid="0">2 <span class="icon-coin-em"> </span>  off ingredient (Distiller Ability)</a>
 
         // @override
+        noZindex() {
+            this.player_list.forEach(pid => {
+                var cards = this.playerPantryStock[pid].ing.getCards();
+                cards.forEach(C => {
+                    elem = this.playerPantryStock[pid].ing.getCardElement(C);
+                    elem.style.zIndex = 0;
+                })
+            });
+        },
         truckerCallback(market)  {
             args = this.stateArgs.args
 
@@ -3181,7 +3199,9 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                             playerId: this.player_id,
                             in: function() {return card_no}(),
                             out: tradeOut,
-                            lock: true})
+                            lock: true}, 
+                        null,
+                        _("Confirm Trade"))
                     })
                 }
             })

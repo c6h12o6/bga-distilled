@@ -347,12 +347,10 @@ var jstpl_player_floater = '\
     <div>\
         <div id="${DIVBASE}_wrapper_${PID}" class="pantry floatingPantry">\
             <div class="displaybase ${DIVBASE}_wrapper"> ${DISPLAYBASE} <br/> </div>\
-            <div style="display: flex; flex-direction: row;">\
-                <div class="pantry_inner_wrapper"> \
-                    <div id="${DIVBASE}_${PID}_deck"> </div>\
-                    <div id="${DIVBASE}_${PID}_label" class="label"> </div>\
-                    <div id="${DIVBASE}_${PID}" class="pantry2"> </div> \
-                </div>\
+            <div class="pantry_inner_wrapper"> \
+                <div id="${DIVBASE}_${PID}_deck"> </div>\
+                <div id="${DIVBASE}_${PID}_label" class="label"> </div>\
+                <div id="${DIVBASE}_${PID}" class="pantry2"> </div> \
             </div>\
         </div>\
     </div>\

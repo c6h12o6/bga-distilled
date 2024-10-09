@@ -1408,15 +1408,21 @@ Purchase it or return it to the bottom of the deck.`
         $distillerList = array();
         $distillerLabels = array();
         $distillerLabelInfo = self::getCollectionFromDb("SELECT player_id, uid, label, location FROM label WHERE signature=1");
+        $undecided = false;
         foreach ($distillers as $d) {
             $distillerClass = $this->distillers[$d["card_id"]];
             $distillerClass->label = $this->signature_recipes[$distillerClass->id / 2];
             $distillerList[$d['player_id']][] = $distillerClass;
+            if (count($distillerList[$d['player_id']]) > 1) 
+                $undecided = true;
             if ($distillerLabelInfo != null) {
                 $tmp = $this->signature_recipes[$d["card_id"] / 2];
                 $tmp['location'] = $distillerLabelInfo[$d['player_id']]['location'];
                 $distillerLabels[$d['player_id']][] = $tmp;
             }
+        }
+        if ($undecided) {
+            $distillerList = [$current_player_id => $distillerList[$current_player_id]];
         }
         $result["distillers"] = $distillerList;
         $result['distillersSelected'] = self::getGameStateValue("distillersSelected");
@@ -1511,6 +1517,11 @@ Purchase it or return it to the bottom of the deck.`
         In this space, you can put any utility methods useful for your game logic
     */
 
+    function isBasicMarket($cardId) {
+        if ($cardId >= 98 && $cardId <= 104)
+            return true;
+        return false;
+    }
     function setupFirstTaste() {
         // Glassblower 19
         // Tour guide 23
@@ -1776,7 +1787,6 @@ Purchase it or return it to the bottom of the deck.`
         );
     }
     public function canPlayerBuy($playerId) {
-
         // This is a protection for zombie mode
         if ($this->isPlayerZombie($playerId)) 
             return false;
@@ -5081,13 +5091,27 @@ Purchase it or return it to the bottom of the deck.`
                                 $sellArgs['duSlot']);
                             break;
                         case 3:
-                            $this->buyCard_internal($playerId, $sellArgs['collectCard'], 'ing', $sellArgs['collectCardSlot']);
+                            $market = 'ing';
+                            if ($this->isBasicMarket($sellArgs['collectCard'])) {
+                                if ($this->AllCards[$sellArgs['collectCard']]->type == "BARREL" || 
+                                        $this->AllCards[$sellArgs['collectCard']]->type == "BOTTLE")
+                                    throw new BgaSystemException("Invalid Card - not an ingredient");
+                                $market = 'bm';
+                            }
+                            $this->buyCard_internal($playerId, $sellArgs['collectCard'], $market, $sellArgs['collectCardSlot']);
                             break;
                         case 4:
                             $this->buyRecipe_internal($playerId, $sellArgs['collectRecipeSlot'], array(), null);
                             break;
                         case 5: 
-                            $this->buyCard_internal($playerId, $sellArgs['collectCard'], 'item', $sellArgs['collectCardSlot']);
+                            $market = 'item';
+                            if ($this->isBasicMarket($sellArgs['collectCard'])) {
+                                if ($this->AllCards[$sellArgs['collectCard']]->type != "BARREL" &&
+                                        $this->AllCards[$sellArgs['collectCard']]->type != "BOTTLE")
+                                    throw new BgaSystemException("Invalid Card - not an item");
+                                $market = 'bm';
+                            }
+                            $this->buyCard_internal($playerId, $sellArgs['collectCard'], $market, $sellArgs['collectCardSlot']);
                             break;
                         case 6: 
                             $this->buyCard_internal($playerId, $sellArgs['collectCard'], 'du', $sellArgs['collectCardSlot'], $sellArgs['duSlot']);
