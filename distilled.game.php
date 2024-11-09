@@ -611,7 +611,7 @@ Purchase it or return it to the bottom of the deck.`
             new Card(74, clienttranslate("Old Cellar"), 0, 1, 0, CardType::FLAVOR),
             new Card(75, clienttranslate("Rubber Tires"), 0, 0, 0, CardType::FLAVOR),
             new Card(76, clienttranslate("Peaty"), 0, 2, 0, CardType::FLAVOR),
-            new Card(77, clienttranslate("Oaky"), 0, 2, 0, CardType::FLAVOR),
+            new Card(77, clienttranslate("Oaky"), 0, 1, 0, CardType::FLAVOR),
             new Card(78, clienttranslate("Plastic"), 0, 0, 0, CardType::FLAVOR),
             new Card(79, clienttranslate("Orange Peel"), 0, 2, 0, CardType::FLAVOR),
             new Card(80, clienttranslate("Nutty"), 0, 2, 0, CardType::FLAVOR),
@@ -1968,7 +1968,7 @@ Purchase it or return it to the bottom of the deck.`
         $myRegion = $this->getRecipeRegionForPlayer($playerId, $recipe);
 
         $match = false;
-        $prevDrinks = self::dbQuery("SELECT uid, label FROM label WHERE player_id=$playerId and location != 'flight'");
+        $prevDrinks = self::dbQuery("SELECT uid, label FROM label WHERE player_id=$playerId and location != 'flight' AND count > 0");
         foreach ($prevDrinks as $pd) {
             if ($pd['uid'] == $drinkInfo['label_uid']) {
                 continue;
@@ -4784,6 +4784,64 @@ Purchase it or return it to the bottom of the deck.`
         $cardsWithFlavors = array_merge($cards, $flavors);
         $value = $this->getDrinkValue(self::getActivePlayerId(), $cardsWithFlavors, $info["recipe_slot"], $bottle, $info['barrel_uid'], true);
         $sp = $this->getDrinkSp(self::getActivePlayerId(), $cardsWithFlavors, $info["recipe_slot"], $info["flavor_count"], $bottle, $info['barrel_uid'], true);
+
+
+        $powerCards = $this->getPowerCards();
+        foreach ($powerCards as $pc) {
+            if ($pc['player_id'] != $playerId) 
+                continue;
+
+            switch ($pc['card_id']) {
+                case 121: // master blender
+                    $sp['total'] += $this->duMasterBlender($playerId, $info, $pc);
+                    break;
+                case 4: // brown brothers
+                    $sp['total'] += $this->distillerBrownBrothers($playerId, $info);
+                    break;
+                case 22: // Nathan
+                    $recipe = $this->getRecipeFromSlot($info["recipe_slot"], $playerId);
+                    if ($recipe['aged']) {
+                        $this->playerGains($playerId, 1, $this->distillers[22]->name);
+                        $value['total'] += 1;
+                    }
+                    break;
+                case 32: // brother vicente
+                    $bottleRegion = $this->getBottleRegionForPlayer($playerId, $bottle);
+                    $recipe = $this->getRecipeFromSlot($info["recipe_slot"], $playerId);
+                    $recipeRegion = $this->getRecipeRegionForPlayer($playerId, $recipe);
+
+                    if ($bottleRegion == $recipeRegion) {
+                        $this->playerGains($playerId, 2, $this->distillers[32]->name);
+                        $value['total'] += 2;
+                    }
+                    break;
+                case 20: // anne mcadam (untested)
+                    if ($info["flavor_count"] >= 3) {
+                        $this->playerPoints($playerId, 2, $this->distillers[20]->name) ;
+                        $sp['total'] += 2;
+                    }
+                    break;
+                case 24: // guillermo (untested)
+                    $sugars = 0;
+                    foreach ($cards as $c) {
+                        if ($this->AllCards[$c]->type == CardType::SUGAR) {
+                            $sugars++;
+                        }
+                    }
+                    if ($sugars >= 3) {
+                        $this->playerPoints($playerId, 1, $this->distillers[24]->name);
+                        $sp['total'] += 1;
+                    }
+                    break;
+                case 30: // joana
+                    $recipe = $this->getRecipeFromSlot($info["recipe_slot"], $playerId);
+                    if (!$recipe["aged"]) {
+                        $this->playerGains($playerId, 1, $this->distillers[30]->name);
+                        $value['total'] += 1;
+                    }
+                    break;
+            }
+        }
 
         self::notifyAllPlayers("dbgdbg", "sp, value", array("sp" => $sp, "value" => $value));
     }

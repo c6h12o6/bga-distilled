@@ -3936,7 +3936,8 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 }
 
                 // TODO race
-                if (ret.cards.filter(X => (X == card.uid)).length != 0) {
+                if (!("label" in card) && ret.cards.filter(X => (X == card.uid)).length != 0) {
+                    console.log("peace", ret)
                     return;
                 }
                 // add card to collection
@@ -4072,7 +4073,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
                 div.style.backgroundPositionY = `calc(-${yBack} * var(--height))`
                 div.style.backgroundPositionX = `calc(-${xBack} * var(--width))`
 
-                if (card.count < 0) {
+                if (card.count <= 0) {
                     div.classList.add('fade');
                     if (div.children.length == 0)
                         dojo.place(this.format_block('jstpl_label_x', {}), div, 'last');
