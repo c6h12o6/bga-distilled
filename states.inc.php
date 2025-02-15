@@ -319,7 +319,7 @@ $machinestates = array(
         "name" => "stRoundEnd",
         "type" => "game",
         "action" => "stRoundEnd",
-        "transitions" => array("nextRound" => 4, "discardGoals"=> 61, "endGame" => 98, "soloGoalCheck" => 74),
+        "transitions" => array("nextRound" => 4, "discardGoals"=> 61, "endGame" => 98, "soloGoalCheck" => 74, "soloGoalCheckEnd" => 75),
     ),
 
         
@@ -368,6 +368,12 @@ $machinestates = array(
         "type" => "game",
         "action" => "stSoloGoalCheck",
         "transitions" => array("nothingAchieved" => 4, "soloGoalConfirm" => 79),
+    ),
+    75 => array(
+        "name" => "soloGoalCheckGameEnd",
+        "type" => "game",
+        "action" => "stSoloGoalCheck",
+        "transitions" => array("nothingAchieved" => 98, "soloGoalConfirm" => 79),
     ),
     
     78 => array(

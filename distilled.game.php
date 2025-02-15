@@ -8603,7 +8603,7 @@ Purchase it or return it to the bottom of the deck.`
             //         $sold++;
             //     }
             // }
-            // self::notifyAllPlayers("soloGoalCheck", clienttranslate('Checking Solo Goals: ${uid} - Drinks: ${drinks}, Sold: ${sold}, Bottles: ${bottles}, Equip: ${du_equip}, Spec: ${du_spec}, Turn: ${turn}, Round End: ${re}'),array(
+            // self::notifyAllPlayers("soloGoalCheck", clienttranslate('Checking Solo Goals: ${uid} - Drinks: ${drinks}, Sold: ${sold}, Bottles: ${bottles}, Equip: ${du_equip}, Spec: ${du_spec}, Turn: ${turn}, Round End: ${re}, money earned: ${money_earned}, points earned: ${points_earned}'),array(
             //         'uid' => $sg["uid"],
             //         'drinks' => count($drinks),
             //         'sold' => $sold,
@@ -8611,7 +8611,9 @@ Purchase it or return it to the bottom of the deck.`
             //         'du_equip' => count($du_equip),
             //         'du_spec' => count($du_spec),
             //         'turn' => $turn,
-            //         're' => self::getGameStateValue("inRoundEnd")
+            //         're' => self::getGameStateValue("inRoundEnd"),
+            //         'money_earned' => $this->getGameStateValue(sprintf("money_per_round_%d", (self::getGameStateValue("inRoundEnd") == 1 ? ($turn - 1) : $turn))),
+            //         'points_earned' => $this->getGameStateValue(sprintf("points_per_round_%d", (self::getGameStateValue("inRoundEnd") == 1 ? ($turn - 1) : $turn)))
             //     ));
             
             switch ($sgObj->uid) {
@@ -8931,7 +8933,7 @@ Purchase it or return it to the bottom of the deck.`
                 if ($turn == 7) {
                     $tempTurn = 8; // Handle the last round by faking a turn 8; it will reduce to 7 next
                 }
-                if (self::getGameStateValue("inRoundEnd") == 1 && $this->getGameStateValue(sprintf("%s_per_round_%d", $type, ($tempTurn - 1)), $player_id) >= $target) {
+                if (self::getGameStateValue("inRoundEnd") == 1 && $this->getGameStateValue(sprintf("%s_per_round_%d", $type, ($tempTurn - 1))) >= $target) {
                     $completed[] = $sgObj;
                 }
                 break;
