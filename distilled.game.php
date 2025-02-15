@@ -705,7 +705,7 @@ Purchase it or return it to the bottom of the deck.`
             new Card(74, clienttranslate("Old Cellar"), 0, 1, 0, CardType::FLAVOR),
             new Card(75, clienttranslate("Rubber Tires"), 0, 0, 0, CardType::FLAVOR),
             new Card(76, clienttranslate("Peaty"), 0, 2, 0, CardType::FLAVOR),
-            new Card(77, clienttranslate("Oaky"), 0, 2, 0, CardType::FLAVOR),
+            new Card(77, clienttranslate("Oaky"), 0, 1, 0, CardType::FLAVOR),
             new Card(78, clienttranslate("Plastic"), 0, 0, 0, CardType::FLAVOR),
             new Card(79, clienttranslate("Orange Peel"), 0, 2, 0, CardType::FLAVOR),
             new Card(80, clienttranslate("Nutty"), 0, 2, 0, CardType::FLAVOR),
@@ -1631,15 +1631,21 @@ Purchase it or return it to the bottom of the deck.`
         $distillerList = array();
         $distillerLabels = array();
         $distillerLabelInfo = self::getCollectionFromDb("SELECT player_id, uid, label, location FROM label WHERE signature=1");
+        $undecided = false;
         foreach ($distillers as $d) {
             $distillerClass = $this->distillers[$d["card_id"]];
             $distillerClass->label = $this->signature_recipes[$distillerClass->id / 2];
             $distillerList[$d['player_id']][] = $distillerClass;
+            if (count($distillerList[$d['player_id']]) > 1) 
+                $undecided = true;
             if ($distillerLabelInfo != null) {
                 $tmp = $this->signature_recipes[$d["card_id"] / 2];
                 $tmp['location'] = $distillerLabelInfo[$d['player_id']]['location'];
                 $distillerLabels[$d['player_id']][] = $tmp;
             }
+        }
+        if ($undecided) {
+            $distillerList = [$current_player_id => $distillerList[$current_player_id]];
         }
         $result["distillers"] = $distillerList;
         $result['distillersSelected'] = self::getGameStateValue("distillersSelected");
@@ -1764,6 +1770,11 @@ Purchase it or return it to the bottom of the deck.`
     /*
         In this space, you can put any utility methods useful for your game logic
     */
+    function isBasicMarket($cardId) {
+        if ($cardId >= 98 && $cardId <= 104)
+            return true;
+        return false;
+    }
     function setupFirstTaste() {
         // Glassblower 19
         // Tour guide 23
@@ -2212,7 +2223,7 @@ Purchase it or return it to the bottom of the deck.`
         $myRegion = $this->getRecipeRegionForPlayer($playerId, $recipe);
 
         $match = false;
-        $prevDrinks = self::dbQuery("SELECT uid, label FROM label WHERE player_id=$playerId and location != 'flight'");
+        $prevDrinks = self::dbQuery("SELECT uid, label FROM label WHERE player_id=$playerId and location != 'flight' AND count > 0");
         foreach ($prevDrinks as $pd) {
             if ($pd['uid'] == $drinkInfo['label_uid']) {
                 continue;
@@ -5055,6 +5066,64 @@ Purchase it or return it to the bottom of the deck.`
         $value = $this->getDrinkValue(self::getActivePlayerId(), $cardsWithFlavors, $info["recipe_slot"], $bottle, $info['barrel_uid'], true);
         $sp = $this->getDrinkSp(self::getActivePlayerId(), $cardsWithFlavors, $info["recipe_slot"], $info["flavor_count"], $bottle, $info['barrel_uid'], true);
 
+
+        $powerCards = $this->getPowerCards();
+        foreach ($powerCards as $pc) {
+            if ($pc['player_id'] != $playerId) 
+                continue;
+
+            switch ($pc['card_id']) {
+                case 121: // master blender
+                    $sp['total'] += $this->duMasterBlender($playerId, $info, $pc);
+                    break;
+                case 4: // brown brothers
+                    $sp['total'] += $this->distillerBrownBrothers($playerId, $info);
+                    break;
+                case 22: // Nathan
+                    $recipe = $this->getRecipeFromSlot($info["recipe_slot"], $playerId);
+                    if ($recipe['aged']) {
+                        $this->playerGains($playerId, 1, $this->distillers[22]->name);
+                        $value['total'] += 1;
+                    }
+                    break;
+                case 32: // brother vicente
+                    $bottleRegion = $this->getBottleRegionForPlayer($playerId, $bottle);
+                    $recipe = $this->getRecipeFromSlot($info["recipe_slot"], $playerId);
+                    $recipeRegion = $this->getRecipeRegionForPlayer($playerId, $recipe);
+
+                    if ($bottleRegion == $recipeRegion) {
+                        $this->playerGains($playerId, 2, $this->distillers[32]->name);
+                        $value['total'] += 2;
+                    }
+                    break;
+                case 20: // anne mcadam (untested)
+                    if ($info["flavor_count"] >= 3) {
+                        $this->playerPoints($playerId, 2, $this->distillers[20]->name) ;
+                        $sp['total'] += 2;
+                    }
+                    break;
+                case 24: // guillermo (untested)
+                    $sugars = 0;
+                    foreach ($cards as $c) {
+                        if ($this->AllCards[$c]->type == CardType::SUGAR) {
+                            $sugars++;
+                        }
+                    }
+                    if ($sugars >= 3) {
+                        $this->playerPoints($playerId, 1, $this->distillers[24]->name);
+                        $sp['total'] += 1;
+                    }
+                    break;
+                case 30: // joana
+                    $recipe = $this->getRecipeFromSlot($info["recipe_slot"], $playerId);
+                    if (!$recipe["aged"]) {
+                        $this->playerGains($playerId, 1, $this->distillers[30]->name);
+                        $value['total'] += 1;
+                    }
+                    break;
+            }
+        }
+
         self::notifyAllPlayers("dbgdbg", "sp, value", array("sp" => $sp, "value" => $value));
     }
 
@@ -5362,13 +5431,27 @@ Purchase it or return it to the bottom of the deck.`
                                 $sellArgs['duSlot']);
                             break;
                         case 3:
-                            $this->buyCard_internal($playerId, $sellArgs['collectCard'], 'ing', $sellArgs['collectCardSlot']);
+                            $market = 'ing';
+                            if ($this->isBasicMarket($sellArgs['collectCard'])) {
+                                if ($this->AllCards[$sellArgs['collectCard']]->type == "BARREL" || 
+                                        $this->AllCards[$sellArgs['collectCard']]->type == "BOTTLE")
+                                    throw new BgaSystemException("Invalid Card - not an ingredient");
+                                $market = 'bm';
+                            }
+                            $this->buyCard_internal($playerId, $sellArgs['collectCard'], $market, $sellArgs['collectCardSlot']);
                             break;
                         case 4:
                             $this->buyRecipe_internal($playerId, $sellArgs['collectRecipeSlot'], array(), null);
                             break;
                         case 5: 
-                            $this->buyCard_internal($playerId, $sellArgs['collectCard'], 'item', $sellArgs['collectCardSlot']);
+                            $market = 'item';
+                            if ($this->isBasicMarket($sellArgs['collectCard'])) {
+                                if ($this->AllCards[$sellArgs['collectCard']]->type != "BARREL" &&
+                                        $this->AllCards[$sellArgs['collectCard']]->type != "BOTTLE")
+                                    throw new BgaSystemException("Invalid Card - not an item");
+                                $market = 'bm';
+                            }
+                            $this->buyCard_internal($playerId, $sellArgs['collectCard'], $market, $sellArgs['collectCardSlot']);
                             break;
                         case 6: 
                             $this->buyCard_internal($playerId, $sellArgs['collectCard'], 'du', $sellArgs['collectCardSlot'], $sellArgs['duSlot']);

@@ -224,6 +224,12 @@ $miscTranslate = array(
   clienttranslate("Asia and Oceania bottles"),
   clienttranslate("Americas bottles"),
   clienttranslate("Europe bottles"),
+  clienttranslate("bronze"),
+  clienttranslate("silver"),
+  clienttranslate("gold"),
+  clienttranslate("clay"),
+  clienttranslate("wood"),
+  clienttranslate("metal"),
 );
 
 $this->distiller_text = array(
