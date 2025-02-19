@@ -26,8 +26,7 @@
     "102": {
         "name": "Game Setup",
         "values": {
-            "1": { "name": "Normal" },
-            "2": { "name": "First Taste (Tutorial)", "firstgameonly": true }
+            "1": { "name": "Normal" }
         },
         "default": 1,
         "displaycondition": [
@@ -48,7 +47,7 @@
         "values": {
             "0": { "name": "Standard"},
             "1": { "name": "Hard"},
-            "2": { "name": "Go home, you're drunk!"}
+            "2": { "name": "Expert"}
         },
         "default": 0,
         "displaycondition": [

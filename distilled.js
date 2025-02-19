@@ -15,6 +15,7 @@
  *
  */
 
+
 define([
     "dojo","dojo/_base/declare","dojo/on",
     "dijit/Dialog",
@@ -755,7 +756,7 @@ function (dojo, declare, on, bgacards) {
                         LOCATION: _("Storeroom"),
                         LOCATION_SHORT: "Storeroom",
                     }), 'pantryButtons', 'last');
-                    if (gamedatas.playerorder.length > 1) {
+                    if (Object.keys(gamedatas.players).length > 1) {
                         let finalButton = dojo.place(this.format_block('jstpl_floating_button', {
                             LOCATION: _("Goals"),
                             LOCATION_SHORT: "DistilleryGoals",
@@ -778,7 +779,7 @@ function (dojo, declare, on, bgacards) {
                     dojo.addClass(revealedCardsButton, 'bgabutton_red');
                 }
                 
-                if (gamedatas.playerorder.length === 1) {
+                if (Object.keys(gamedatas.players).length === 1) {
                     divbases = ['reveal', 'pantry', 'storeroom', 'washback', 'warehouse1', 'warehouse2'];
                 } else {
                     divbases = ['reveal', 'pantry', 'storeroom', 'distillerygoals', 'washback', 'warehouse1', 'warehouse2'];
@@ -845,7 +846,7 @@ function (dojo, declare, on, bgacards) {
                 this.playerWarehouse1Stock[player_id] = this.makeComboStock("warehouse1_", player_id)
                 this.playerWarehouse2Stock[player_id] = this.makeComboStock("warehouse2_", player_id)
 
-                if (gamedatas.playerorder.length > 1) {
+                if (Object.keys(gamedatas.players).length > 1) {
                     this.playerGoalsStock[player_id] = new LineStock(
                             this.goalsCardsManager,
                             document.getElementById("distillerygoals_" + player_id),
@@ -887,7 +888,7 @@ function (dojo, declare, on, bgacards) {
 
             } // end of player loop
 
-            if (gamedatas.playerorder.length === 1) {
+            if (Object.keys(gamedatas.players).length === 1) {
                 this.solo_goal_text = gamedatas.solo_goal_text;
                 // Setting up Solo Mode
                 this.soloGoalsRowStock = [
@@ -1151,7 +1152,7 @@ function (dojo, declare, on, bgacards) {
             div = document.getElementById("floatingPantryButton");
             dojo.connect(div, "onclick", this, "showFloatingPantry");
 
-            if (gamedatas.playerorder.length > 1) {
+            if (Object.keys(gamedatas.players).length > 1) {
                 div = document.getElementById("floatingDistilleryGoalsButton");
                 dojo.connect(div, "onclick", this, "showFloatingGoals");
             }
@@ -1289,11 +1290,13 @@ function (dojo, declare, on, bgacards) {
                     document.getElementById("pagemaintitletext").innerText += " " + (
                         dojo.string.substitute(_('for ${location}'), {location: this.getProperSubtype(args.args.location)}));
 
+                    console.log("angus select flavor", args)
                     if (this.isCurrentPlayerActive()) { // only connect for the active player
                         Object.keys(args.args.allowedCards).forEach(C => {
                                 let card = this.activeCards[C];
                                 var elem = document.getElementById(`ing-card-${card.uid}`)
                                 elem.classList.add("marketBuyable")
+
                                 dojo.connect(elem, "onclick", this, () => {
                                     this.confirmButton(_("Confirm"), "selectFlavor", {
                                         flavor: C,
@@ -1851,19 +1854,17 @@ function (dojo, declare, on, bgacards) {
                         })
                        break;
                     case 'selectFlavor':
-                        
-                            /*
                         Object.keys(args.allowedCards).forEach(C => {
                             let card = this.activeCards[C];
-                            this.addActionButton('buyButton' + card.uid, dojo.string.substitute(_('Select ${name}'), {name: card.name}),  () => {
-                                    this.ajaxcall( "/distilled/distilled/selectFlavor.html", {
+                            this.addActionButton('buyButton' + card.uid, dojo.string.substitute(_('Select ${name} ${value} <span class="icon-coin-em"></span>'), {name: _(card.name), value: card.sale}),  () => {
+                                this.confirmButton(_("Confirm"), "selectFlavor", {
                                         flavor: C,
                                         drink: args.drink,
                                         lock: true,
-                                    }, this, function(result) {});
-                                })
+                                    }, null, dojo.string.substitute(_("Select ${flavor}"), {flavor: _(card.name)}))
+                            })
+                            this.addTooltipForCard(card, document.getElementById(`buyButton${card.uid}`))
                         })
-                        */
                         break;
 
                     case 'distill':
@@ -4747,7 +4748,7 @@ dojo.string.substitute(_("Place label on ${slot} for 5 <span class='icon-coin-em
         },
         prevPlayerVisible: function() {
             // console.log("prevPlayerVisbile")
-            let pids = this.gamedatas.playerorder;
+            let pids = Object.keys(this.gamedatas.players);
             let idx = pids.indexOf(this.visiblePlayer)
             // console.log(pids)
             // console.log(idx)

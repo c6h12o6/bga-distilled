@@ -22,6 +22,7 @@
 
 
 
+
 // Did not know this file existed, seems like it would have been nice to use in the tutorials
 $this->card_text = array(
    0 => clienttranslate("Can be used as either a <span class='icon-water-em'></span> or <span class='icon-yeast-em'></span> in your washback. Cannot be traded with the basic market."),

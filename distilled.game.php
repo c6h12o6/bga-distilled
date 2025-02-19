@@ -549,6 +549,7 @@ class distilled extends Table
             "points_per_round_7" => 31,
             "money_per_round_7" => 32,
             "points_per_round_8" => 33,
+            "money_per_round_8" => 34,
             "flight" => 100,
             "pairings" => 101,
             "setup" => 102,
@@ -1268,6 +1269,7 @@ Purchase it or return it to the bottom of the deck.`
             self::setGameStateInitialValue( 'points_per_round_7', 0);
             self::setGameStateInitialValue( 'money_per_round_7', 0);
             self::setGameStateInitialValue( 'points_per_round_8', 0);
+            self::setGameStateInitialValue( 'money_per_round_8', 0);
         }
 
         // TODO: setup the initial game situation here
@@ -1644,7 +1646,7 @@ Purchase it or return it to the bottom of the deck.`
                 $distillerLabels[$d['player_id']][] = $tmp;
             }
         }
-        if ($undecided) {
+        if (!$this->isSpectator() && $undecided) {
             $distillerList = [$current_player_id => $distillerList[$current_player_id]];
         }
         $result["distillers"] = $distillerList;
@@ -3471,6 +3473,7 @@ Purchase it or return it to the bottom of the deck.`
     }
     // Note this is also used for Fang Xin
     function waterReveal($deckName) {
+
         self::checkAction("reveal");
 
         $pid = self::getActivePlayerId();
@@ -6422,7 +6425,7 @@ Purchase it or return it to the bottom of the deck.`
                                 $maxCount = $plantCount;
                             }
                         }
-                        if (in_array($player_id, $maxPlayers)) {
+                        if (0 != $maxCount && in_array($player_id, $maxPlayers)) {
                             $score = 7;
                         }
                         break;
@@ -9251,13 +9254,11 @@ Purchase it or return it to the bottom of the deck.`
         if (count($completed) > 0) {
             $labels = array();
             foreach($completed as $c) {
-                $labels[] = $this->getSoloGoalLabelFromID($c->uid);
+                self::notifyAllPlayers("soloGoalCheckDebug", clienttranslate('${player_name} has qualified for the solo goal: ${label}'), array(
+                    "player_name" => $this->getPlayerName($player_id),
+                    "label" => $this->getSoloGoalLabelFromID($c->uid),
+                ));
             }
-            self::notifyAllPlayers("soloGoalCheckDebug", clienttranslate('${player_name} has qualified for the solo goal${plural} ${labels}'), array(
-                "player_name" => $this->getPlayerName($player_id),
-                "plural" => (count($labels) > 1) ? "s" : "",
-                "labels" => implode(' and ', $labels)
-            ));
         }
         return $completed;
     }
@@ -9270,9 +9271,16 @@ Purchase it or return it to the bottom of the deck.`
         }
         $turn = self::getGameStateValue("turn");
         if (count($completed) > 0) {
+            $prompt = false;
             foreach ($completed as $completedGoal) {
                 $sql = sprintf("UPDATE solo_goal SET completed = 1, drink_ids = '%s' WHERE uid = %d", implode(",", $completedGoal->drinks), $completedGoal->uid);
                 self::dbQuery($sql);
+
+                // Check to see if it's already been skipped
+                $skippedGoals = $this->globals->get("skippedGoals");
+                if ($skippedGoals == null || !in_array($completedGoal->uid, $skippedGoals)) {
+                    $prompt = true;
+                }
             }
 
             if ($this->getStateName() != 'soloGoalCheckLoop') { // If not in the loop, capture how to get back to the current game state
@@ -9281,7 +9289,8 @@ Purchase it or return it to the bottom of the deck.`
                     self::setGameStateValue("resumeStateId", $state["transitions"]["nothingAchieved"]);
                 }
             }
-            $this->gamestate->nextState("soloGoalConfirm"); // Player needs to confirm/deny the goal
+            if ($prompt) // If they havent explicitly passed on this one before.
+                $this->gamestate->nextState("soloGoalConfirm"); // Player needs to confirm/deny the goal
         } else {
             $this->soloGoalMarkDrinksInvalid();
             
@@ -9479,6 +9488,14 @@ Purchase it or return it to the bottom of the deck.`
         self::checkAction("skipSoloGoal");
 
         // "Collect" type goals do not have to be completed right away, but the other types do. Update all those other types to not be "completed"
+        $skippedGoals = $this->globals->get("skippedGoals");
+        if ($skippedGoals == null) {
+            $skippedGoals = [];
+        }
+        if (!in_array($goal['uid'], $skippedGoals)) {
+            $skippedGoals[] = $goal['uid'];
+            $this->globals->set("skippedGoals");
+        }
 
         $completedGoals = self::getCollectionFromDb(sprintf("SELECT uid FROM solo_goal WHERE completed = 1 AND type != %d", SoloGoalType::COLLECT));
         foreach ($completedGoals as $goal) {

@@ -12,6 +12,7 @@
 
 $gameinfos = array( 
 
+
 // Name of the game in English (will serve as the basis for translation) 
 'game_name' => "Distilled",
 
