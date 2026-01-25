@@ -11,7 +11,8 @@
             "7": { "name": "G (no gold recipes)", "nobeginner": true },
             "8": { "name": "H (aged spirits only)", "nobeginner": true },
             "9": {"name": "Random (A, B, C)"},
-            "10": {"name": "Random (All)"}
+            "10": {"name": "Random (All)"},
+            "11": {"name": "Annual Distilled Championship: Winner's Flight"}
         },
         "default": 9
     },
@@ -56,5 +57,13 @@
                 "value": [ 1 ]
             }
         ]
+    },
+    "104": {
+        "name": "Enable BGA Exclusives",
+        "values": {
+            "0": { "name": "No"},
+            "1": { "name": "Yes"}
+        },
+        "default": 1
     }
 }

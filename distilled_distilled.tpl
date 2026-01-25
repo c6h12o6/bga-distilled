@@ -34,6 +34,11 @@ require(["dojo/parser", "dijit/Dialog", "dijit/form/Button", "dijit/form/TextBox
     <div class='maximizeDistillerChoice'> <div> + </div> </div>
 </div>
 
+<div id="betaWarning" class="invisible" style="width: 100%; height: 20px; background-color: lightblue; text-align: center;">
+    Solo mode is in Beta - If you have issues, please report a bug
+
+</div>
+
 <div class="centerScreen invisible" style="position: absolute; justify-content: center; align-items: center; width: 100%; height: auto; display: flex; z-index: 100; gap: 10px">
     <div id="centerScreen" class="centerScreen" style="position: absolute; top: 5vw; justify-content: center; align-items: top; width: 100%; height: unset; display: flex; z-index: 100;">
         <div id="game-scoring" class="invisible" style="background-color: rgba(255, 255, 255, 0.95); height: auto; border-radius: 1vw;">

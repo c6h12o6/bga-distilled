@@ -539,9 +539,9 @@ body > .card {
     height: 920px;
 }
 .playerFlight {
-    background: url('img/Flights.png');
+    background: url('img/Flights.jpg');
     /*background-size: 2616px  3000px;*/
-    background-size: 400% 300%;
+    background-size: 400% 400%;
     background-repeat: no-repeat;
     position: absolute;
     top: 33%;
@@ -607,6 +607,11 @@ body > .card {
     background-color:rgba(0, 0, 0, 0.0);
     border-radius: 10px;
     opacity: unset;
+}
+
+.dcard_page2 {
+    background: url('img/cardfronts_new_page2.jpg');
+    background-size: 1708px 1900px;
 }
 
 .dcard2 {

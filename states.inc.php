@@ -51,15 +51,6 @@
 
  
 $machinestates = array(
-
-    // The initial state. Please do not modify.
-    1 => array(
-        "name" => "gameSetup",
-        "description" => "",
-        "type" => "manager",
-        "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
-    ),
     2 => array(
         "name" => "chooseDistiller",
         "type" => "multipleactiveplayer",
@@ -412,16 +403,6 @@ $machinestates = array(
         "description" => "waiting for the endgame",
         "transitions" => array('' => 99),
     ),
-   
-    // Final state.
-    // Please do not modify (and do not overload action/args methods).
-    99 => array(
-        "name" => "gameEnd",
-        "description" => clienttranslate("End of game"),
-        "type" => "manager",
-        "action" => "stGameEnd",
-        "args" => "argGameEnd"
-    )
 );
 
 

@@ -1,4 +1,7 @@
 <?php // Putting more stuff here for Jai
+
+use Bga\GameFramework\Table;
+
  /**
   *------
   * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -15,9 +18,6 @@
   * In this PHP file, you are going to defines the rules of the game.
   *
   */
-
-
-require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
 // Card Types
 class CardType {
@@ -403,6 +403,16 @@ class distilled extends Table
                         'label' => 7,
                         'region' => Region::AMERICAS,
                         'allowed' => array(Sugar::PLANT)),
+                    'applejack' => array('name' => clienttranslate("Applejack"),
+                        'sp' => 10,
+                        'sugars' => 1,
+                        'value' => 0,
+                        'aged' => true,
+                        'barrel' => Barrel::WOOD,
+                        'cube' => CUBENAME::SILVER,
+                        'label' => 57,
+                        'region' => Region::AMERICAS,
+                        'allowed' => array(Sugar::FRUIT)),
         );
 
         switch ($flight) {
@@ -494,6 +504,17 @@ class distilled extends Table
                     $this->recipeMap['tequila'],
                 );
                 break;
+            case '11': // BGA
+                $this->recipeFlight = array(
+                    $this->recipeMap['cachaca'],
+                    $this->recipeMap['shochu'],
+                    $this->recipeMap['gin'],
+                    $this->recipeMap['applejack'],
+                    $this->recipeMap['whiskey'],
+                    $this->recipeMap['baijiu'],
+                    $this->recipeMap['tequila'],
+                );
+                break;
             default:
                 /*
                 throw new BgaSystemException("Invalid flight");
@@ -554,6 +575,7 @@ class distilled extends Table
             "pairings" => 101,
             "setup" => 102,
             "difficulty" => 103,
+            "exclusives" => 104,
         ) );
 
         // Add Alcohol
@@ -855,6 +877,12 @@ Purchase it or return it to the bottom of the deck.`
 
         // Additional cards
         $this->premium_ingredient_cards[] = new Card(47, clienttranslate("Mountain Spring Water"), 3, 2, 1, CardType::WATER);
+        // BGA Exclusive cards. Always create them to make sure uniqueids are the same.
+        if (self::getGameStateValue("exclusives") == 1) {
+            $this->premium_item_cards[] = new Card(140, clienttranslate("Trophy Bottle"), 5, 2, 4, CardType::BOTTLE, Region::HOME);
+        } else {
+            new Card(140, clienttranslate("Trophy Bottle"), 5, 2, 4, CardType::BOTTLE, Region::HOME);
+        }
 
         // TODO need to get the values of the sig recipes
         $this->distillers = array(
@@ -1179,12 +1207,6 @@ Purchase it or return it to the bottom of the deck.`
             clienttranslate("1 free distillery upgrade"),
         );
     }
-    
-    protected function getGameName( )
-    {
-        // Used for translations and stuff. Please do not modify.
-        return "distilled";
-    }   
 
     /*
         setupNewGame:
@@ -1396,7 +1418,6 @@ Purchase it or return it to the bottom of the deck.`
                     unset($distillers[24]);
                     unset($distillers[30]);
                     break;
-
             }
         }
 
@@ -1507,6 +1528,8 @@ Purchase it or return it to the bottom of the deck.`
         // Activate first player (which is in general a good idea :) )
         //$this->activeNextPlayer();
         $this->gamestate->setAllPlayersMultiactive();
+
+        return 2;
     }
 
     /*
@@ -7319,6 +7342,12 @@ Purchase it or return it to the bottom of the deck.`
 
             $sql = sprintf("UPDATE solo_goal SET used = 1 WHERE uid = %d", $marketCard->uid);
             self::dbQuery($sql);
+
+            // Check to see if all are marked used, then mark them to be reusable
+            $marketCardUID = self::getUniqueValueFromDb("SELECT uid FROM solo_goal WHERE tier='B' AND row IS NULL AND used = false ORDER BY id LIMIT 1");
+            $sql = sprintf("UPDATE solo_goal SET used = 0 WHERE tier='B' AND row is NULL");
+            self::dbQuery($sql);
+
         }
 
         $newCardTokens = [];
@@ -8564,44 +8593,6 @@ Purchase it or return it to the bottom of the deck.`
             ++$sid;
         }
     }
-    public function loadBugReportHelp() {
-        $this->loadBugReportSQL(125469, [2383524, 2383525]);
-    }
-    public function loadBugReportSQL(int $reportId, array $studioPlayersIds): void {
-      $players = $this->getObjectListFromDb('SELECT player_id FROM player', true);
-  
-      // Change for your game
-      // We are setting the current state to match the start of a player's turn if it's already game over
-      $sql = ['UPDATE global SET global_value=10 WHERE global_id=1 AND global_value=99'];
-      $map = [];
-      foreach ($players as $index => $pId) {
-        $studioPlayer = $studioPlayersIds[$index];
-  
-        // All games can keep this SQL
-        $sql[] = "UPDATE player SET player_id=$studioPlayer WHERE player_id=$pId";
-        $sql[] = "UPDATE global SET global_value=$studioPlayer WHERE global_value=$pId";
-        $sql[] = "UPDATE stats SET stats_player_id=$studioPlayer WHERE stats_player_id=$pId";
-  
-        // Add game-specific SQL update the tables for your game
-        //$sql[] = "UPDATE card SET card_location_arg=$studioPlayer WHERE card_location_arg = $pId";
-        //$sql[] = "UPDATE global_variables SET `value` = REPLACE(`value`,'$pId','$studioPlayer')";
-        $tables = ['premium_ingredient', 'premium_item', 'label', 'distillery_upgrade', 'flavor', 'drink',
-            'bottomless_card', 'spirit_award'];
-        foreach ($tables as $t) {
-            $sql[] = "UPDATE $t SET `location` = REPLACE(`location`,'$pId','$studioPlayer')";
-        }
-        $tables = array_merge($tables, ['recipe', 'market_purchase', 'distillery_goal', 'distiller']);
-        foreach ($tables as $t) {
-            $sql[] = "UPDATE $t SET `player_id` = REPLACE(`player_id`,'$pId','$studioPlayer')";
-        }
-      }
-  
-      foreach ($sql as $q) {
-        $this->DbQuery($q);
-      }
-  
-      $this->reloadPlayersBasicInfos();
-    }
 
     function callZombie($numCycles = 1) { // Runs zombieTurn() on all active players
         // Note: isMultiactiveState() doesn't work during this! It crashes without yielding an error.
@@ -8650,7 +8641,7 @@ Purchase it or return it to the bottom of the deck.`
 
     function stSoloGoalCheck_internal() {
         $player_id = self::getActivePlayerId();
-        $turn = self::getGameStateValue("turn", 0);
+        $turn = self::getGameStateValue("turn");
         if ($turn > 7) {
             $turn = 7;
         }
@@ -8682,6 +8673,8 @@ Purchase it or return it to the bottom of the deck.`
             $sgObj = $this->AllSoloCards[$sg["uid"]];
             $sgObj->drinks = array();
             $drinks = $this->soloGoalsFilterDrinksByGoalType($drinksAll, $drinksUsed, $sgObj->type);
+            //self::notifyAllPlayers("dbgdbg", 'checking for goal ${uid}', ['uid' => $sgObj->uid, 'obj' => $sgObj, 'drinks' => $drinks]);
+
 
             // $sold = 0;
             // foreach ($drinks as $drink) {
@@ -9011,6 +9004,7 @@ Purchase it or return it to the bottom of the deck.`
                     $target = 8;
                     $type = "points";
                 } else if ($sgObj->uid == 216) {
+                    //self::notifyAllPlayers("dbgdbg", 'checking for points', []);
                     $target = 25;
                     $type = "points";
                 }
@@ -9025,18 +9019,21 @@ Purchase it or return it to the bottom of the deck.`
                 break;
             case 203: // X = 2
                 // Sell X in one round (evaluated as an "Earn" goal)
+                //self::notifyAllPlayers("dbgdbg", "Checking for 2 sales", []);
                 $target = 100;
                 if ($sgObj->uid == 203) {
                     $target = 2;
                 }
                 $sold = 0;
                 foreach ($drinks as $drink) {
-                    if ($drink["sold_turn"] == $turn) {
+                    if ($drink["sold_turn"] == ($turn-1)) {
                         $sgObj->drinks[] = $drink["id"];
                         $sold++;
                     }
                 }
+                //self::notifyAllPlayers("dbgdbg", 'Checking for 2 sales  2 sold = ${sold}', ['sold' => $sold, 'obj' => $sgObj, 'target' => $target, 'roundEnd' => self::getGameStateValue("inRoundEnd")]);
                 if (self::getGameStateValue("inRoundEnd") == 1 && $sold >= $target) {
+                    //self::notifyAllPlayers("dbgdbg", 'Checking for 2 sales  3 sold = ${sold}', ['sold' => $sold, 'obj' => $sgObj, 'target' => $target]);
                     $completed[] = $sgObj;
                 }
                 break;
@@ -9270,6 +9267,7 @@ Purchase it or return it to the bottom of the deck.`
             $completed = array();
         }
         $turn = self::getGameStateValue("turn");
+        self::notifyAllPlayers("dbgdbg", 'turn is ${turn} ${stateName}', ['turn'=> $turn, 'stateName'=>$this->getStateName()]);
         if (count($completed) > 0) {
             $prompt = false;
             foreach ($completed as $completedGoal) {
@@ -9291,6 +9289,9 @@ Purchase it or return it to the bottom of the deck.`
             }
             if ($prompt) // If they havent explicitly passed on this one before.
                 $this->gamestate->nextState("soloGoalConfirm"); // Player needs to confirm/deny the goal
+            else {
+                $this->gamestate->nextState("nothingAchieved"); // If nothing was completed and not in the loop, continue forward in the state
+            }
         } else {
             $this->soloGoalMarkDrinksInvalid();
             
@@ -9308,6 +9309,7 @@ Purchase it or return it to the bottom of the deck.`
                 $this->gamestate->nextState("nothingAchieved"); // If nothing was completed and not in the loop, continue forward in the state
             }
         }
+        //$this->gamestate->jumpToState(97);
     }
 
     function solo_dealRow($tier, $row, $count, $revealed, $unlocked) {
@@ -9492,14 +9494,14 @@ Purchase it or return it to the bottom of the deck.`
         if ($skippedGoals == null) {
             $skippedGoals = [];
         }
-        if (!in_array($goal['uid'], $skippedGoals)) {
-            $skippedGoals[] = $goal['uid'];
-            $this->globals->set("skippedGoals");
-        }
 
         $completedGoals = self::getCollectionFromDb(sprintf("SELECT uid FROM solo_goal WHERE completed = 1 AND type != %d", SoloGoalType::COLLECT));
         foreach ($completedGoals as $goal) {
             $this->AllSoloCards[$goal["uid"]]->completed = false;
+            if (!in_array($goal['uid'], $skippedGoals)) {
+                $skippedGoals[] = $goal['uid'];
+                $this->globals->set("skippedGoals", $skippedGoals);
+            }
         }
         $sql = sprintf("UPDATE solo_goal SET completed = 0, drink_ids = NULL WHERE completed = 1 AND type != %d", SoloGoalType::COLLECT);
         self::dbQuery($sql);
